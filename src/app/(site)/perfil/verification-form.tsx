@@ -3,7 +3,7 @@
 import { useActionState, useId, useRef } from "react";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
-import { submitVerification } from "./actions";
+import { submitVerification } from "./verification-actions";
 
 export function VerificationForm({
   casinos,

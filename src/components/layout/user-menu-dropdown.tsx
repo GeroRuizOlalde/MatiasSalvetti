@@ -1,6 +1,6 @@
 "use client";
 
-import { Castle, ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
+import { BadgeCheck, Castle, ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "@/app/auth/actions";
@@ -59,6 +59,9 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
           </p>
           <Link href="/perfil" className={itemClass} onClick={close}>
             <User className="size-4" aria-hidden /> Mi perfil
+          </Link>
+          <Link href="/perfil#cuentas" className={itemClass} onClick={close}>
+            <BadgeCheck className="size-4" aria-hidden /> Verificar cuenta
           </Link>
           <Link href="/cuartel" className={itemClass} onClick={close}>
             <Castle className="size-4" aria-hidden /> Cuartel

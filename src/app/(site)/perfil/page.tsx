@@ -6,14 +6,13 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/ui/page-header";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { getActiveCasinos } from "@/lib/casinos";
 import { formatDate, maskAccountId } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteAccountForm } from "./delete-account-form";
+import { VerificationForm } from "./verification-form";
 
-export const metadata: Metadata = {
-  title: "Mi perfil",
-  robots: { index: false },
-};
+export const metadata: Metadata = { title: "Mi perfil", robots: { index: false } };
 
 const ROLE_LABEL = { viewer: "Viewer", mod: "Moderador", admin: "Admin" } as const;
 
@@ -86,16 +85,27 @@ const ACCOUNT_STATUS = {
   rejected: { label: "Rechazada", className: "text-live" },
 } as const;
 
+/** Cuentas de casino del viewer y el formulario para verificar una nueva (Wager Race, sorteos con casino). */
 async function CasinoAccounts({ userId }: { userId: string }) {
   const supabase = await createClient();
-  const { data: accounts } = await supabase
-    .from("casino_accounts")
-    .select("id, account_id, status, reject_reason, casino:casinos(name)")
-    .eq("user_id", userId)
-    .order("created_at");
+  const [{ data: accounts }, casinos] = await Promise.all([
+    supabase
+      .from("casino_accounts")
+      .select("id, casino_id, account_id, status, reject_reason, casino:casinos(name)")
+      .eq("user_id", userId)
+      .order("created_at"),
+    getActiveCasinos(),
+  ]);
+  // Una rechazada se puede volver a mandar.
+  const done = new Set((accounts ?? []).filter((a) => a.status !== "rejected").map((a) => a.casino_id));
+  const available = casinos.filter((c) => !done.has(c.id));
 
   return (
-    <section aria-labelledby="accounts-title" className="rounded-2xl border border-line bg-surface p-5">
+    <section
+      id="cuentas"
+      aria-labelledby="accounts-title"
+      className="scroll-mt-24 rounded-2xl border border-line bg-surface p-5"
+    >
       <h2 id="accounts-title" className="flex items-center gap-2 font-semibold">
         <BadgeCheck className="size-4 text-accent-text" aria-hidden /> Cuentas de casino
       </h2>
@@ -115,9 +125,18 @@ async function CasinoAccounts({ userId }: { userId: string }) {
       ) : (
         <p className="mt-2 text-sm text-muted">Todavía no cargaste ninguna.</p>
       )}
-      <Link href="/wager-race" className="mt-3 inline-block text-sm font-semibold text-accent-text hover:underline">
-        Verificar una cuenta en la Wager Race
-      </Link>
+      {available.length ? (
+        <div className="mt-5 border-t border-line pt-5">
+          <h3 className="font-semibold">Verificar una cuenta</h3>
+          <p className="mt-1 mb-3 text-sm text-muted">
+            Cargá el ID de tu cuenta y una captura. Tiene que ser una cuenta creada con el link de Matías. Con la cuenta
+            verificada entrás a la Wager Race y a los sorteos del casino.
+          </p>
+          <VerificationForm casinos={available.map(({ id, name }) => ({ id, name }))} />
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted">Ya cargaste tus cuentas de todos los casinos.</p>
+      )}
     </section>
   );
 }
