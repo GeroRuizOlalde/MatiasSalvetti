@@ -6,6 +6,7 @@ import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { HUNT_STATUSES, type HuntStatus } from "@/lib/hunt-status";
 import type { Enums } from "@/types/database";
 import { deleteHunt, saveHunt } from "./actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 type Hunt = {
   id: string;
@@ -48,13 +49,9 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
       </Field>
       <div className="grid grid-cols-[1fr_auto] gap-2">
         <Field id={`${id}-start`} label="Inversión inicial">
-          <input
+          <AmountInput
             id={`${id}-start`}
             name="start_cost"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
             required
             defaultValue={hunt?.start_cost}
             className={inputClass}

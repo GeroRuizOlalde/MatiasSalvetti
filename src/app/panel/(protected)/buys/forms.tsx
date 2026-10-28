@@ -11,6 +11,7 @@ import { formatMoney, formatMulti } from "@/lib/format";
 import { BUY_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
 import { addBuy, deleteBuy, reviewBuyCall, saveBuySession, updateBuy } from "./actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -91,41 +92,13 @@ export function AddBuyForm({ sessionId, defaults }: { sessionId: string; default
         <SlotPicker key={round} id={`${id}-slot`} required />
       </Field>
       <Field id={`${id}-bet`} label="Apuesta">
-        <input
-          id={`${id}-bet`}
-          name="bet"
-          type="number"
-          inputMode="decimal"
-          min={0.01}
-          step="0.01"
-          required
-          defaultValue={defaults?.bet}
-          className={moneyInput}
-        />
+        <AmountInput id={`${id}-bet`} name="bet" required defaultValue={defaults?.bet} className={moneyInput} />
       </Field>
       <Field id={`${id}-cost`} label="Costo de la compra">
-        <input
-          id={`${id}-cost`}
-          name="cost"
-          type="number"
-          inputMode="decimal"
-          min={0.01}
-          step="0.01"
-          required
-          defaultValue={defaults?.cost}
-          className={moneyInput}
-        />
+        <AmountInput id={`${id}-cost`} name="cost" required defaultValue={defaults?.cost} className={moneyInput} />
       </Field>
       <Field id={`${id}-payout`} label="Pago (si ya se abrió)">
-        <input
-          id={`${id}-payout`}
-          name="payout"
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step="0.01"
-          className={moneyInput}
-        />
+        <AmountInput id={`${id}-payout`} name="payout" className={moneyInput} />
       </Field>
       <SubmitButton className="h-10 sm:mt-5">Agregar</SubmitButton>
       <FormMessage state={state} className="sm:col-span-5" />
@@ -159,23 +132,19 @@ export function BuyRowForm({
   const id = useId();
   const message = deleteState.error ? deleteState : state;
 
-  const input = (name: keyof typeof values, label: string, width: string, min: number) => (
+  const input = (name: keyof typeof values, label: string, width: string) => (
     <>
       <label htmlFor={`${id}-${name}`} className="sr-only">
         {label}
       </label>
-      <input
+      <AmountInput
         id={`${id}-${name}`}
         name={name}
-        type="number"
-        inputMode="decimal"
-        min={min}
-        step="0.01"
         required={name !== "payout"}
         placeholder={label}
         disabled={locked}
         value={values[name]}
-        onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
+        onValueChange={(raw) => setValues((v) => ({ ...v, [name]: raw }))}
         className={cn(moneyInput, "h-9", width)}
       />
     </>
@@ -186,9 +155,9 @@ export function BuyRowForm({
       <form action={formAction} className="flex flex-wrap items-center gap-2">
         <input type="hidden" name="id" value={buy.id} />
         <input type="hidden" name="session_id" value={sessionId} />
-        {input("bet", "Apuesta", "w-24", 0.01)}
-        {input("cost", "Costo", "w-28", 0.01)}
-        {input("payout", "Pago", "w-28", 0)}
+        {input("bet", "Apuesta", "w-24")}
+        {input("cost", "Costo", "w-28")}
+        {input("payout", "Pago", "w-28")}
         <span className="num w-20 text-right text-sm text-gold">{multi !== null ? formatMulti(multi) : "—"}</span>
         <span
           className={cn(
@@ -249,13 +218,9 @@ export function BuyCallReviewForm({
           <label htmlFor={`${id}-${name}`} className="sr-only">
             {name === "bet" ? "Apuesta" : "Costo de la compra"}
           </label>
-          <input
+          <AmountInput
             id={`${id}-${name}`}
             name={name}
-            type="number"
-            inputMode="decimal"
-            min={0.01}
-            step="0.01"
             placeholder={name === "bet" ? "Apuesta" : "Costo"}
             defaultValue={defaults?.[name]}
             className={cn(moneyInput, "h-9 w-28")}

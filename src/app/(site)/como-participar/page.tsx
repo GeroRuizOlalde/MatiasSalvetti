@@ -56,15 +56,12 @@ export default async function ComoParticiparPage() {
       title: "Verificá tu cuenta de casino",
       body: (
         <>
-          Cargá el ID de tu cuenta y una captura de pantalla desde la pestaña <strong>Verificación</strong> de la{" "}
-          <Link href="/wager-race" className={linkClass}>
-            Wager Race
-          </Link>
-          . Un admin la revisa y vas a ver el estado en tu{" "}
-          <Link href="/perfil" className={linkClass}>
-            perfil
-          </Link>
-          .
+          Cargá el ID de tu cuenta y una captura de pantalla en <strong>Cuentas de casino</strong>, dentro de{" "}
+          <Link href="/perfil#cuentas" className={linkClass}>
+            tu perfil
+          </Link>{" "}
+          (también llegás desde el menú de tu usuario, en «Verificar cuenta»). Un admin la revisa y te avisamos con una
+          notificación cuando esté lista.
         </>
       ),
     },
