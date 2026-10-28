@@ -6,7 +6,7 @@ import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { CASINOS_TAG } from "@/lib/casinos";
 import { parseCsv } from "@/lib/csv";
-import { fetchSlotReportSlots } from "@/lib/external/slot-report";
+import { fetchSlotReportSlots, SlotReportError } from "@/lib/external/slot-report";
 import { createClient } from "@/lib/supabase/server";
 import { hasFile, uploadPublicImage } from "@/lib/uploads";
 
@@ -101,6 +101,12 @@ export async function importFromSlotReport(): Promise<ActionState> {
     slots = await fetchSlotReportSlots();
   } catch (error) {
     console.error("[catalogo] slot.report", error);
+    if (error instanceof SlotReportError && (error.status === 401 || error.status === 403)) {
+      return {
+        error:
+          "slot.report rechazó el pedido: pide un link a su sitio en el texto de una página pública de la web. Mientras tanto, importá el catálogo con un CSV.",
+      };
+    }
     return { error: "No pudimos conectarnos con slot.report. Probá de nuevo en un rato." };
   }
   if (slots.length === 0) return { error: "slot.report no devolvió slots. Puede que haya cambiado su formato." };
