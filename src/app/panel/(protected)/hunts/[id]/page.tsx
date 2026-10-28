@@ -5,11 +5,13 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { HuntStatsGrid } from "@/components/hunts/hunt-stats";
 import { HuntStatusBadge } from "@/components/hunts/status-badge";
+import { TipeoButtons } from "@/components/panel/tipeo-buttons";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { huntStats } from "@/lib/calc/hunt";
 import { formatDateTime, formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
+import { isTipeoHit } from "@/lib/tipeos";
 import { DeleteHuntForm, HuntForm } from "../hunt-form";
 import { AddBonusForm, BonusRowForm, CallReviewForm } from "./bonus-forms";
 
@@ -46,9 +48,8 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
         .order("created_at"),
       supabase.from("casinos").select("id, name").order("sort_order").order("name"),
       supabase.rpc("hunt_guess_count", { p_hunt: id }),
-      supabase.rpc("hunt_tipeo_candidates", { p_hunt: id }),
+      supabase.from("tipeos").select("bonus_id, status").eq("hunt_id", id),
     ]);
-  const tipeoOf = (callId: string) => tipeos?.find((t) => t.call_id === callId);
 
   const userIds = [
     ...(bonuses ?? []).map((b) => b.called_by),
@@ -68,6 +69,9 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
   const stats = huntStats(hunt.start_cost, list);
   const locked = hunt.status === "finished";
   const lastBet = list.at(-1)?.bet;
+  const tipeoStatus = (bonusId: string) => tipeos?.find((t) => t.bonus_id === bonusId)?.status;
+  // Bonos abiertos que vinieron de un call y pagaron más de 110x, sin decidir todavía.
+  const recommended = list.filter((b) => isTipeoHit(b) && !tipeoStatus(b.id));
 
   return (
     <div className="space-y-6">
@@ -94,6 +98,30 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
         currency={hunt.currency}
         finalBalance={hunt.final_balance}
       />
+
+      {recommended.length ? (
+        <section aria-labelledby="tipeos" className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
+          <h2 id="tipeos" className="mb-1 flex items-center gap-2 font-semibold text-gold">
+            <Sparkles className="size-4" aria-hidden /> Tipeos recomendados
+          </h2>
+          <p className="mb-3 text-sm text-muted">Estos calls pagaron más de 110x. ¿Le das tipeo al viewer?</p>
+          <ul className="divide-y divide-gold/20">
+            {recommended.map((bonus) => (
+              <li key={bonus.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{nameOf(bonus.called_by) ?? "Viewer"}</p>
+                  <p className="text-sm text-muted">
+                    {bonus.slot_name} · {formatMoney(bonus.bet, hunt.currency)} →{" "}
+                    {formatMoney(bonus.payout ?? 0, hunt.currency)}{" "}
+                    <span className="num font-semibold text-gold">{formatMulti((bonus.payout ?? 0) / bonus.bet)}</span>
+                  </p>
+                </div>
+                <TipeoButtons bonusId={bonus.id} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section aria-labelledby="settings" className="rounded-2xl border border-line bg-surface p-5">
         <h2 id="settings" className="mb-3 font-semibold">
@@ -129,35 +157,17 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
         </h2>
         {calls?.length ? (
           <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
-            {calls.map((call) => {
-              const tipeo = tipeoOf(call.id);
-              return (
-                <li key={call.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-center gap-2 font-semibold">
-                      {call.slot_name}
-                      {tipeo ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold">
-                          <Sparkles className="size-3" aria-hidden /> Tipeo
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-subtle">
-                      {nameOf(call.user_id) ?? "Viewer"} · {formatDateTime(call.created_at)}
-                    </p>
-                    {tipeo ? (
-                      <p className="text-xs text-gold">
-                        Ya pagó <span className="num">{formatMulti(tipeo.multi)}</span> en{" "}
-                        {tipeo.source === "hunt" ? "el hunt" : "los buys"} «{tipeo.title}»
-                      </p>
-                    ) : null}
-                  </div>
-                  {locked ? null : (
-                    <CallReviewForm huntId={hunt.id} callId={call.id} defaultBet={lastBet} tipeo={Boolean(tipeo)} />
-                  )}
-                </li>
-              );
-            })}
+            {calls.map((call) => (
+              <li key={call.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{call.slot_name}</p>
+                  <p className="text-xs text-subtle">
+                    {nameOf(call.user_id) ?? "Viewer"} · {formatDateTime(call.created_at)}
+                  </p>
+                </div>
+                {locked ? null : <CallReviewForm huntId={hunt.id} callId={call.id} defaultBet={lastBet} />}
+              </li>
+            ))}
           </ul>
         ) : (
           <p className="rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-subtle">
@@ -184,7 +194,14 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
               >
                 <span className="num w-8 text-sm text-subtle">{i + 1}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{bonus.slot_name}</p>
+                  <p className="flex items-center gap-2 font-semibold">
+                    <span className="min-w-0 truncate">{bonus.slot_name}</span>
+                    {tipeoStatus(bonus.id) === "given" ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold">
+                        <Sparkles className="size-3" aria-hidden /> Tipeo
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="truncate text-xs text-subtle">
                     {bonus.provider ?? "Sin proveedor"}
                     {bonus.called_by ? ` · call de ${nameOf(bonus.called_by) ?? "un viewer"}` : ""}

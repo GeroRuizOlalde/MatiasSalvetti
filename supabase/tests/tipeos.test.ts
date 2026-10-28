@@ -5,23 +5,25 @@ let db: TestDb;
 let mod: { id: string };
 let viewer: { id: string };
 
-async function createHunt(title = "Hunt") {
+/** Hunt con un bono que vino del call del viewer, abierto con el pago indicado. */
+async function calledBonus(bet: number, payout: number | null) {
   const { rows } = await as(db, mod, () =>
     db.query<{ id: string }>(
-      "insert into public.hunts (title, start_cost, status, calls_open) values ($1, 1000, 'collecting', true) returning id",
-      [title],
+      "insert into public.hunts (title, start_cost, status, calls_open) values ('Hunt', 1000, 'collecting', true) returning id",
     ),
   );
-  return rows[0].id;
-}
-
-async function callFor(hunt: string, slot: string) {
-  await as(db, viewer, () => db.query("select public.submit_hunt_call($1, null, $2)", [hunt, slot]));
-  const { rows } = await db.query<{ id: string }>(
-    "select id from public.hunt_calls where hunt_id = $1 and user_id = $2",
-    [hunt, viewer.id],
+  const hunt = rows[0].id;
+  await as(db, viewer, () => db.query("select public.submit_hunt_call($1, null, 'Sugar Rush')", [hunt]));
+  const call = await db.query<{ id: string }>("select id from public.hunt_calls where hunt_id = $1", [hunt]);
+  const bonus = await as(db, mod, () =>
+    db.query<{ id: string }>("select public.accept_hunt_call($1, $2) as id", [call.rows[0].id, bet]),
   );
-  return rows[0].id;
+  if (payout !== null) {
+    await as(db, mod, () =>
+      db.query("update public.hunt_bonuses set payout = $2 where id = $1", [bonus.rows[0].id, payout]),
+    );
+  }
+  return { hunt, bonus: bonus.rows[0].id };
 }
 
 beforeAll(async () => {
@@ -30,81 +32,74 @@ beforeAll(async () => {
   viewer = await createTwitchUser(db, "viewer_tipeo");
   await db.query("update public.profiles set role = 'mod' where id = $1", [mod.id]);
   await as(db, viewer, () => db.query("select public.accept_terms(1)"));
-
-  // Historial: Sugar Rush pagó 250x en un hunt; Big Bass pagó 110x justo en buys (no alcanza).
-  const old = await createHunt("Hunt viejo");
-  await as(db, mod, () =>
-    db.query(
-      "insert into public.hunt_bonuses (hunt_id, slot_name, bet, payout) values ($1, 'Sugar Rush', 100, 25000)",
-      [old],
-    ),
-  );
-  const { rows } = await as(db, mod, () =>
-    db.query<{ id: string }>("insert into public.buy_sessions (title) values ('Buys viejos') returning id"),
-  );
-  await as(db, mod, () =>
-    db.query(
-      "insert into public.buys (session_id, slot_name, bet, cost, payout) values ($1, 'Big Bass Bonanza', 100, 10000, 11000)",
-      [rows[0].id],
-    ),
-  );
 }, 60_000);
 
 describe("tipeos", () => {
-  it("marca como tipeo solo los slots que pagaron más de 110x", async () => {
-    const hunt = await createHunt();
-    const call = await callFor(hunt, "sugar rush");
+  it("da tipeo al viewer del call cuando el bono pagó más de 110x", async () => {
+    const { hunt, bonus } = await calledBonus(150, 160000);
+    await as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [bonus]));
     const { rows } = await as(db, mod, () =>
-      db.query<{ call_id: string; multi: string; source: string; title: string }>(
-        "select * from public.hunt_tipeo_candidates($1)",
+      db.query(
+        "select hunt_id, user_id, slot_name, bet, payout, multi, status from public.tipeos where bonus_id = $1",
+        [bonus],
+      ),
+    );
+    expect(rows).toEqual([
+      {
+        hunt_id: hunt,
+        user_id: viewer.id,
+        slot_name: "Sugar Rush",
+        bet: "150.00",
+        payout: "160000.00",
+        multi: "1066.67",
+        status: "given",
+      },
+    ]);
+  });
+
+  it("se puede descartar y cambiar de idea", async () => {
+    const { bonus } = await calledBonus(100, 20000);
+    await as(db, mod, () => db.query("select public.decide_tipeo($1, false)", [bonus]));
+    await as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [bonus]));
+    const { rows } = await as(db, mod, () => db.query("select status from public.tipeos where bonus_id = $1", [bonus]));
+    expect(rows).toEqual([{ status: "given" }]);
+  });
+
+  it("no deja dar tipeo si el bono no pasó los 110x o no está abierto", async () => {
+    const low = await calledBonus(100, 11000);
+    await expect(as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [low.bonus]))).rejects.toThrow(
+      /not_tipeo/,
+    );
+    const closed = await calledBonus(100, null);
+    await expect(as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [closed.bonus]))).rejects.toThrow(
+      /not_tipeo/,
+    );
+  });
+
+  it("no deja dar tipeo a un bono que no vino de un call", async () => {
+    const { hunt } = await calledBonus(100, null);
+    const { rows } = await as(db, mod, () =>
+      db.query<{ id: string }>(
+        "insert into public.hunt_bonuses (hunt_id, slot_name, bet, payout) values ($1, 'Otro', 100, 50000) returning id",
         [hunt],
       ),
     );
-    expect(rows).toEqual([{ call_id: call, multi: "250.00", source: "hunt", title: "Hunt viejo" }]);
-
-    const other = await createHunt();
-    await callFor(other, "Big Bass Bonanza");
-    const none = await as(db, mod, () => db.query("select * from public.hunt_tipeo_candidates($1)", [other]));
-    expect(none.rows).toHaveLength(0);
-  });
-
-  it("aceptar como tipeo crea el bono y lo anota en la lista", async () => {
-    const hunt = await createHunt();
-    const call = await callFor(hunt, "Sugar Rush");
-    const { rows } = await as(db, mod, () =>
-      db.query<{ bonus: string }>("select public.accept_hunt_call_as_tipeo($1, 200) as bonus", [call]),
+    await expect(as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [rows[0].id]))).rejects.toThrow(
+      /bonus_not_called/,
     );
-    const tipeo = await as(db, mod, () =>
-      db.query<{ bonus_id: string; user_id: string; ref_multi: string; ref_source: string }>(
-        "select bonus_id, user_id, ref_multi, ref_source from public.tipeos where call_id = $1",
-        [call],
-      ),
+  });
+
+  it("los viewers no ven ni dan tipeos, y borrar el bono borra el tipeo", async () => {
+    const { bonus } = await calledBonus(100, 30000);
+    await expect(as(db, viewer, () => db.query("select public.decide_tipeo($1, true)", [bonus]))).rejects.toThrow(
+      /forbidden/,
     );
-    expect(tipeo.rows).toEqual([
-      { bonus_id: rows[0].bonus, user_id: viewer.id, ref_multi: "250.00", ref_source: "hunt" },
-    ]);
-    const status = await db.query<{ status: string }>("select status from public.hunt_calls where id = $1", [call]);
-    expect(status.rows[0].status).toBe("accepted");
-  });
+    await as(db, mod, () => db.query("select public.decide_tipeo($1, true)", [bonus]));
+    const seen = await as(db, viewer, () => db.query("select id from public.tipeos"));
+    expect(seen.rows).toHaveLength(0);
 
-  it("no deja aceptar como tipeo un slot que no califica", async () => {
-    const hunt = await createHunt();
-    const call = await callFor(hunt, "Big Bass Bonanza");
-    await expect(
-      as(db, mod, () => db.query("select public.accept_hunt_call_as_tipeo($1, 100)", [call])),
-    ).rejects.toThrow(/not_tipeo/);
-  });
-
-  it("los viewers no ven ni aceptan tipeos", async () => {
-    const hunt = await createHunt();
-    const call = await callFor(hunt, "Sugar Rush");
-    await expect(
-      as(db, viewer, () => db.query("select * from public.hunt_tipeo_candidates($1)", [hunt])),
-    ).rejects.toThrow(/forbidden/);
-    await expect(
-      as(db, viewer, () => db.query("select public.accept_hunt_call_as_tipeo($1, 100)", [call])),
-    ).rejects.toThrow(/forbidden/);
-    const list = await as(db, viewer, () => db.query("select id from public.tipeos"));
-    expect(list.rows).toHaveLength(0);
+    await as(db, mod, () => db.query("delete from public.hunt_bonuses where id = $1", [bonus]));
+    const left = await db.query("select id from public.tipeos where bonus_id = $1", [bonus]);
+    expect(left.rows).toHaveLength(0);
   });
 });

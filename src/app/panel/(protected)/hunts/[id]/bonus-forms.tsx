@@ -140,13 +140,10 @@ export function CallReviewForm({
   huntId,
   callId,
   defaultBet,
-  tipeo,
 }: {
   huntId: string;
   callId: string;
   defaultBet?: number;
-  /** El slot ya pagó más de 110x: se ofrece aceptarlo como tipeo. */
-  tipeo?: boolean;
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(reviewCall, INITIAL_ACTION_STATE);
   const id = useId();
@@ -169,24 +166,11 @@ export function CallReviewForm({
         defaultValue={defaultBet}
         className={cn(moneyInput, "h-9 w-28")}
       />
-      {tipeo ? (
-        <button
-          type="submit"
-          name="decision"
-          value="tipeo"
-          className="h-9 rounded-lg bg-gold px-3 text-sm font-semibold text-bg hover:brightness-110"
-        >
-          Aceptar tipeo
-        </button>
-      ) : null}
       <button
         type="submit"
         name="decision"
         value="accept"
-        className={cn(
-          "h-9 rounded-lg px-3 text-sm font-semibold",
-          tipeo ? "border border-line text-text hover:bg-surface-2" : "bg-accent text-white hover:bg-[#8a2cec]",
-        )}
+        className="h-9 rounded-lg bg-accent px-3 text-sm font-semibold text-white hover:bg-[#8a2cec]"
       >
         Aceptar
       </button>
