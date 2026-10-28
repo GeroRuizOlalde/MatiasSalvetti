@@ -6,6 +6,7 @@ import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { CASINOS_TAG } from "@/lib/casinos";
 import { parseCsv } from "@/lib/csv";
+import { fetchSlotReportSlots } from "@/lib/external/slot-report";
 import { createClient } from "@/lib/supabase/server";
 import { hasFile, uploadPublicImage } from "@/lib/uploads";
 
@@ -47,7 +48,9 @@ export async function saveSlot(_prev: ActionState, formData: FormData): Promise<
     : await supabase.from("slots").insert(values).select("id").single();
 
   if (result.error) {
-    return { error: result.error.code === "23505" ? "Ya existe un slot con ese nombre y proveedor." : "No se pudo guardar." };
+    return {
+      error: result.error.code === "23505" ? "Ya existe un slot con ese nombre y proveedor." : "No se pudo guardar.",
+    };
   }
 
   const image = formData.get("image");
@@ -84,7 +87,36 @@ export async function importSlots(_prev: ActionState, formData: FormData): Promi
 
   refresh();
   const skipped = valid.length - (data ?? 0);
-  return { ok: `Importados ${data ?? 0} slots nuevos${skipped ? ` (${skipped} ya existían o estaban repetidos)` : ""}.` };
+  return {
+    ok: `Importados ${data ?? 0} slots nuevos${skipped ? ` (${skipped} ya existían o estaban repetidos)` : ""}.`,
+  };
+}
+
+/** Trae nombres y proveedores de slot.report. Se puede repetir: los que ya están se saltean. */
+export async function importFromSlotReport(): Promise<ActionState> {
+  await requirePanelProfile("mod");
+
+  let slots;
+  try {
+    slots = await fetchSlotReportSlots();
+  } catch (error) {
+    console.error("[catalogo] slot.report", error);
+    return { error: "No pudimos conectarnos con slot.report. Probá de nuevo en un rato." };
+  }
+  if (slots.length === 0) return { error: "slot.report no devolvió slots. Puede que haya cambiado su formato." };
+
+  const supabase = await createClient();
+  let inserted = 0;
+  // import_slots acepta hasta 5.000 filas por llamada.
+  for (let i = 0; i < slots.length; i += 5000) {
+    const { data, error } = await supabase.rpc("import_slots", { p_rows: slots.slice(i, i + 5000) });
+    if (error) return { error: `Se importaron ${inserted} slots y después falló. Probá de nuevo para seguir.` };
+    inserted += data ?? 0;
+  }
+
+  refresh();
+  const skipped = slots.length - inserted;
+  return { ok: `Importados ${inserted} slots nuevos de slot.report${skipped ? ` (${skipped} ya estaban)` : ""}.` };
 }
 
 // -----------------------------------------------------------------------------

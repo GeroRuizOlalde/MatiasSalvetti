@@ -110,6 +110,19 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 - **Viewers**: un call por hunt (editable mientras esté pendiente; si lo rechazan, pueden pedir otro) y una apuesta de balance (editable mientras esté abierto). Las dos cosas pasan por funciones `SECURITY DEFINER` que chequean `can_participate()` y un rate limit. Los montos del GTB se ven recién cuando el hunt termina.
 - **En vivo**: la página `/bonus-hunt/[id]` escucha la tabla `hunts` por Supabase Realtime (cada cambio de un bono también actualiza su hunt) y se vuelve a pedir. Los datos públicos se cachean (perfil `hunt`) y el panel invalida el caché en cada cambio.
 
+## Bonus Buys y Bonus Battle (fase 4)
+
+- **Buys** (`/panel/buys`): sesiones de compras. Cada compra lleva apuesta, costo y pago (multi = pago / apuesta; resultado = pagado − costo). Con la sesión *en vivo*, el mod abre una **votación** «¿qué compramos?» con 2 a 8 slots; hay una sola abierta por sesión, cada viewer tiene un voto que puede cambiar, y al cerrarla gana la más votada (en empate, la primera de la lista). Terminar la sesión cierra la votación abierta.
+- **Battle** (`/panel/battles`): borrador → *bancá a tu slot* (los viewers eligen quién gana) → *en juego* → *terminada*. Se arranca con 2, 4, 8 o 16 slots: la base arma el cuadro (1 contra 2, 3 contra 4…, se puede sortear el orden antes). En cada cruce gana el de mayor multi (empate: mayor pago, después mejor seed) y avanza solo; la final define al campeón. Un cruce no se puede corregir si el siguiente ya tiene resultados. «Borrar cuadro» vuelve a *bancá a tu slot* conservando los picks.
+- Las dos páginas públicas se actualizan solas por Realtime (escuchan `buy_sessions` y `battles`) y la home muestra la sesión en curso o la última de cada tipo.
+
+## Wager Race y verificaciones (fase 5)
+
+- **Verificación** (`/wager-race`, sección «Tu cuenta»): el viewer elige el casino, carga el ID de su cuenta y una captura. La captura va al bucket privado `verifications`, en la carpeta del usuario; solo la ve el admin (con links firmados de 10 minutos). Un mismo ID de un casino no puede estar en dos usuarios. El admin aprueba o rechaza con motivo desde `/panel/verificaciones`; si la rechaza, el viewer puede corregirla. Al borrar la cuenta se borran también sus capturas.
+- **Carreras** (`/panel/wager-race`, solo admin): casino, fechas (hora AR), premios por puesto (uno por renglón) y reglas opcionales en Markdown. El wager se carga con el **CSV del casino** (ID de cuenta, wager del período): reemplaza el valor anterior y solo cuentan las cuentas verificadas de ese casino; los IDs que no coinciden se listan para revisar. También se puede corregir a mano.
+- **Web**: la carrera en curso (o la próxima) con cuenta regresiva, premios y ranking con los IDs enmascarados; cada viewer ve su puesto y el estado de sus cuentas, también en `/perfil`. La home muestra la cuenta regresiva y el podio.
+- **Catálogo desde slot.report**: en `/panel/catalogo`, «Importar desde slot.report» carga nombres y proveedores de su API pública (sin imágenes). Su uso pide un link a slot.report, que está en el pie.
+
 ## Seguridad
 
 - RLS en todas las tablas. Rol, baneo y saldos solo cambian por funciones `SECURITY DEFINER` o desde el servidor.
@@ -118,5 +131,5 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 
 ## Pendiente (por fase)
 
-- **Fases 4 a 6**: Buys, Battle, Wager Race, Cuartel, sorteos. XP y puntos por participar en los hunts llegan con el Cuartel (fase 6).
+- **Fase 6**: Cuartel (XP, puntos, misiones, tienda) y sorteos. XP y puntos por participar (calls, GTB, votos, picks, wager) llegan ahí.
 - **Fase 7**: overlays de OBS, E2E, SEO y deploy.

@@ -4,12 +4,15 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+/** Tablas que la base "toca" cuando cambia algo de su sesión (bonos, compras, cruces, votaciones). */
+type LiveTable = "hunts" | "buy_sessions" | "battles";
+
 /**
- * Escucha los cambios del hunt por Supabase Realtime (cada cambio de un bono
- * también actualiza el hunt) y vuelve a pedir la página. Los datos vienen del caché del servidor, que el panel
- * invalida en cada cambio, así que no hace falta armar el estado acá.
+ * Escucha los cambios de una fila por Supabase Realtime y vuelve a pedir la
+ * página. Los datos vienen del caché del servidor, que el panel invalida en
+ * cada cambio, así que no hace falta armar el estado acá.
  */
-export function HuntLive({ huntId }: { huntId: string }) {
+export function RealtimeRefresh({ table, id }: { table: LiveTable; id: string }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -22,12 +25,8 @@ export function HuntLive({ huntId }: { huntId: string }) {
     };
 
     const channel = supabase
-      .channel(`hunt:${huntId}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "hunts", filter: `id=eq.${huntId}` },
-        schedule,
-      )
+      .channel(`${table}:${id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table, filter: `id=eq.${id}` }, schedule)
       .subscribe();
 
     // Al volver a la pestaña puede haberse perdido algún evento.
@@ -39,7 +38,7 @@ export function HuntLive({ huntId }: { huntId: string }) {
       document.removeEventListener("visibilitychange", onVisible);
       void supabase.removeChannel(channel);
     };
-  }, [huntId, router]);
+  }, [table, id, router]);
 
   return null;
 }

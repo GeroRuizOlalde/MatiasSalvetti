@@ -18,7 +18,8 @@ export function hasFile(value: FormDataEntryValue | null): value is File {
 export function validateImage(file: File, maxBytes = 2 * 1024 * 1024): { ext: string } | { error: string } {
   const ext = IMAGE_TYPES[file.type];
   if (!ext) return { error: "La imagen tiene que ser PNG, JPG, WebP o SVG." };
-  if (file.size > maxBytes) return { error: `La imagen no puede pesar más de ${Math.round(maxBytes / 1024 / 1024)} MB.` };
+  if (file.size > maxBytes)
+    return { error: `La imagen no puede pesar más de ${Math.round(maxBytes / 1024 / 1024)} MB.` };
   return { ext };
 }
 
@@ -37,5 +38,27 @@ export async function uploadPublicImage(
     .from(PUBLIC_ASSETS_BUCKET)
     .upload(path, file, { contentType: file.type, cacheControl: "31536000", upsert: false });
   if (error) return { error: "No se pudo subir la imagen." };
+  return { path };
+}
+
+export const VERIFICATIONS_BUCKET = "verifications";
+
+const SCREENSHOT_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+
+/** Captura de verificación al bucket privado, dentro de la carpeta del usuario (lo exige la policy). */
+export async function uploadVerificationScreenshot(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  casinoSlug: string,
+  file: File,
+): Promise<{ path: string } | { error: string }> {
+  const ext = SCREENSHOT_TYPES[file.type];
+  if (!ext) return { error: "La captura tiene que ser PNG, JPG o WebP." };
+  if (file.size > 5 * 1024 * 1024) return { error: "La captura no puede pesar más de 5 MB." };
+  const path = `${userId}/${casinoSlug}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from(VERIFICATIONS_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
+  if (error) return { error: "No se pudo subir la captura." };
   return { path };
 }

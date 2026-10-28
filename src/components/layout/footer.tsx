@@ -29,13 +29,13 @@ export async function Footer() {
               Jugá con responsabilidad · +18
             </h2>
             <p>
-              El juego es entretenimiento, no una forma de ganar plata. Poné límites de tiempo y de dinero, y no
-              juegues para recuperar lo que perdiste. Si necesitás ayuda, comunicate con{" "}
+              El juego es entretenimiento, no una forma de ganar plata. Poné límites de tiempo y de dinero, y no juegues
+              para recuperar lo que perdiste. Si necesitás ayuda, comunicate con{" "}
               <span className="text-text">{settings.responsible_gaming_helpline}</span>.
             </p>
             <p className="text-xs text-subtle">
-              Los links a casinos de esta web son links de referido: Matías recibe una comisión si te registrás
-              desde ellos.
+              Los links a casinos de esta web son links de referido: Matías recibe una comisión si te registrás desde
+              ellos.
             </p>
           </div>
         </section>
@@ -43,7 +43,15 @@ export async function Footer() {
         <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <Logo />
-            <p className="text-sm text-subtle">Matías Salvetti · Chupetti</p>
+            <div className="text-sm text-subtle">
+              <p>Matías Salvetti · Chupetti</p>
+              <p className="text-xs">
+                Datos de slots:{" "}
+                <a href="https://slot.report" target="_blank" className="hover:text-text">
+                  slot.report
+                </a>
+              </p>
+            </div>
           </div>
           <nav aria-label="Legales">
             <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">

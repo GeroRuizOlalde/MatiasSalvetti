@@ -20,7 +20,14 @@ export function SlotForm({ slot }: { slot?: Slot }) {
     <form ref={formRef} action={formAction} className="grid gap-3 sm:grid-cols-[2fr_1.5fr_1.5fr_auto] sm:items-end">
       {slot ? <input type="hidden" name="id" value={slot.id} /> : null}
       <Field id={`${id}-name`} label="Nombre">
-        <input id={`${id}-name`} name="name" required maxLength={120} defaultValue={slot?.name} className={inputClass} />
+        <input
+          id={`${id}-name`}
+          name="name"
+          required
+          maxLength={120}
+          defaultValue={slot?.name}
+          className={inputClass}
+        />
       </Field>
       <Field id={`${id}-provider`} label="Proveedor">
         <input
@@ -42,7 +49,12 @@ export function SlotForm({ slot }: { slot?: Slot }) {
       </Field>
       <div className="flex items-center gap-3 sm:pb-0.5">
         <label className="flex items-center gap-2 text-xs text-muted">
-          <input type="checkbox" name="is_active" defaultChecked={slot?.is_active ?? true} className="size-4 accent-accent" />
+          <input
+            type="checkbox"
+            name="is_active"
+            defaultChecked={slot?.is_active ?? true}
+            className="size-4 accent-accent"
+          />
           Activo
         </label>
         <SubmitButton>{slot ? "Guardar" : "Agregar"}</SubmitButton>

@@ -55,7 +55,12 @@ export function formatDateTime(date: Date | string) {
 
 export function formatDate(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: "numeric", month: "long", year: "numeric" }).format(d);
+  return new Intl.DateTimeFormat(LOCALE, {
+    timeZone: TIME_ZONE,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 /** `1239•••623`. IDs cortos muestran menos dígitos para no revelarlos casi enteros. */
@@ -64,4 +69,23 @@ export function maskAccountId(id: string) {
   if (clean.length <= 4) return "•••";
   const visible = clean.length >= 10 ? [4, 3] : [2, 2];
   return `${clean.slice(0, visible[0])}•••${clean.slice(-visible[1])}`;
+}
+
+/** ISO → valor para <input type="datetime-local"> en hora de Buenos Aires (`2026-11-01T21:30`). */
+export function toArgentinaInput(date: Date | string) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(d)
+      .map((p) => [p.type, p.value]),
+  );
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }

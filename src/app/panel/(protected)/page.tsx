@@ -1,4 +1,4 @@
-import { Crosshair, Inbox, Megaphone, Radio, ShoppingCart, Swords } from "lucide-react";
+import { BadgeCheck, Crosshair, Inbox, Megaphone, Radio, ShoppingCart, Swords } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,15 +12,25 @@ export const metadata: Metadata = { title: "Inicio" };
 
 const QUICK_ACTIONS = [
   { label: "Nuevo Bonus Hunt", icon: Crosshair, href: "/panel/hunts" },
-  { label: "Nueva sesión de Buys", icon: ShoppingCart, phase: 4 },
-  { label: "Nueva Battle", icon: Swords, phase: 4 },
+  { label: "Nueva sesión de Buys", icon: ShoppingCart, href: "/panel/buys" },
+  { label: "Nueva Battle", icon: Swords, href: "/panel/battles" },
 ];
 
 export default async function PanelHomePage() {
   const supabase = isSupabaseConfigured() ? await createClient() : null;
-  const [settings, pendingCalls] = await Promise.all([
+  const [settings, pendingCalls, pendingVerifications] = await Promise.all([
     getPublicSettings(),
-    supabase?.from("hunt_calls").select("hunt_id, hunt:hunts(title)").eq("status", "pending").then((r) => r.data),
+    supabase
+      ?.from("hunt_calls")
+      .select("hunt_id, hunt:hunts(title)")
+      .eq("status", "pending")
+      .then((r) => r.data),
+    // RLS: solo el admin ve las cuentas de casino; para un mod da 0.
+    supabase
+      ?.from("casino_accounts")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending")
+      .then((r) => r.count ?? 0),
   ]);
 
   const pendingByHunt = new Map<string, { title: string; count: number }>();
@@ -39,23 +49,15 @@ export default async function PanelHomePage() {
           Accesos rápidos
         </h2>
         <ul className="grid gap-3 sm:grid-cols-3">
-          {QUICK_ACTIONS.map(({ label, icon: Icon, phase, href }) => (
+          {QUICK_ACTIONS.map(({ label, icon: Icon, href }) => (
             <li key={label}>
-              {href ? (
-                <Link
-                  href={href}
-                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-accent/60"
-                >
-                  <Icon className="size-5 text-accent-text" aria-hidden />
-                  <span className="text-sm font-semibold">{label}</span>
-                </Link>
-              ) : (
-                <span className="flex items-center gap-3 rounded-xl border border-dashed border-line bg-surface/60 p-4 text-subtle">
-                  <Icon className="size-5" aria-hidden />
-                  <span className="text-sm font-semibold">{label}</span>
-                  <span className="ml-auto text-[10px]">fase {phase}</span>
-                </span>
-              )}
+              <Link
+                href={href}
+                className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-accent/60"
+              >
+                <Icon className="size-5 text-accent-text" aria-hidden />
+                <span className="text-sm font-semibold">{label}</span>
+              </Link>
             </li>
           ))}
         </ul>
@@ -65,8 +67,19 @@ export default async function PanelHomePage() {
         <h2 id="pending" className="mb-3 text-sm font-semibold text-subtle">
           Pendientes
         </h2>
-        {pendingByHunt.size ? (
+        {pendingByHunt.size || pendingVerifications ? (
           <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
+            {pendingVerifications ? (
+              <li>
+                <Link href="/panel/verificaciones" className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2">
+                  <BadgeCheck className="size-4 text-gold" aria-hidden />
+                  <span className="text-sm">
+                    <span className="num font-semibold text-gold">{formatInteger(pendingVerifications)}</span>{" "}
+                    {pendingVerifications === 1 ? "cuenta de casino por verificar" : "cuentas de casino por verificar"}
+                  </span>
+                </Link>
+              </li>
+            ) : null}
             {[...pendingByHunt].map(([huntId, { title, count }]) => (
               <li key={huntId}>
                 <Link href={`/panel/hunts/${huntId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2">

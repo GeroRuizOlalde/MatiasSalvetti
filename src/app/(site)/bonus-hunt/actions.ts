@@ -4,22 +4,17 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { createClient } from "@/lib/supabase/server";
+import { viewerError } from "@/lib/viewer-actions";
 
 const ERRORS: Record<string, string> = {
-  not_authenticated: "Entrá con Twitch para participar.",
-  cannot_participate: "Todavía no podés participar: revisá que hayas aceptado las bases y los requisitos de tu cuenta.",
   calls_closed: "Los calls de este hunt ya están cerrados.",
   call_already_accepted: "Tu call ya está en el hunt.",
   invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
   guesses_closed: "Las apuestas del balance ya están cerradas.",
   invalid_amount: "Revisá el monto.",
-  rate_limited: "Vas muy rápido. Esperá un minuto y probá de nuevo.",
 };
 
-function friendly(message: string) {
-  const key = Object.keys(ERRORS).find((k) => message.includes(k));
-  return key ? ERRORS[key] : "No se pudo guardar. Probá de nuevo.";
-}
+const friendly = (message: string) => viewerError(message, ERRORS);
 
 const callSchema = z.object({
   hunt_id: z.uuid(),
