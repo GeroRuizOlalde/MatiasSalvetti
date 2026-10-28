@@ -706,6 +706,305 @@ export type Database = {
           },
         ];
       };
+      point_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: string;
+          source_id: string | null;
+          points: number;
+          xp: number;
+          note: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          kind: string;
+          source_id?: string | null;
+          points?: number;
+          xp?: number;
+          note?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["point_events"]["Insert"]>;
+        Relationships: [];
+      };
+      missions: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          type: Database["public"]["Enums"]["mission_type"];
+          points: number;
+          xp: number;
+          url: string | null;
+          starts_at: string | null;
+          ends_at: string | null;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          type: Database["public"]["Enums"]["mission_type"];
+          points?: number;
+          xp?: number;
+          url?: string | null;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["missions"]["Insert"]>;
+        Relationships: [];
+      };
+      mission_codes: {
+        Row: {
+          mission_id: string;
+          code: string;
+        };
+        Insert: {
+          mission_id: string;
+          code: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["mission_codes"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mission_codes_mission_id_fkey";
+            columns: ["mission_id"];
+            isOneToOne: false;
+            referencedRelation: "missions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mission_claims: {
+        Row: {
+          mission_id: string;
+          user_id: string;
+          claim_key: string;
+          created_at: string;
+        };
+        Insert: {
+          mission_id: string;
+          user_id: string;
+          claim_key: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["mission_claims"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mission_claims_mission_id_fkey";
+            columns: ["mission_id"];
+            isOneToOne: false;
+            referencedRelation: "missions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      shop_items: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          image_path: string | null;
+          kind: Database["public"]["Enums"]["shop_item_kind"];
+          tickets: number | null;
+          cost: number;
+          stock: number | null;
+          per_user_limit: number | null;
+          min_level: number;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          image_path?: string | null;
+          kind?: Database["public"]["Enums"]["shop_item_kind"];
+          tickets?: number | null;
+          cost: number;
+          stock?: number | null;
+          per_user_limit?: number | null;
+          min_level?: number;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shop_items"]["Insert"]>;
+        Relationships: [];
+      };
+      shop_orders: {
+        Row: {
+          id: string;
+          item_id: string | null;
+          user_id: string;
+          item_title: string;
+          cost: number;
+          status: Database["public"]["Enums"]["order_status"];
+          note: string | null;
+          handled_by: string | null;
+          handled_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          item_id?: string | null;
+          user_id: string;
+          item_title: string;
+          cost: number;
+          status: Database["public"]["Enums"]["order_status"];
+          note?: string | null;
+          handled_by?: string | null;
+          handled_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shop_orders"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "shop_orders_item_id_fkey";
+            columns: ["item_id"];
+            isOneToOne: false;
+            referencedRelation: "shop_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shop_orders_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      giveaways: {
+        Row: {
+          id: string;
+          title: string;
+          prize: string;
+          description: string | null;
+          image_path: string | null;
+          starts_at: string;
+          ends_at: string;
+          status: Database["public"]["Enums"]["giveaway_status"];
+          entry_mode: Database["public"]["Enums"]["giveaway_entry_mode"];
+          max_tickets_per_user: number;
+          winners_count: number;
+          min_level: number;
+          casino_id: string | null;
+          drawn_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          prize: string;
+          description?: string | null;
+          image_path?: string | null;
+          starts_at?: string;
+          ends_at: string;
+          status?: Database["public"]["Enums"]["giveaway_status"];
+          entry_mode?: Database["public"]["Enums"]["giveaway_entry_mode"];
+          max_tickets_per_user?: number;
+          winners_count?: number;
+          min_level?: number;
+          casino_id?: string | null;
+          drawn_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["giveaways"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "giveaways_casino_id_fkey";
+            columns: ["casino_id"];
+            isOneToOne: false;
+            referencedRelation: "casinos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      giveaway_entries: {
+        Row: {
+          giveaway_id: string;
+          user_id: string;
+          entries: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          giveaway_id: string;
+          user_id: string;
+          entries: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["giveaway_entries"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_entries_giveaway_id_fkey";
+            columns: ["giveaway_id"];
+            isOneToOne: false;
+            referencedRelation: "giveaways";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "giveaway_entries_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      giveaway_winners: {
+        Row: {
+          giveaway_id: string;
+          user_id: string;
+          position: number;
+          status: Database["public"]["Enums"]["winner_status"];
+          drawn_at: string;
+        };
+        Insert: {
+          giveaway_id: string;
+          user_id: string;
+          position: number;
+          status?: Database["public"]["Enums"]["winner_status"];
+          drawn_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["giveaway_winners"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_winners_giveaway_id_fkey";
+            columns: ["giveaway_id"];
+            isOneToOne: false;
+            referencedRelation: "giveaways";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "giveaway_winners_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       rate_limits: {
         Row: { key: string; window_start: string; count: number };
         Insert: { key: string; window_start: string; count: number };
@@ -729,19 +1028,30 @@ export type Database = {
     Functions: {
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
+      admin_adjust_points: {
+        Args: { p_user: string; p_points: number; p_xp: number; p_note: string };
+        Returns: undefined;
+      };
       auth_role: { Args: Record<PropertyKey, never>; Returns: Database["public"]["Enums"]["user_role"] };
       battle_pick_counts: { Args: { p_battle: string }; Returns: { entry_id: string; picks: number }[] };
       buy_poll_counts: { Args: { p_session: string }; Returns: { option_id: string; votes: number }[] };
+      buy_shop_item: { Args: { p_item: string }; Returns: string };
       can_participate: { Args: Record<PropertyKey, never>; Returns: boolean };
       cast_buy_vote: { Args: { p_option: string }; Returns: undefined };
+      claim_mission: { Args: { p_mission: string; p_code?: string | null }; Returns: undefined };
       close_buy_poll: { Args: { p_session: string }; Returns: undefined };
       current_legal_version: { Args: { p_kind: Database["public"]["Enums"]["legal_kind"] }; Returns: number };
+      draw_giveaway: { Args: { p_giveaway: string; p_count?: number | null }; Returns: number };
+      enter_giveaway: { Args: { p_giveaway: string; p_tickets?: number }; Returns: number };
+      giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
+      handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_mod: { Args: Record<PropertyKey, never>; Returns: boolean };
+      level_for_xp: { Args: { p_xp: number }; Returns: number };
       mask_account_id: { Args: { p_id: string }; Returns: string };
       open_buy_poll: { Args: { p_session: string; p_options: Json }; Returns: string };
       pick_battle_entry: { Args: { p_entry: string }; Returns: undefined };
@@ -758,6 +1068,10 @@ export type Database = {
       set_user_ban: { Args: { p_user: string; p_banned: boolean; p_reason?: string }; Returns: undefined };
       set_user_role: {
         Args: { p_user: string; p_role: Database["public"]["Enums"]["user_role"] };
+        Returns: undefined;
+      };
+      set_winner_status: {
+        Args: { p_giveaway: string; p_user: string; p_status: Database["public"]["Enums"]["winner_status"] };
         Returns: undefined;
       };
       setting_int: { Args: { p_key: string; p_default: number }; Returns: number };
@@ -789,11 +1103,17 @@ export type Database = {
       buy_session_status: "draft" | "live" | "finished";
       call_status: "pending" | "accepted" | "rejected";
       currency_code: "ARS" | "USD";
+      giveaway_entry_mode: "free" | "tickets";
+      giveaway_status: "draft" | "published";
       hunt_status: "draft" | "collecting" | "opening" | "finished";
       legal_kind: "terms" | "privacy" | "responsible_gaming";
+      mission_type: "daily" | "code" | "link";
+      order_status: "pending" | "delivered" | "cancelled";
+      shop_item_kind: "reward" | "tickets";
       user_role: "viewer" | "mod" | "admin";
       verification_status: "pending" | "approved" | "rejected";
       wager_race_status: "draft" | "published";
+      winner_status: "pending" | "contacted" | "delivered" | "void";
     };
     CompositeTypes: Record<string, never>;
   };

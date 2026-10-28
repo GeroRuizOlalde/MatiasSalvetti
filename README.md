@@ -123,6 +123,15 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 - **Web**: la carrera en curso (o la próxima) con cuenta regresiva, premios y ranking con los IDs enmascarados; cada viewer ve su puesto y el estado de sus cuentas, también en `/perfil`. La home muestra la cuenta regresiva y el podio.
 - **Catálogo desde slot.report**: en `/panel/catalogo`, «Importar desde slot.report» carga nombres y proveedores de su API pública (sin imágenes). Su uso pide un link a slot.report, que está en el pie.
 
+## Cuartel y sorteos (fase 6)
+
+- **Puntos y XP**: cada movimiento queda en `point_events` y un mismo (usuario, motivo, origen) suma una sola vez, así reabrir un hunt o una votación no paga de nuevo. El nivel se recalcula en la base con la misma curva que `levelFromXp` (setting `level_curve`).
+- **Premios automáticos** (configurables en `/panel/puntos`): call aceptado, apostar en el GTB y ganarlo, votar en Buys (al cerrar la votación), bancar en la Battle y bancar al campeón (al terminar). Los baneados no suman.
+- **Misiones**: diaria (check-in, una por día en hora AR), palabra secreta (se dice en el stream; está en una tabla que solo ve el admin) y link (una vez). Pueden tener fechas.
+- **Tienda**: premios que entrega el admin (quedan pendientes en `/panel/puntos`; cancelar devuelve puntos y stock) o tickets de sorteo (automático). Stock, límite por persona y nivel mínimo opcionales.
+- **Sorteos** (`/panel/sorteos`): gratis (una chance) o con tickets (cada ticket es una chance, con máximo por persona), nivel mínimo y cuenta verificada en un casino opcionales. `draw_giveaway` sortea en la base, ponderado por chances y sin repetir; si un ganador no responde se anula y se vuelve a sortear. Los ganadores se ven en `/sorteos`.
+- El admin puede sumar o restar puntos a mano con motivo; queda en el historial del viewer, que lo ve en `/cuartel`.
+
 ## Seguridad
 
 - RLS en todas las tablas. Rol, baneo y saldos solo cambian por funciones `SECURITY DEFINER` o desde el servidor.
@@ -131,5 +140,4 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 
 ## Pendiente (por fase)
 
-- **Fase 6**: Cuartel (XP, puntos, misiones, tienda) y sorteos. XP y puntos por participar (calls, GTB, votos, picks, wager) llegan ahí.
 - **Fase 7**: overlays de OBS, E2E, SEO y deploy.
