@@ -12,6 +12,7 @@ import { BUY_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
 import { addBuy, deleteBuy, reviewBuyCall, saveBuySession, updateBuy } from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -121,6 +122,7 @@ export function BuyRowForm({
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(updateBuy, INITIAL_ACTION_STATE);
   const [deleteState, deleteAction] = useActionState<ActionState, FormData>(deleteBuy, INITIAL_ACTION_STATE);
+  const confirmDelete = useConfirmSubmit(confirmFromText("¿Borrar esta compra?"));
   const [values, setValues] = useState({
     bet: String(buy.bet),
     cost: String(buy.cost),
@@ -174,12 +176,8 @@ export function BuyRowForm({
         )}
       </form>
       {locked ? null : (
-        <form
-          action={deleteAction}
-          onSubmit={(e) => {
-            if (!confirm("¿Borrar esta compra?")) e.preventDefault();
-          }}
-        >
+        <form action={deleteAction} onSubmit={confirmDelete.onSubmit}>
+          {confirmDelete.dialog}
           <input type="hidden" name="id" value={buy.id} />
           <input type="hidden" name="session_id" value={sessionId} />
           <button

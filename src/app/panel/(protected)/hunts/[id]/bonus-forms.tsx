@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { formatMulti } from "@/lib/format";
 import { addBonus, deleteBonus, reviewCall, updateBonus } from "../actions";
 import { AmountInput } from "@/components/ui/amount-input";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -46,6 +47,7 @@ type Bonus = { id: string; bet: number; payout: number | null };
 export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus: Bonus; locked: boolean }) {
   const [state, formAction] = useActionState<ActionState, FormData>(updateBonus, INITIAL_ACTION_STATE);
   const [deleteState, deleteAction] = useActionState<ActionState, FormData>(deleteBonus, INITIAL_ACTION_STATE);
+  const confirmDelete = useConfirmSubmit(confirmFromText("¿Borrar este bono?"));
   const [payout, setPayout] = useState(bonus.payout === null ? "" : String(bonus.payout));
   const [bet, setBet] = useState(String(bonus.bet));
   const preview = payout !== "" && Number(bet) > 0 ? Number(payout) / Number(bet) : null;
@@ -89,12 +91,8 @@ export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus:
         )}
       </form>
       {locked ? null : (
-        <form
-          action={deleteAction}
-          onSubmit={(e) => {
-            if (!confirm("¿Borrar este bono?")) e.preventDefault();
-          }}
-        >
+        <form action={deleteAction} onSubmit={confirmDelete.onSubmit}>
+          {confirmDelete.dialog}
           <input type="hidden" name="id" value={bonus.id} />
           <input type="hidden" name="hunt_id" value={huntId} />
           <button

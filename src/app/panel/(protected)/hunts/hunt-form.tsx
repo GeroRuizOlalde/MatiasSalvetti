@@ -7,6 +7,7 @@ import { HUNT_STATUSES, type HuntStatus } from "@/lib/hunt-status";
 import type { Enums } from "@/types/database";
 import { deleteHunt, saveHunt } from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
 
 type Hunt = {
   id: string;
@@ -117,15 +118,12 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
 
 export function DeleteHuntForm({ huntId }: { huntId: string }) {
   const [state, formAction] = useActionState<ActionState, FormData>(deleteHunt, INITIAL_ACTION_STATE);
+  const confirmDelete = useConfirmSubmit(
+    confirmFromText("¿Borrar el hunt con todos sus bonos, calls y apuestas? No se puede deshacer."),
+  );
   return (
-    <form
-      action={formAction}
-      onSubmit={(e) => {
-        if (!confirm("¿Borrar el hunt con todos sus bonos, calls y apuestas? No se puede deshacer."))
-          e.preventDefault();
-      }}
-      className="flex flex-wrap items-center gap-3"
-    >
+    <form action={formAction} onSubmit={confirmDelete.onSubmit} className="flex flex-wrap items-center gap-3">
+      {confirmDelete.dialog}
       <input type="hidden" name="id" value={huntId} />
       <SubmitButton variant="ghost" pendingLabel="Borrando…" className="text-live">
         Borrar hunt
