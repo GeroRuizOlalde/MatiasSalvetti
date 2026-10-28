@@ -1093,6 +1093,7 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      hunt_taken_slots: { Args: { p_hunt: string }; Returns: { slot_name: string }[] };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };

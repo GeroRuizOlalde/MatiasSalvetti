@@ -7,7 +7,8 @@ import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { submitCall, submitGuess } from "../actions";
 
-export function CallForm({ huntId, hasCall }: { huntId: string; hasCall: boolean }) {
+/** Pedir un slot. Una vez mandado no se cambia; solo se puede pedir otro si el panel lo rechaza. */
+export function CallForm({ huntId, retry, taken }: { huntId: string; retry: boolean; taken: string[] }) {
   const [state, formAction] = useActionState<ActionState, FormData>(submitCall, INITIAL_ACTION_STATE);
   const id = useId();
 
@@ -15,16 +16,24 @@ export function CallForm({ huntId, hasCall }: { huntId: string; hasCall: boolean
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="hunt_id" value={huntId} />
       <label htmlFor={`${id}-slot`} className="block text-xs font-semibold text-subtle">
-        {hasCall ? "Cambiar mi slot" : "¿Qué slot querés que compre?"}
+        {retry ? "Pedí otro slot" : "¿Qué slot querés que compre?"}
       </label>
       <div className="flex gap-2">
         <div className="min-w-0 flex-1">
           <SlotPicker id={`${id}-slot`} required />
         </div>
         <SubmitButton pendingLabel="Enviando…" className="h-10">
-          {hasCall ? "Cambiar" : "Pedir"}
+          Pedir
         </SubmitButton>
       </div>
+      <p className="text-xs text-subtle">
+        Una máquina por hunt y el call no se puede cambiar una vez mandado: elegí bien.
+      </p>
+      {taken.length ? (
+        <p className="text-xs text-subtle">
+          Ya pedidas: <span className="text-muted">{taken.join(", ")}</span>
+        </p>
+      ) : null}
       <FormMessage state={state} />
     </form>
   );

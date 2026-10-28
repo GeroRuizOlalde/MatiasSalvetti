@@ -174,7 +174,7 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
     >
       {async (profile) => {
         const supabase = await createClient();
-        const [{ data: call }, { data: guess }] = await Promise.all([
+        const [{ data: call }, { data: guess }, { data: taken }] = await Promise.all([
           supabase
             .from("hunt_calls")
             .select("slot_name, status")
@@ -182,6 +182,7 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
             .eq("user_id", profile.id)
             .maybeSingle(),
           supabase.from("hunt_guesses").select("amount").eq("hunt_id", hunt.id).eq("user_id", profile.id).maybeSingle(),
+          supabase.rpc("hunt_taken_slots", { p_hunt: hunt.id }),
         ]);
 
         return (
@@ -197,8 +198,12 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
                     </span>
                   </p>
                 ) : null}
-                {hunt.calls_open && call?.status !== "accepted" ? (
-                  <CallForm huntId={hunt.id} hasCall={Boolean(call)} />
+                {hunt.calls_open && (!call || call.status === "rejected") ? (
+                  <CallForm
+                    huntId={hunt.id}
+                    retry={call?.status === "rejected"}
+                    taken={(taken ?? []).map((t) => t.slot_name)}
+                  />
                 ) : null}
               </div>
             ) : null}

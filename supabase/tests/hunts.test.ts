@@ -117,10 +117,12 @@ describe("calls", () => {
     ).rejects.toThrow(/calls_closed/);
   });
 
-  it("un call por viewer, editable mientras está pendiente, y el mod lo acepta como bono", async () => {
+  it("un call por viewer, sin cambios, y el mod lo acepta como bono", async () => {
     const hunt = await createHunt();
-    await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Sugar Rush')", [hunt]));
     await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Gates of Olympus')", [hunt]));
+    await expect(
+      as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Sugar Rush')", [hunt])),
+    ).rejects.toThrow(/call_already_sent/);
 
     const own = await as(db, viewerA, () =>
       db.query<{ id: string; slot_name: string }>("select id, slot_name from public.hunt_calls where hunt_id = $1", [
@@ -159,6 +161,33 @@ describe("calls", () => {
       rows[0].id,
     ]);
     expect(after[0].status).toBe("pending");
+  });
+
+  it("una máquina por hunt: no se puede pedir la que ya pidió otro o ya es bono", async () => {
+    const hunt = await createHunt();
+    await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Sweet Bonanza')", [hunt]));
+    await expect(
+      as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, '  sweet bonanza ')", [hunt])),
+    ).rejects.toThrow(/slot_taken/);
+
+    await as(db, mod, () =>
+      db.query("insert into public.hunt_bonuses (hunt_id, slot_name, bet) values ($1, 'Big Bass Bonanza', 100)", [
+        hunt,
+      ]),
+    );
+    await expect(
+      as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, 'Big Bass Bonanza')", [hunt])),
+    ).rejects.toThrow(/slot_taken/);
+
+    const taken = await as(db, "anon", () =>
+      db.query<{ slot_name: string }>("select slot_name from public.hunt_taken_slots($1)", [hunt]),
+    );
+    expect(taken.rows.map((r) => r.slot_name)).toEqual(["Big Bass Bonanza", "Sweet Bonanza"]);
+
+    // Si el panel rechaza el call, la máquina se libera.
+    const { rows } = await db.query<{ id: string }>("select id from public.hunt_calls where hunt_id = $1", [hunt]);
+    await as(db, mod, () => db.query("select public.reject_hunt_call($1)", [rows[0].id]));
+    await as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, 'Sweet Bonanza')", [hunt]));
   });
 
   it("los viewers no escriben calls directo", async () => {
