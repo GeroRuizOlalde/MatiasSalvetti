@@ -1038,6 +1038,7 @@ export type Database = {
       buy_shop_item: { Args: { p_item: string }; Returns: string };
       can_participate: { Args: Record<PropertyKey, never>; Returns: boolean };
       cast_buy_vote: { Args: { p_option: string }; Returns: undefined };
+      check_overlay_token: { Args: { p_key: string }; Returns: boolean };
       claim_mission: { Args: { p_mission: string; p_code?: string | null }; Returns: undefined };
       close_buy_poll: { Args: { p_session: string }; Returns: undefined };
       current_legal_version: { Args: { p_kind: Database["public"]["Enums"]["legal_kind"] }; Returns: number };
