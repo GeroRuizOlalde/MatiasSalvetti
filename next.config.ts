@@ -24,8 +24,24 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "static-cdn.jtvnw.net" },
       // Miniaturas de YouTube
       { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
-      ...(storageHost ? [{ protocol: "https" as const, hostname: storageHost, pathname: "/storage/v1/object/public/**" }] : []),
+      ...(storageHost
+        ? [{ protocol: "https" as const, hostname: storageHost, pathname: "/storage/v1/object/public/**" }]
+        : []),
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+          // Nadie embebe la web en un iframe (OBS abre los overlays directo, no los embebe).
+          { key: "X-Frame-Options", value: "DENY" },
+        ],
+      },
+    ];
   },
   turbopack: {
     rules: {

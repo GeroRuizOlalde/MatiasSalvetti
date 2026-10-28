@@ -11,6 +11,8 @@ export type SessionCard = {
   description: string;
   /** null = todavía no hay sesiones cargadas. */
   status: { label: string; tone: "live" | "past" | "next" } | null;
+  /** Arriba a la derecha (fecha de la sesión). */
+  meta?: string;
   facts: { label: string; value: string }[];
 };
 
@@ -21,7 +23,8 @@ export const EMPTY_SESSIONS: SessionCard[] = [
     title: "Bonus Hunt",
     href: "/bonus-hunt",
     icon: Crosshair,
-    description: "Juntamos bonos, los abrimos en vivo y vos adivinás el balance final.",
+    description:
+      "Junto bonos durante el stream y los abro todos juntos. Seguí cada slot, el break-even y adiviná el balance final.",
     status: null,
     facts: [],
   },
@@ -30,7 +33,7 @@ export const EMPTY_SESSIONS: SessionCard[] = [
     title: "Bonus Buys",
     href: "/bonus-buys",
     icon: ShoppingCart,
-    description: "Compras de bonus una atrás de otra. Votá cuál sigue.",
+    description: "Sesiones de compra directa de bonos. Cuánto costó cada uno, cuánto pagó y el resultado acumulado.",
     status: null,
     facts: [],
   },
@@ -39,7 +42,8 @@ export const EMPTY_SESSIONS: SessionCard[] = [
     title: "Bonus Battle",
     href: "/bonus-battle",
     icon: Swords,
-    description: "Slots cara a cara en eliminación directa. Bancá a tu favorito.",
+    description:
+      "Slots elegidos por el chat, uno contra otro. El que paga mejor multiplicador pasa de ronda. Elegí tu slot.",
     status: null,
     facts: [],
   },
@@ -48,43 +52,47 @@ export const EMPTY_SESSIONS: SessionCard[] = [
 const TONE: Record<"live" | "past" | "next", string> = {
   live: "bg-live/15 text-live",
   past: "bg-surface-2 text-muted",
-  next: "bg-accent/15 text-accent-text",
+  next: "bg-accent/20 text-accent-light",
 };
 
 export function Sessions({ cards }: { cards: SessionCard[] }) {
   return (
     <section aria-labelledby="sessions-title" className="mx-auto max-w-7xl px-4 py-16">
-      <SectionHeading id="sessions-title" kicker="no te pierdas nada" title="Seguí cada sesión" />
+      <SectionHeading id="sessions-title" kicker="lo que pasa en el stream" title="Seguí cada sesión" />
       <ul className="grid gap-4 md:grid-cols-3">
-        {cards.map(({ key, title, href, icon: Icon, description, status, facts }) => (
+        {cards.map(({ key, title, href, description, status, meta, facts }) => (
           <li key={key}>
             <Link
               href={href}
-              className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-colors hover:border-accent/60"
+              className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-accent/60"
             >
               <div className="flex items-center justify-between gap-3">
-                <Icon className="size-7 text-accent-text" aria-hidden />
                 <span
-                  className={cn("rounded-full px-3 py-1 text-xs font-semibold", status ? TONE[status.tone] : TONE.past)}
+                  className={cn(
+                    "rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase",
+                    status ? TONE[status.tone] : TONE.past,
+                  )}
                 >
                   {status?.label ?? "Sin sesiones todavía"}
                 </span>
+                {meta ? <span className="num text-xs text-subtle">{meta}</span> : null}
               </div>
               <h3 className="mt-4 font-display text-3xl tracking-wide uppercase">{title}</h3>
               <p className="mt-2 text-sm text-muted">{description}</p>
               {facts.length > 0 ? (
-                <dl className="mt-5 grid grid-cols-2 gap-3">
+                <dl className="mt-auto flex gap-8 border-t border-line pt-4">
                   {facts.map((fact) => (
-                    <div key={fact.label} className="rounded-lg bg-surface-2 px-3 py-2">
-                      <dt className="text-xs text-subtle">{fact.label}</dt>
-                      <dd className="num font-semibold text-gold">{fact.value}</dd>
+                    <div key={fact.label} className="min-w-0">
+                      <dt className="num text-[10px] tracking-wide text-subtle uppercase">{fact.label}</dt>
+                      <dd className="num truncate font-semibold">{fact.value}</dd>
                     </div>
                   ))}
                 </dl>
-              ) : null}
-              <span className="mt-auto flex items-center gap-1 pt-6 text-sm font-semibold text-accent-text group-hover:text-accent-light">
-                Ver {title} <ArrowRight className="size-4" aria-hidden />
-              </span>
+              ) : (
+                <span className="mt-auto flex items-center gap-1 pt-6 text-sm font-semibold text-accent-text group-hover:text-accent-light">
+                  Ver {title} <ArrowRight className="size-4" aria-hidden />
+                </span>
+              )}
             </Link>
           </li>
         ))}

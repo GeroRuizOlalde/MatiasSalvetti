@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     locale: "es_AR",
     siteName: "Matías Salvetti",
   },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

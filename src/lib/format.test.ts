@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatMoney, formatMulti, maskAccountId, toArgentinaInput } from "./format";
+import { formatDateTime, formatMoney, formatMoneyShort, formatMulti, maskAccountId, toArgentinaInput } from "./format";
 
 const NBSP = " ";
 
@@ -50,5 +50,14 @@ describe("maskAccountId", () => {
 describe("toArgentinaInput", () => {
   it("pasa a hora de Buenos Aires (UTC-3)", () => {
     expect(toArgentinaInput("2026-11-02T00:30:00Z")).toBe("2026-11-01T21:30");
+  });
+});
+
+describe("formatMoneyShort", () => {
+  it("abrevia miles y millones", () => {
+    expect(formatMoneyShort(1_000_000)).toBe("1M ARS");
+    expect(formatMoneyShort(1_500_000, "USD")).toBe("1,5M USD");
+    expect(formatMoneyShort(500_000)).toBe("500K ARS");
+    expect(formatMoneyShort(750)).toBe("750 ARS");
   });
 });

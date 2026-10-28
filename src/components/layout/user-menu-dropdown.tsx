@@ -6,12 +6,12 @@ import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "@/app/auth/actions";
 import { Avatar } from "@/components/ui/avatar";
 
-type Props = { displayName: string; avatarUrl: string | null; canUsePanel: boolean };
+type Props = { displayName: string; avatarUrl: string | null; canUsePanel: boolean; level: number; points: number };
 
 const itemClass =
   "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-muted hover:bg-surface-2 hover:text-text";
 
-export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel }: Props) {
+export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, points }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -53,6 +53,10 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel }: Props)
           id={menuId}
           className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-line bg-surface p-2 shadow-2xl shadow-black/50"
         >
+          <p className="num mb-1 border-b border-line px-3 pt-1 pb-2 text-xs text-subtle">
+            Nivel <span className="font-semibold text-accent-text">{level}</span> ·{" "}
+            <span className="font-semibold text-gold">{new Intl.NumberFormat("es-AR").format(points)}</span> puntos
+          </p>
           <Link href="/perfil" className={itemClass} onClick={close}>
             <User className="size-4" aria-hidden /> Mi perfil
           </Link>

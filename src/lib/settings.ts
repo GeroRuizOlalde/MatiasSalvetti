@@ -20,6 +20,8 @@ const socialsSchema = z.object({
 });
 export type Socials = z.infer<typeof socialsSchema>;
 
+const rewardSchema = z.object({ points: z.number().int().min(0), xp: z.number().int().min(0) });
+
 export const SETTING_SCHEMAS = {
   socials: socialsSchema,
   primary_platform: platformSchema,
@@ -32,6 +34,19 @@ export const SETTING_SCHEMAS = {
   responsible_gaming_helpline: z.string(),
   twitch_min_account_age_days: z.number().int().min(0),
   level_curve: z.object({ base: z.number().positive(), exponent: z.number().positive() }),
+  partner: z.object({
+    casino_slug: z.string(),
+    description: z.string(),
+    perks: z.array(z.object({ label: z.string(), value: z.string() })).max(6),
+  }),
+  rewards: z.object({
+    hunt_call: rewardSchema,
+    gtb_participation: rewardSchema,
+    gtb_win: rewardSchema,
+    buy_vote: rewardSchema,
+    battle_pick: rewardSchema,
+    battle_champion: rewardSchema,
+  }),
 };
 
 export type PublicSettings = { [K in keyof typeof SETTING_SCHEMAS]: z.infer<(typeof SETTING_SCHEMAS)[K]> };
@@ -53,6 +68,24 @@ export const DEFAULT_SETTINGS: PublicSettings = {
   responsible_gaming_helpline: "[LÍNEA DE AYUDA]",
   twitch_min_account_age_days: 0,
   level_curve: DEFAULT_LEVEL_CURVE,
+  partner: {
+    casino_slug: "1xslots",
+    description:
+      "1xSlot es el casino donde juego en el stream. Registrate con mi link y mi código para entrar a la Wager Race, a los sorteos y a los beneficios de la comunidad.",
+    perks: [
+      { label: "Bono de bienvenida", value: "[BONO]" },
+      { label: "Cuenta para la Wager Race", value: "1M ARS" },
+      { label: "Sorteos exclusivos de la comunidad", value: "[FRECUENCIA]" },
+    ],
+  },
+  rewards: {
+    hunt_call: { points: 50, xp: 40 },
+    gtb_participation: { points: 10, xp: 15 },
+    gtb_win: { points: 300, xp: 150 },
+    buy_vote: { points: 5, xp: 10 },
+    battle_pick: { points: 10, xp: 15 },
+    battle_champion: { points: 150, xp: 80 },
+  },
 };
 
 /** Configuración pública, cacheada. Si falta Supabase o un valor es inválido, usa el default. */

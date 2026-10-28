@@ -24,7 +24,7 @@ export function NavLinkList({ className, orientation = "horizontal", pathname }:
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "block rounded-md px-3 py-2 text-sm font-semibold transition-colors",
+                  "block rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors",
                   orientation === "vertical" && "py-3 text-base",
                   active ? "text-accent-light" : "text-muted hover:text-text",
                 )}
