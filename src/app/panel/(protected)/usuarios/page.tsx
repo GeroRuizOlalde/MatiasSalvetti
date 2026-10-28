@@ -31,7 +31,7 @@ export default async function UsuariosPage({ searchParams }: PageProps<"/panel/u
   const { data: users, error } = await query;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Usuarios</h1>
       <p className="text-sm text-muted">
         Para sumar un mod: la persona entra una vez a la web con Twitch y acá le cambiás el rol.

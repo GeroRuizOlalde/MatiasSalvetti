@@ -23,7 +23,7 @@ export default async function PanelSorteosPage() {
   ]);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Sorteos</h1>
       <section aria-labelledby="new-giveaway" className="rounded-2xl border border-line bg-surface p-5">
         <h2 id="new-giveaway" className="mb-3 font-semibold">

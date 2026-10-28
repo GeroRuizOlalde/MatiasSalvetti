@@ -48,7 +48,7 @@ export function FloatingDecor() {
   );
 }
 
-function Chip() {
+export function Chip() {
   return (
     <svg viewBox="0 0 64 64" className="w-full drop-shadow-[0_0_10px_rgb(157_59_255/0.5)]">
       <circle cx="32" cy="32" r="30" fill="#9d3bff" />
@@ -59,7 +59,7 @@ function Chip() {
   );
 }
 
-function Card({ label, red }: { label: string; red?: boolean }) {
+export function Card({ label, red }: { label: string; red?: boolean }) {
   return (
     <div
       className="flex aspect-[5/7] w-full items-start rounded-md border border-line-strong bg-[#f4f0fa] p-1 shadow-[0_0_18px_rgb(157_59_255/0.35)]"

@@ -9,6 +9,7 @@ import type { LiveStatus } from "@/lib/live-status";
 import type { PublicSettings } from "@/lib/settings";
 import { PartnerLogo } from "@/components/layout/partner-logo";
 import { FloatingDecor } from "./floating-decor";
+import { HeroDecor } from "./hero-decor";
 
 const PLATFORM_LABEL = { twitch: "Twitch", kick: "Kick" } as const;
 
@@ -34,21 +35,21 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pt-14 pb-16 md:grid-cols-[1.1fr_1fr] md:pt-20 md:pb-24">
         <div>
-          <p className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
+          <p className="flex animate-rise items-center gap-2 font-display text-2xl tracking-wide uppercase">
             Chupetti <PartnerLogo />
           </p>
           <h1
             id="hero-title"
-            className="mt-2 font-display text-6xl leading-[0.95] tracking-wide uppercase sm:text-7xl lg:text-8xl"
+            className="mt-2 animate-rise font-display text-6xl leading-[0.95] tracking-wide uppercase [animation-delay:120ms] sm:text-7xl lg:text-8xl"
           >
             Matías <span className="text-glow block">Salvetti</span>
           </h1>
-          <p className="mt-6 max-w-lg text-lg text-muted">
+          <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">
             Slots, bonus hunts, batallas y CS2 en vivo. Todos los meses reparto premios con la Wager Race y los sorteos
             de la comunidad.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:360ms]">
             <a
               href={settings.socials[primary]}
               target="_blank"
@@ -64,7 +65,10 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
             </Link>
           </div>
 
-          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Redes de Matías">
+          <ul
+            className="mt-6 flex animate-rise flex-wrap gap-x-5 gap-y-2 text-sm [animation-delay:480ms]"
+            aria-label="Redes de Matías"
+          >
             {TEXT_SOCIALS.filter((name) => name !== primary).map((name) => (
               <li key={name}>
                 <a
@@ -104,6 +108,7 @@ function Character({
         aria-hidden
         className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgb(157_59_255/0.5),rgb(157_59_255/0.12)_45%,transparent_70%)] blur-2xl"
       />
+      <HeroDecor />
       {/* Aro punteado que gira muy lento */}
       <div
         aria-hidden

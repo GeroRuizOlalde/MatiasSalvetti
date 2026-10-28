@@ -25,7 +25,7 @@ export default async function LegalEditPage({ params }: PageProps<"/panel/config
   const latest = versions?.[0];
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="space-y-6">
       <Link href="/panel/configuracion" className="flex items-center gap-1 text-sm text-subtle hover:text-text">
         <ArrowLeft className="size-4" aria-hidden /> Configuración
       </Link>

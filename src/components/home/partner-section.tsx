@@ -8,7 +8,7 @@ import type { PublicSettings } from "@/lib/settings";
 export function PartnerSection({ casino, partner }: { casino: PublicCasino; partner: PublicSettings["partner"] }) {
   return (
     <section aria-labelledby="partner-title" className="mx-auto max-w-7xl px-4 pt-16">
-      <div className="grid gap-8 rounded-3xl border border-accent/50 bg-[linear-gradient(135deg,rgb(157_59_255/0.16),transparent_55%)] p-6 shadow-[0_0_40px_-12px_rgb(157_59_255/0.6)] sm:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+      <div className="reveal grid gap-8 rounded-3xl border border-accent/50 bg-[linear-gradient(135deg,rgb(157_59_255/0.16),transparent_55%)] p-6 shadow-[0_0_40px_-12px_rgb(157_59_255/0.6)] sm:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div>
           <p className="num text-xs tracking-[0.2em] text-subtle uppercase">Partner oficial</p>
           <h2
@@ -43,7 +43,7 @@ export function PartnerSection({ casino, partner }: { casino: PublicCasino; part
             {partner.perks.map((perk) => (
               <li
                 key={perk.label}
-                className="flex items-center justify-between gap-4 rounded-xl border border-line bg-bg/60 px-4 py-3 text-sm"
+                className="lift flex items-center justify-between gap-4 rounded-xl border border-line bg-bg/60 px-4 py-3 text-sm hover:border-accent/60"
               >
                 <span className="font-semibold">{perk.label}</span>
                 <span className="num font-bold text-gold">{perk.value}</span>

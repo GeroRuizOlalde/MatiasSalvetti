@@ -42,7 +42,7 @@ export default async function VerificacionesPage({ searchParams }: PageProps<"/p
   const urlOf = (path: string | null) => signed?.find((s) => s.path === path)?.signedUrl ?? null;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Verificaciones</h1>
       <p className="text-sm text-muted">
         Revisá que la captura muestre el mismo ID y que la cuenta se haya creado con el link de Matías. Solo las cuentas

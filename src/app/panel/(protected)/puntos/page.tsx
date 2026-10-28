@@ -35,7 +35,7 @@ export default async function PuntosPage() {
   ]);
 
   return (
-    <div className="max-w-6xl space-y-8">
+    <div className="space-y-8">
       <h1 className="font-display text-4xl tracking-wide uppercase">Puntos y misiones</h1>
 
       <section aria-labelledby="orders" className="space-y-3">

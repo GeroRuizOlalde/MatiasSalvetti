@@ -18,7 +18,7 @@ export default async function CatalogoCasinosPage() {
     .order("name");
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Catálogo</h1>
       <CatalogTabs active="casinos" isAdmin />
 

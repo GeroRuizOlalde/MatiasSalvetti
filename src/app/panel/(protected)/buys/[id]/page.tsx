@@ -67,7 +67,7 @@ export default async function PanelBuySessionPage({ params }: PageProps<"/panel/
   const status = statusInfo(BUY_STATUSES, session.status);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <Link href="/panel/buys" className="flex items-center gap-1 text-sm text-subtle hover:text-text">
         <ArrowLeft className="size-4" aria-hidden /> Sesiones
       </Link>

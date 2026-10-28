@@ -16,7 +16,7 @@ export function SectionHeading({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="reveal mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         {kicker ? <p className="font-marker text-lg text-accent-text">{kicker}</p> : null}
         <h2 id={id} className="font-display text-4xl tracking-wide uppercase sm:text-5xl">
