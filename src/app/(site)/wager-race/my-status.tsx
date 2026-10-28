@@ -1,10 +1,10 @@
 import { BadgeCheck, Clock, XCircle } from "lucide-react";
+import Link from "next/link";
 import { ParticipationGate, ParticipationTitle, participationBox } from "@/components/participation-gate";
 import { getActiveCasinos } from "@/lib/casinos";
 import { formatMoney, maskAccountId } from "@/lib/format";
 import type { LeaderboardRow, PublicRace } from "@/lib/wager";
 import { createClient } from "@/lib/supabase/server";
-import { VerificationForm } from "./verification-form";
 
 const STATUS = {
   pending: { icon: Clock, label: "En revisión", className: "text-gold" },
@@ -12,7 +12,10 @@ const STATUS = {
   rejected: { icon: XCircle, label: "Rechazada", className: "text-live" },
 } as const;
 
-/** Lee la sesión: va dentro de un <Suspense>. Estado de verificación del viewer y su puesto. */
+/**
+ * Lee la sesión: va dentro de un <Suspense>. Estado de verificación del viewer y su puesto.
+ * La verificación se hace desde Mi perfil.
+ */
 export function MyRaceStatus({ race, leaderboard }: { race: PublicRace | null; leaderboard: LeaderboardRow[] }) {
   return (
     <ParticipationGate
@@ -31,8 +34,8 @@ export function MyRaceStatus({ race, leaderboard }: { race: PublicRace | null; l
         ]);
         const mine = leaderboard.find((row) => row.user_id === profile.id);
         const done = new Set((accounts ?? []).filter((a) => a.status !== "rejected").map((a) => a.casino_id));
-        const available = casinos.filter((c) => !done.has(c.id));
         const raceCasino = race ? casinos.find((c) => c.slug === race.casino?.slug) : undefined;
+        const hasRaceAccount = raceCasino ? done.has(raceCasino.id) : done.size > 0;
 
         return (
           <section className={`${participationBox} space-y-5`}>
@@ -64,18 +67,15 @@ export function MyRaceStatus({ race, leaderboard }: { race: PublicRace | null; l
                 })}
               </ul>
             ) : null}
-            {available.length ? (
-              <div>
-                <p className="mb-3 text-sm text-muted">
-                  Cargá el ID de tu cuenta y una captura. Tiene que ser una cuenta creada con el link de Matías.
-                </p>
-                <VerificationForm
-                  casinos={available.map(({ id, name }) => ({ id, name }))}
-                  defaultCasinoId={available.some((c) => c.id === raceCasino?.id) ? raceCasino?.id : undefined}
-                />
-              </div>
-            ) : (
-              <p className="text-sm text-muted">Ya cargaste tus cuentas de todos los casinos.</p>
+            {hasRaceAccount ? null : (
+              <p className="text-sm text-muted">
+                Para aparecer en el ranking verificá tu cuenta{raceCasino ? ` de ${raceCasino.name}` : " de casino"}{" "}
+                desde{" "}
+                <Link href="/perfil#cuentas" className="font-semibold text-accent-text hover:underline">
+                  tu perfil
+                </Link>
+                .
+              </p>
             )}
           </section>
         );
