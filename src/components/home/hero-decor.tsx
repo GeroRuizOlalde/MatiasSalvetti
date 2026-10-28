@@ -41,17 +41,20 @@ type OrbitItem =
   | { kind: "card"; label: string; red?: boolean; angle: number; size: number }
   | { kind: "image"; src: string; w: number; h: number; angle: number; size: number };
 
-/** Cartas, fichas y símbolos de slots que giran alrededor del personaje (uno cada 40°). */
+/** Cartas, fichas y golosinas de slots que giran alrededor del personaje (una cada 30°). */
 const ORBIT: OrbitItem[] = [
   { kind: "card", label: "A♠︎", angle: 0, size: 34 },
-  { kind: "image", src: "/decor/uva.webp", w: 240, h: 196, angle: 40, size: 48 },
-  { kind: "chip", angle: 80, size: 30 },
+  { kind: "image", src: "/decor/uva.webp", w: 240, h: 196, angle: 30, size: 46 },
+  { kind: "image", src: "/decor/corazon.webp", w: 240, h: 212, angle: 60, size: 38 },
+  { kind: "chip", angle: 90, size: 30 },
   { kind: "card", label: "K♥︎", red: true, angle: 120, size: 32 },
-  { kind: "image", src: "/decor/caramelo.webp", w: 240, h: 221, angle: 160, size: 42 },
-  { kind: "card", label: "J♣︎", angle: 200, size: 30 },
+  { kind: "image", src: "/decor/oso-violeta.webp", w: 240, h: 286, angle: 150, size: 40 },
+  { kind: "image", src: "/decor/estrella.webp", w: 240, h: 219, angle: 180, size: 40 },
+  { kind: "card", label: "J♣︎", angle: 210, size: 30 },
   { kind: "chip", angle: 240, size: 26 },
-  { kind: "image", src: "/decor/banana.webp", w: 240, h: 165, angle: 280, size: 48 },
-  { kind: "card", label: "Q♦︎", red: true, angle: 320, size: 32 },
+  { kind: "image", src: "/decor/chupetin.webp", w: 240, h: 228, angle: 270, size: 42 },
+  { kind: "image", src: "/decor/caramelo.webp", w: 240, h: 221, angle: 300, size: 38 },
+  { kind: "card", label: "Q♦︎", red: true, angle: 330, size: 32 },
 ];
 
 function OrbitPiece({ item }: { item: OrbitItem }) {
