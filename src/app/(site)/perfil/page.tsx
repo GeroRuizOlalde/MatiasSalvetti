@@ -1,4 +1,4 @@
-import { CalendarDays, ShieldCheck, UserRound } from "lucide-react";
+import { BadgeCheck, CalendarDays, ShieldCheck, UserRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -6,7 +6,8 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/ui/page-header";
 import { getCurrentProfile } from "@/lib/auth/session";
-import { formatDate } from "@/lib/format";
+import { formatDate, maskAccountId } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
 import { DeleteAccountForm } from "./delete-account-form";
 
 export const metadata: Metadata = {
@@ -41,9 +42,7 @@ async function ProfileDetails() {
         <Avatar url={profile.avatar_url} name={name} size={72} />
         <div className="min-w-0">
           <h2 className="truncate font-display text-3xl tracking-wide uppercase">{name}</h2>
-          {profile.twitch_login ? (
-            <p className="num text-sm text-subtle">twitch.tv/{profile.twitch_login}</p>
-          ) : null}
+          {profile.twitch_login ? <p className="num text-sm text-subtle">twitch.tv/{profile.twitch_login}</p> : null}
           <span className="mt-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-semibold text-accent-text">
             {ROLE_LABEL[profile.role]}
           </span>
@@ -74,12 +73,52 @@ async function ProfileDetails() {
         </p>
       ) : null}
 
-      <p className="text-sm text-subtle">
-        Acá vas a ver tus verificaciones de casino, calls, apuestas y participaciones a medida que se habiliten.
-      </p>
+      <CasinoAccounts userId={profile.id} />
 
       <DeleteAccountForm />
     </div>
+  );
+}
+
+const ACCOUNT_STATUS = {
+  pending: { label: "En revisión", className: "text-gold" },
+  approved: { label: "Verificada", className: "text-emerald-400" },
+  rejected: { label: "Rechazada", className: "text-live" },
+} as const;
+
+async function CasinoAccounts({ userId }: { userId: string }) {
+  const supabase = await createClient();
+  const { data: accounts } = await supabase
+    .from("casino_accounts")
+    .select("id, account_id, status, reject_reason, casino:casinos(name)")
+    .eq("user_id", userId)
+    .order("created_at");
+
+  return (
+    <section aria-labelledby="accounts-title" className="rounded-2xl border border-line bg-surface p-5">
+      <h2 id="accounts-title" className="flex items-center gap-2 font-semibold">
+        <BadgeCheck className="size-4 text-accent-text" aria-hidden /> Cuentas de casino
+      </h2>
+      {accounts?.length ? (
+        <ul className="mt-3 space-y-2 text-sm">
+          {accounts.map((account) => (
+            <li key={account.id} className="flex flex-wrap items-center gap-x-3 rounded-lg bg-surface-2 px-3 py-2">
+              <span className="font-semibold">{account.casino?.name ?? "Casino"}</span>
+              <span className="num text-xs text-subtle">{maskAccountId(account.account_id)}</span>
+              <span className={`ml-auto text-xs ${ACCOUNT_STATUS[account.status].className}`}>
+                {ACCOUNT_STATUS[account.status].label}
+                {account.status === "rejected" && account.reject_reason ? `: ${account.reject_reason}` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-muted">Todavía no cargaste ninguna.</p>
+      )}
+      <Link href="/wager-race" className="mt-3 inline-block text-sm font-semibold text-accent-text hover:underline">
+        Verificar una cuenta en la Wager Race
+      </Link>
+    </section>
   );
 }
 

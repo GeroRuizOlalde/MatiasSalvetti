@@ -17,6 +17,7 @@ import { getHuntRecords, getPublicHunts, type HuntSummary } from "@/lib/hunts";
 import { getLiveStatus } from "@/lib/live-status";
 import { BATTLE_STATUSES, statusInfo } from "@/lib/session-status";
 import { getPublicSettings, type PublicSettings } from "@/lib/settings";
+import { getLeaderboard, getWagerOverview } from "@/lib/wager";
 
 function buildStats(settings: PublicSettings, records: { hunts: number; bestMulti: number | null }): Stat[] {
   const { years_streaming, monthly_prizes } = settings.home_stats;
@@ -87,7 +88,7 @@ function buildSessions(hunt?: HuntSummary, buys?: BuySessionSummary, battle?: Ba
 }
 
 export default async function HomePage() {
-  const [settings, live, casinos, videos, hunts, records, buySessions, battles] = await Promise.all([
+  const [settings, live, casinos, videos, hunts, records, buySessions, battles, wager] = await Promise.all([
     getPublicSettings(),
     getLiveStatus(),
     getActiveCasinos(),
@@ -96,14 +97,16 @@ export default async function HomePage() {
     getHuntRecords(),
     getPublicBuySessions(),
     getPublicBattles(),
+    getWagerOverview(),
   ]);
+  const top = wager.featured && wager.featured.phase !== "ended" ? await getLeaderboard(wager.featured.id, 3) : [];
 
   return (
     <>
       <Hero settings={settings} live={live} />
       <StatsStrip stats={buildStats(settings, records)} />
       <Sessions cards={buildSessions(hunts[0], buySessions[0], battles[0])} />
-      <WagerTeaser />
+      <WagerTeaser race={wager.featured} top={top} />
       <CasinosSection casinos={casinos} />
       <ClipsSection videos={videos} channelUrl={settings.socials.youtube} />
       <CommunitySection socials={settings.socials} />

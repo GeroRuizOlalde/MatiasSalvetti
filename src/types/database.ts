@@ -588,6 +588,124 @@ export type Database = {
           },
         ];
       };
+      casino_accounts: {
+        Row: {
+          id: string;
+          user_id: string;
+          casino_id: string;
+          account_id: string;
+          screenshot_path: string | null;
+          status: Database["public"]["Enums"]["verification_status"];
+          reject_reason: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          casino_id: string;
+          account_id: string;
+          screenshot_path?: string | null;
+          status?: Database["public"]["Enums"]["verification_status"];
+          reject_reason?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["casino_accounts"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "casino_accounts_casino_id_fkey";
+            columns: ["casino_id"];
+            isOneToOne: false;
+            referencedRelation: "casinos";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "casino_accounts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      wager_races: {
+        Row: {
+          id: string;
+          title: string;
+          casino_id: string;
+          currency: Database["public"]["Enums"]["currency_code"];
+          starts_at: string;
+          ends_at: string;
+          prizes: number[];
+          rules_md: string | null;
+          status: Database["public"]["Enums"]["wager_race_status"];
+          wager_updated_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          casino_id: string;
+          currency?: Database["public"]["Enums"]["currency_code"];
+          starts_at: string;
+          ends_at: string;
+          prizes?: number[];
+          rules_md?: string | null;
+          status?: Database["public"]["Enums"]["wager_race_status"];
+          wager_updated_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["wager_races"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "wager_races_casino_id_fkey";
+            columns: ["casino_id"];
+            isOneToOne: false;
+            referencedRelation: "casinos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      wager_entries: {
+        Row: {
+          race_id: string;
+          account_id: string;
+          wager: number;
+          updated_at: string;
+        };
+        Insert: {
+          race_id: string;
+          account_id: string;
+          wager: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["wager_entries"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "wager_entries_race_id_fkey";
+            columns: ["race_id"];
+            isOneToOne: false;
+            referencedRelation: "wager_races";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "wager_entries_account_id_fkey";
+            columns: ["account_id"];
+            isOneToOne: false;
+            referencedRelation: "casino_accounts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       rate_limits: {
         Row: { key: string; window_start: string; count: number };
         Insert: { key: string; window_start: string; count: number };
@@ -621,12 +739,18 @@ export type Database = {
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
+      import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_mod: { Args: Record<PropertyKey, never>; Returns: boolean };
+      mask_account_id: { Args: { p_id: string }; Returns: string };
       open_buy_poll: { Args: { p_session: string; p_options: Json }; Returns: string };
       pick_battle_entry: { Args: { p_entry: string }; Returns: undefined };
       reject_hunt_call: { Args: { p_call: string }; Returns: undefined };
       reset_battle: { Args: { p_battle: string }; Returns: undefined };
+      review_casino_account: {
+        Args: { p_id: string; p_approve: boolean; p_reason?: string | null };
+        Returns: undefined;
+      };
       search_slots: {
         Args: { p_query: string; p_limit?: number };
         Returns: Database["public"]["Tables"]["slots"]["Row"][];
@@ -638,11 +762,27 @@ export type Database = {
       };
       setting_int: { Args: { p_key: string; p_default: number }; Returns: number };
       start_battle: { Args: { p_battle: string }; Returns: undefined };
+      submit_casino_account: {
+        Args: { p_casino: string; p_account_id: string; p_screenshot_path: string };
+        Returns: string;
+      };
       submit_hunt_call: {
         Args: { p_hunt: string; p_slot?: string | null; p_slot_name?: string | null };
         Returns: string;
       };
       submit_hunt_guess: { Args: { p_hunt: string; p_amount: number }; Returns: undefined };
+      wager_leaderboard: {
+        Args: { p_race: string; p_limit?: number };
+        Returns: {
+          rank: number;
+          user_id: string;
+          display_name: string;
+          avatar_url: string | null;
+          masked_account: string;
+          wager: number;
+          prize: number | null;
+        }[];
+      };
     };
     Enums: {
       battle_status: "draft" | "open" | "live" | "finished";
@@ -652,6 +792,8 @@ export type Database = {
       hunt_status: "draft" | "collecting" | "opening" | "finished";
       legal_kind: "terms" | "privacy" | "responsible_gaming";
       user_role: "viewer" | "mod" | "admin";
+      verification_status: "pending" | "approved" | "rejected";
+      wager_race_status: "draft" | "published";
     };
     CompositeTypes: Record<string, never>;
   };

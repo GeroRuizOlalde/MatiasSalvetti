@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatMoney, formatMulti, maskAccountId } from "./format";
+import { formatDateTime, formatMoney, formatMulti, maskAccountId, toArgentinaInput } from "./format";
 
 const NBSP = " ";
 
@@ -44,5 +44,11 @@ describe("maskAccountId", () => {
   it("muestra menos dígitos en IDs cortos", () => {
     expect(maskAccountId("123456")).toBe("12•••56");
     expect(maskAccountId("1234")).toBe("•••");
+  });
+});
+
+describe("toArgentinaInput", () => {
+  it("pasa a hora de Buenos Aires (UTC-3)", () => {
+    expect(toArgentinaInput("2026-11-02T00:30:00Z")).toBe("2026-11-01T21:30");
   });
 });

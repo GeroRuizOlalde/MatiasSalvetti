@@ -3,6 +3,7 @@ import { publicEnv } from "@/lib/env";
 import { getPublicBattles } from "@/lib/battles";
 import { getPublicBuySessions } from "@/lib/buys";
 import { getPublicHunts } from "@/lib/hunts";
+import { getWagerOverview } from "@/lib/wager";
 
 // Páginas públicas indexables, más cada hunt, sesión de buys y battle publicados.
 const ROUTES = [
@@ -19,7 +20,12 @@ const ROUTES = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [hunts, buys, battles] = await Promise.all([getPublicHunts(), getPublicBuySessions(), getPublicBattles()]);
+  const [hunts, buys, battles, wager] = await Promise.all([
+    getPublicHunts(),
+    getPublicBuySessions(),
+    getPublicBattles(),
+    getWagerOverview(),
+  ]);
   const detail = (path: string, finished: boolean, lastModified: string) => ({
     url: `${publicEnv.NEXT_PUBLIC_SITE_URL}${path}`,
     lastModified,
@@ -35,5 +41,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...hunts.map((h) => detail(`/bonus-hunt/${h.id}`, h.status === "finished", h.finished_at ?? h.created_at)),
     ...buys.map((b) => detail(`/bonus-buys/${b.id}`, b.status === "finished", b.finished_at ?? b.created_at)),
     ...battles.map((b) => detail(`/bonus-battle/${b.id}`, b.status === "finished", b.finished_at ?? b.created_at)),
+    ...wager.past.map((r) => detail(`/wager-race/${r.id}`, true, r.ends_at)),
   ];
 }

@@ -75,3 +75,10 @@ export async function resolveSlot(
     .single();
   return created;
 }
+
+/** <input type="datetime-local"> sin zona: se interpreta en hora de Argentina (UTC-3, sin horario de verano). */
+export const argentinaDateTime = (message: string) =>
+  z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, message)
+    .transform((v) => new Date(`${v}:00-03:00`).toISOString());
