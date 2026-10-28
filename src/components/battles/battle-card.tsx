@@ -11,7 +11,7 @@ export function BattleCard({ battle }: { battle: BattleSummary }) {
   return (
     <Link
       href={`/bonus-battle/${battle.id}`}
-      className="flex h-full flex-col rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-accent/60"
+      className="lift flex h-full flex-col rounded-2xl border border-line bg-surface p-5 hover:border-accent/60"
     >
       <div className="flex items-center justify-between gap-3">
         <StatusPill label={status.label} tone={status.tone} />

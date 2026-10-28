@@ -45,7 +45,7 @@ export default async function PanelRacePage({ params }: PageProps<"/panel/wager-
   const entryOf = (userId: string) => entries?.find((e) => e.account?.user_id === userId);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <Link href="/panel/wager-race" className="flex items-center gap-1 text-sm text-subtle hover:text-text">
         <ArrowLeft className="size-4" aria-hidden /> Carreras
       </Link>

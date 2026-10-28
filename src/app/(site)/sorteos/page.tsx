@@ -45,7 +45,7 @@ export default async function SorteosPage() {
         {giveaways.length ? (
           <ul className="grid gap-4 md:grid-cols-2">
             {giveaways.map((giveaway) => (
-              <li key={giveaway.id}>
+              <li key={giveaway.id} className="reveal">
                 <GiveawayCard giveaway={giveaway} />
               </li>
             ))}

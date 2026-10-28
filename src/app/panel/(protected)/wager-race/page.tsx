@@ -24,7 +24,7 @@ export default async function PanelWagerPage() {
   ]);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Wager Race</h1>
       {pending ? (
         <p className="text-sm">

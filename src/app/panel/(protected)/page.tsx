@@ -46,7 +46,7 @@ export default async function PanelHomePage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-8">
+    <div className="space-y-8">
       <h1 className="font-display text-4xl tracking-wide uppercase">Inicio</h1>
 
       <section aria-labelledby="quick">

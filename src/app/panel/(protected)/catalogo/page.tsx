@@ -35,7 +35,7 @@ export default async function CatalogoSlotsPage({ searchParams }: PageProps<"/pa
   const pageHref = (p: number) => `/panel/catalogo?${new URLSearchParams({ ...(q ? { q } : {}), page: String(p) })}`;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Catálogo</h1>
       <CatalogTabs active="slots" isAdmin={profile.role === "admin"} />
 
