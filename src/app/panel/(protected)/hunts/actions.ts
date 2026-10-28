@@ -158,7 +158,7 @@ export async function deleteBonus(_prev: ActionState, formData: FormData): Promi
     .eq("hunt_id", parsed.data.hunt_id);
   if (error) return { error: friendly(error.message, "No se pudo borrar.") };
   invalidate(parsed.data.hunt_id);
-  return { ok: "Bono borrado." };
+  return { ok: "Bono borrado. Si venía de un call, el viewer ya puede volver a pedir." };
 }
 
 // -----------------------------------------------------------------------------

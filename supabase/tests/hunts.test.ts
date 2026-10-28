@@ -244,3 +244,25 @@ describe("adiviná el balance", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("borrar un bono que vino de un call", () => {
+  it("deja al viewer volver a pedir", async () => {
+    const hunt = await createHunt();
+    await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Sugar Rush')", [hunt]));
+    const call = await db.query<{ id: string }>("select id from public.hunt_calls where hunt_id = $1", [hunt]);
+    const bonus = await as(db, mod, () =>
+      db.query<{ id: string }>("select public.accept_hunt_call($1, 100) as id", [call.rows[0].id]),
+    );
+    await expect(
+      as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Otro')", [hunt])),
+    ).rejects.toThrow(/call_already_accepted/);
+
+    await as(db, mod, () => db.query("delete from public.hunt_bonuses where id = $1", [bonus.rows[0].id]));
+    await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Gates of Olympus')", [hunt]));
+    const { rows } = await db.query<{ slot_name: string; status: string }>(
+      "select slot_name, status from public.hunt_calls where hunt_id = $1",
+      [hunt],
+    );
+    expect(rows).toEqual([{ slot_name: "Gates of Olympus", status: "pending" }]);
+  });
+});
