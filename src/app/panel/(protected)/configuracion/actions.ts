@@ -1,0 +1,114 @@
+"use server";
+
+import { randomBytes } from "node:crypto";
+import { refresh, updateTag } from "next/cache";
+import { z } from "zod";
+import type { ActionState } from "@/lib/action-state";
+import { requirePanelProfile } from "@/lib/auth/session";
+import { LEGAL_TAG } from "@/lib/legal";
+import { SETTING_SCHEMAS, SETTINGS_TAG } from "@/lib/settings";
+import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/types/database";
+
+async function saveSetting(key: string, value: Json, isPublic = true): Promise<ActionState | null> {
+  const profile = await requirePanelProfile("admin");
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ key, value, is_public: isPublic, updated_by: profile.id }, { onConflict: "key" });
+  if (error) return { error: "No se pudo guardar." };
+  updateTag(SETTINGS_TAG);
+  return null;
+}
+
+/** "1.500.000" o "1500000,50" → número. Vacío → null. */
+const optionalAmount = z
+  .string()
+  .trim()
+  .transform((v, ctx) => {
+    if (v === "") return null;
+    const n = Number(v.replace(/\./g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n < 0) {
+      ctx.addIssue({ code: "custom", message: "Número inválido." });
+      return z.NEVER;
+    }
+    return n;
+  });
+
+export async function saveSocials(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("admin");
+  const raw = Object.fromEntries(formData);
+  const socials = SETTING_SCHEMAS.socials.safeParse(raw);
+  if (!socials.success) return { error: "Revisá los links: todos tienen que ser URLs completas (https://…)." };
+  const platform = SETTING_SCHEMAS.primary_platform.safeParse(raw.primary_platform);
+  if (!platform.success) return { error: "Plataforma inválida." };
+
+  const failed = (await saveSetting("socials", socials.data)) ?? (await saveSetting("primary_platform", platform.data));
+  return failed ?? { ok: "Redes guardadas." };
+}
+
+const homeStatsSchema = z.object({
+  years_streaming: optionalAmount,
+  monthly_prizes: optionalAmount,
+});
+
+export async function saveHomeStats(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = homeStatsSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+  return (await saveSetting("home_stats", parsed.data)) ?? { ok: "Stats guardadas." };
+}
+
+const generalSchema = z.object({
+  helpline: z.string().trim().min(1, "Completá la línea de ayuda.").max(200),
+  min_age_days: z.coerce.number().int().min(0).max(3650),
+});
+
+export async function saveGeneral(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = generalSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+  const failed =
+    (await saveSetting("responsible_gaming_helpline", parsed.data.helpline)) ??
+    (await saveSetting("twitch_min_account_age_days", parsed.data.min_age_days));
+  return failed ?? { ok: "Configuración guardada." };
+}
+
+export async function regenerateOverlayToken(): Promise<ActionState> {
+  const failed = await saveSetting("overlay_token", randomBytes(24).toString("hex"), false);
+  if (failed) return failed;
+  refresh();
+  return { ok: "Token nuevo generado. Actualizá las URLs en OBS." };
+}
+
+const legalSchema = z.object({
+  kind: z.enum(["terms", "privacy", "responsible_gaming"]),
+  title: z.string().trim().min(1, "Poné un título.").max(120),
+  content_md: z.string().trim().min(20, "El contenido es demasiado corto.").max(100_000),
+});
+
+export async function publishLegalDocument(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await requirePanelProfile("admin");
+  const parsed = legalSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+
+  const supabase = await createClient();
+  const { data: last } = await supabase
+    .from("legal_documents")
+    .select("version")
+    .eq("kind", parsed.data.kind)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const version = (last?.version ?? 0) + 1;
+
+  const { error } = await supabase.from("legal_documents").insert({
+    ...parsed.data,
+    version,
+    published_at: new Date().toISOString(),
+    created_by: profile.id,
+  });
+  if (error) return { error: "No se pudo publicar. Probá de nuevo." };
+
+  updateTag(LEGAL_TAG);
+  refresh();
+  return { ok: `Versión ${version} publicada.` };
+}

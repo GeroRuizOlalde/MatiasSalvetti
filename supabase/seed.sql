@@ -1,0 +1,4 @@
+-- Datos de desarrollo local. Los datos reales iniciales (casinos, redes,
+-- configuración y documentos legales) están en la migración *_initial_data.sql.
+-- No cargamos slots ni usuarios inventados: el admin se crea con
+-- `npm run make-admin -- <usuario_de_twitch>` después del primer login.
