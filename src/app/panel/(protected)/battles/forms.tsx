@@ -73,12 +73,12 @@ export function AddEntryForm({ battleId }: { battleId: string }) {
   const id = useId();
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+    <form action={formAction} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
       <input type="hidden" name="battle_id" value={battleId} />
       <Field id={`${id}-slot`} label="Agregar slot" hint="Si no está en el catálogo, se agrega.">
         <SlotPicker key={round} id={`${id}-slot`} required />
       </Field>
-      <SubmitButton className="sm:mb-6">Agregar</SubmitButton>
+      <SubmitButton className="h-10 sm:mt-5">Agregar</SubmitButton>
       <FormMessage state={state} className="sm:col-span-2" />
     </form>
   );

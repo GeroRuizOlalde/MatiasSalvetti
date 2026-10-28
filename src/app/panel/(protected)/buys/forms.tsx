@@ -73,7 +73,7 @@ export function AddBuyForm({ sessionId, defaults }: { sessionId: string; default
   const id = useId();
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end">
+    <form action={formAction} className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-start">
       <input type="hidden" name="session_id" value={sessionId} />
       <Field id={`${id}-slot`} label="Slot" hint="Si no está en el catálogo, se agrega.">
         <SlotPicker key={round} id={`${id}-slot`} required />
@@ -115,7 +115,7 @@ export function AddBuyForm({ sessionId, defaults }: { sessionId: string; default
           className={moneyInput}
         />
       </Field>
-      <SubmitButton className="sm:mb-0.5">Agregar</SubmitButton>
+      <SubmitButton className="h-10 sm:mt-5">Agregar</SubmitButton>
       <FormMessage state={state} className="sm:col-span-5" />
     </form>
   );
