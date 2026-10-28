@@ -5,19 +5,19 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { isActivePath, NAV_LINKS } from "./nav";
 
-export function NavLinks({
-  className,
-  orientation = "horizontal",
-}: {
-  className?: string;
-  orientation?: "horizontal" | "vertical";
-}) {
-  const pathname = usePathname();
+type Props = { className?: string; orientation?: "horizontal" | "vertical" };
+
+export function NavLinks(props: Props) {
+  return <NavLinkList {...props} pathname={usePathname()} />;
+}
+
+/** Sin `pathname` no marca ninguno como activo: sirve de fallback mientras se resuelve la URL. */
+export function NavLinkList({ className, orientation = "horizontal", pathname }: Props & { pathname: string | null }) {
   return (
     <nav aria-label="Principal" className={className}>
       <ul className={cn("flex", orientation === "vertical" ? "flex-col gap-1" : "items-center gap-1")}>
         {NAV_LINKS.map(({ href, label }) => {
-          const active = isActivePath(pathname, href);
+          const active = pathname !== null && isActivePath(pathname, href);
           return (
             <li key={href}>
               <Link

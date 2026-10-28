@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { publicEnv } from "@/lib/env";
+import { getPublicHunts } from "@/lib/hunts";
 
-// Páginas públicas indexables. Los hunts y battles individuales se suman en sus fases.
+// Páginas públicas indexables. Las battles individuales se suman en la fase 4.
 const ROUTES = [
   { path: "/", priority: 1 },
   { path: "/wager-race", priority: 0.9 },
@@ -15,10 +16,19 @@ const ROUTES = [
   { path: "/privacidad", priority: 0.3 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return ROUTES.map(({ path, priority }) => ({
-    url: `${publicEnv.NEXT_PUBLIC_SITE_URL}${path}`,
-    changeFrequency: "daily",
-    priority,
-  }));
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const hunts = await getPublicHunts();
+  return [
+    ...ROUTES.map(({ path, priority }) => ({
+      url: `${publicEnv.NEXT_PUBLIC_SITE_URL}${path}`,
+      changeFrequency: "daily" as const,
+      priority,
+    })),
+    ...hunts.map((hunt) => ({
+      url: `${publicEnv.NEXT_PUBLIC_SITE_URL}/bonus-hunt/${hunt.id}`,
+      lastModified: hunt.finished_at ?? hunt.created_at,
+      changeFrequency: hunt.status === "finished" ? ("monthly" as const) : ("hourly" as const),
+      priority: 0.6,
+    })),
+  ];
 }

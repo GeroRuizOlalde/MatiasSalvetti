@@ -10,6 +10,10 @@ const CURRENCY_PREFIX: Record<Enums<"currency_code">, string> = {
   USD: "US$",
 };
 
+export function currencyPrefix(currency: Enums<"currency_code">) {
+  return CURRENCY_PREFIX[currency];
+}
+
 function number(value: number, fractionDigits: number) {
   return new Intl.NumberFormat(LOCALE, {
     minimumFractionDigits: fractionDigits,

@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   cacheLife: {
     // Estado en vivo de Twitch/Kick: se consulta a las APIs como mucho una vez por minuto.
     live: { stale: 30, revalidate: 60, expire: 300 },
+    // Hunts: el panel invalida el tag en cada cambio; esto cubre las apuestas del GTB.
+    hunt: { stale: 30, revalidate: 30, expire: 3600 },
   },
   images: {
     remotePatterns: [
