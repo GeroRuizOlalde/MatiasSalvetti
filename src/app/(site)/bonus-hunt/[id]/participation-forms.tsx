@@ -5,6 +5,7 @@ import { FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { submitGuess } from "../actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 export function GuessForm({
   huntId,
@@ -32,13 +33,9 @@ export function GuessForm({
           >
             {currencyPrefix}
           </span>
-          <input
+          <AmountInput
             id={`${id}-amount`}
             name="amount"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
             required
             defaultValue={currentGuess ?? undefined}
             className={cn(inputClass, "num pl-12")}

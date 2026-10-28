@@ -8,6 +8,7 @@ import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { formatMulti } from "@/lib/format";
 import { addBonus, deleteBonus, reviewCall, updateBonus } from "../actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -28,28 +29,10 @@ export function AddBonusForm({ huntId, defaultBet }: { huntId: string; defaultBe
         <SlotPicker key={round} id={`${id}-slot`} required />
       </Field>
       <Field id={`${id}-bet`} label="Apuesta">
-        <input
-          id={`${id}-bet`}
-          name="bet"
-          type="number"
-          inputMode="decimal"
-          min={0.01}
-          step="0.01"
-          required
-          defaultValue={defaultBet}
-          className={moneyInput}
-        />
+        <AmountInput id={`${id}-bet`} name="bet" required defaultValue={defaultBet} className={moneyInput} />
       </Field>
       <Field id={`${id}-payout`} label="Pago (si ya se abrió)">
-        <input
-          id={`${id}-payout`}
-          name="payout"
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step="0.01"
-          className={moneyInput}
-        />
+        <AmountInput id={`${id}-payout`} name="payout" className={moneyInput} />
       </Field>
       <SubmitButton className="h-10 sm:mt-5">Agregar</SubmitButton>
       <FormMessage state={state} className="sm:col-span-4" />
@@ -77,33 +60,25 @@ export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus:
         <label htmlFor={`${id}-bet`} className="sr-only">
           Apuesta
         </label>
-        <input
+        <AmountInput
           id={`${id}-bet`}
           name="bet"
-          type="number"
-          inputMode="decimal"
-          min={0.01}
-          step="0.01"
           required
           disabled={locked}
           value={bet}
-          onChange={(e) => setBet(e.target.value)}
+          onValueChange={setBet}
           className={cn(moneyInput, "h-9 w-28")}
         />
         <label htmlFor={`${id}-payout`} className="sr-only">
           Pago
         </label>
-        <input
+        <AmountInput
           id={`${id}-payout`}
           name="payout"
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step="0.01"
           placeholder="Pago"
           disabled={locked}
           value={payout}
-          onChange={(e) => setPayout(e.target.value)}
+          onValueChange={setPayout}
           className={cn(moneyInput, "h-9 w-32")}
         />
         <span className="num w-20 text-right text-sm text-gold">{preview !== null ? formatMulti(preview) : "—"}</span>
@@ -155,13 +130,9 @@ export function CallReviewForm({
       <label htmlFor={`${id}-bet`} className="sr-only">
         Apuesta
       </label>
-      <input
+      <AmountInput
         id={`${id}-bet`}
         name="bet"
-        type="number"
-        inputMode="decimal"
-        min={0.01}
-        step="0.01"
         placeholder="Apuesta"
         defaultValue={defaultBet}
         className={cn(moneyInput, "h-9 w-28")}

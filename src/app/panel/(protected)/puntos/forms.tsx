@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 import { REWARD_KINDS } from "@/lib/rewards";
 import type { Enums } from "@/types/database";
 import { adjustPoints, handleOrder, saveMission, saveRewards, saveShopItem } from "./actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 const numInput = cn(inputClass, "num");
 
@@ -23,24 +24,20 @@ export function RewardsForm({ rewards }: { rewards: Record<string, { points: num
             <p className="mb-2 text-xs text-subtle">{reward.description}</p>
             <div className="grid grid-cols-2 gap-2">
               <Field id={`${id}-${reward.key}-p`} label="Puntos">
-                <input
+                <AmountInput
+                  decimals={false}
                   id={`${id}-${reward.key}-p`}
                   name={`${reward.key}_points`}
-                  type="number"
-                  min={0}
-                  max={100000}
                   required
                   defaultValue={rewards[reward.key]?.points ?? 0}
                   className={numInput}
                 />
               </Field>
               <Field id={`${id}-${reward.key}-x`} label="XP">
-                <input
+                <AmountInput
+                  decimals={false}
                   id={`${id}-${reward.key}-x`}
                   name={`${reward.key}_xp`}
-                  type="number"
-                  min={0}
-                  max={100000}
                   required
                   defaultValue={rewards[reward.key]?.xp ?? 0}
                   className={numInput}
@@ -144,22 +141,20 @@ export function MissionForm({ mission }: { mission?: Mission }) {
         />
       </Field>
       <Field id={`${id}-points`} label="Puntos">
-        <input
+        <AmountInput
+          decimals={false}
           id={`${id}-points`}
           name="points"
-          type="number"
-          min={0}
           required
           defaultValue={mission?.points ?? 20}
           className={numInput}
         />
       </Field>
       <Field id={`${id}-xp`} label="XP">
-        <input
+        <AmountInput
+          decimals={false}
           id={`${id}-xp`}
           name="xp"
-          type="number"
-          min={0}
           required
           defaultValue={mission?.xp ?? 10}
           className={numInput}
@@ -287,11 +282,10 @@ export function ShopItemForm({ item }: { item?: Item }) {
         />
       </Field>
       <Field id={`${id}-cost`} label="Costo en puntos">
-        <input
+        <AmountInput
+          decimals={false}
           id={`${id}-cost`}
           name="cost"
-          type="number"
-          min={1}
           required
           defaultValue={item?.cost}
           className={numInput}
@@ -420,10 +414,18 @@ export function AdjustForm() {
         <input id={`${id}-login`} name="login" required placeholder="usuario" className={inputClass} />
       </Field>
       <Field id={`${id}-points`} label="Puntos (±)">
-        <input id={`${id}-points`} name="points" type="number" required defaultValue={0} className={numInput} />
+        <AmountInput
+          allowNegative
+          decimals={false}
+          id={`${id}-points`}
+          name="points"
+          required
+          defaultValue={0}
+          className={numInput}
+        />
       </Field>
       <Field id={`${id}-xp`} label="XP (+)">
-        <input id={`${id}-xp`} name="xp" type="number" min={0} required defaultValue={0} className={numInput} />
+        <AmountInput decimals={false} id={`${id}-xp`} name="xp" required defaultValue={0} className={numInput} />
       </Field>
       <Field id={`${id}-note`} label="Motivo">
         <input

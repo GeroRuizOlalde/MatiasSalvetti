@@ -11,6 +11,7 @@ import { formatMulti } from "@/lib/format";
 import { BATTLE_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
 import { addEntry, saveBattle, saveMatch } from "./actions";
+import { AmountInput } from "@/components/ui/amount-input";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -122,17 +123,13 @@ export function MatchForm({
               <label htmlFor={`${id}-${name}`} className="sr-only">
                 {field === "bet" ? "Apuesta" : "Pago"} de {info.name}
               </label>
-              <input
+              <AmountInput
                 id={`${id}-${name}`}
                 name={name}
-                type="number"
-                inputMode="decimal"
-                min={field === "bet" ? 0.01 : 0}
-                step="0.01"
                 placeholder={field === "bet" ? "Apuesta" : "Pago"}
                 disabled={locked}
                 value={values[name]}
-                onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
+                onValueChange={(raw) => setValues((v) => ({ ...v, [name]: raw }))}
                 className={cn(moneyInput, "h-9 w-28")}
               />
             </span>
