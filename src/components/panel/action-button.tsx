@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, type ReactNode } from "react";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { FormMessage, SubmitButton } from "./form";
@@ -26,14 +27,14 @@ export function ActionButton({
   className?: string;
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, INITIAL_ACTION_STATE);
+  const confirm = useConfirmSubmit(confirmText ? confirmFromText(confirmText) : null);
   return (
     <form
       action={formAction}
-      onSubmit={(e) => {
-        if (confirmText && !confirm(confirmText)) e.preventDefault();
-      }}
+      onSubmit={confirm.onSubmit}
       className={cn("flex flex-wrap items-center gap-3", className)}
     >
+      {confirm.dialog}
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
