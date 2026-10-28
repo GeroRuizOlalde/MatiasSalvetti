@@ -132,9 +132,6 @@ export default async function ComoParticiparPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-subtle">
-              Son links de referido: Matías recibe una comisión si te registrás desde acá.
-            </p>
           </section>
         ) : null}
       </div>
