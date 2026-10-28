@@ -34,10 +34,6 @@ export async function Footer() {
               apuestes lo que no podés perder. Si se te va de las manos, pedí ayuda:{" "}
               <span className="text-text">{settings.responsible_gaming_helpline}</span>.
             </p>
-            <p className="text-xs text-subtle">
-              Los links a casinos de esta web son links de referido: Matías recibe una comisión si te registrás desde
-              ellos.
-            </p>
           </section>
           <Logo className="shrink-0" />
         </div>

@@ -38,7 +38,8 @@ const match = (round: number, slot: number, extra: Partial<BracketMatch> = {}): 
 describe("bracket", () => {
   it("nombra las rondas desde la final", () => {
     expect([1, 2, 3, 4].map((r) => roundName(r, 4))).toEqual(["Octavos", "Cuartos", "Semifinal", "Final"]);
-    expect(roundName(1, 5)).toBe("Ronda 1");
+    expect([1, 2].map((r) => roundName(r, 6))).toEqual(["32avos", "16avos"]);
+    expect(roundName(1, 7)).toBe("Ronda 1");
   });
 
   it("agrupa por ronda y encuentra el cruce en juego", () => {

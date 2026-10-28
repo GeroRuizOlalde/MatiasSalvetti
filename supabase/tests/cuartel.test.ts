@@ -123,7 +123,9 @@ describe("premios de buys y battles", () => {
     expect((await balance(viewerB)).points).toBe(before + 5);
 
     const { rows: battle } = await as(db, admin, () =>
-      db.query<{ id: string }>("insert into public.battles (title, status) values ('Bt', 'open') returning id"),
+      db.query<{ id: string }>(
+        "insert into public.battles (title, status, size) values ('Bt', 'open', 2) returning id",
+      ),
     );
     await as(db, admin, () =>
       db.query("insert into public.battle_entries (battle_id, slot_name) values ($1, 'X'), ($1, 'Y')", [battle[0].id]),

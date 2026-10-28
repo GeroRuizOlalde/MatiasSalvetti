@@ -35,7 +35,7 @@ export function PartnerSection({ casino, partner }: { casino: PublicCasino; part
             ) : null}
           </div>
           <p className="mt-4 text-xs text-subtle">
-            Link de referido: si te registrás, Matías recibe una comisión. +18. Jugá con responsabilidad.
+            +18. Jugá con responsabilidad.
           </p>
         </div>
         {partner.perks.length ? (

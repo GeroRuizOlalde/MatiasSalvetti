@@ -54,8 +54,15 @@ export function Bracket({
                         )}
                       >
                         {won ? <Crown className="size-3.5 shrink-0 text-gold" aria-label="Ganó" /> : null}
-                        <span className={cn("min-w-0 flex-1 truncate", won && "font-semibold text-text")}>
-                          {entry?.slot_name ?? <span className="text-subtle">Por definir</span>}
+                        <span className={cn("min-w-0 flex-1", won && "font-semibold text-text")}>
+                          <span className="block truncate">
+                            {entry?.slot_name ?? <span className="text-subtle">Por definir</span>}
+                          </span>
+                          {entry?.calledBy ? (
+                            <span className="block truncate text-[11px] font-normal text-subtle">
+                              {entry.calledBy.name}
+                            </span>
+                          ) : null}
                         </span>
                         {payout !== null ? (
                           <span

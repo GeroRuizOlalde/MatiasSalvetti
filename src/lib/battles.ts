@@ -12,23 +12,19 @@ export const battleTag = (id: string) => `battle:${id}`;
 
 type BattleRow = Pick<
   Tables<"battles">,
-  "id" | "title" | "currency" | "status" | "winner_entry_id" | "started_at" | "finished_at" | "created_at"
+  "id" | "title" | "currency" | "status" | "size" | "winner_entry_id" | "started_at" | "finished_at" | "created_at"
 >;
 
-export type BattleEntry = Pick<Tables<"battle_entries">, "id" | "seed" | "slot_name" | "provider">;
+export type BattleEntry = Pick<Tables<"battle_entries">, "id" | "seed" | "slot_name" | "provider" | "called_by"> & {
+  /** Viewer que calleó el slot (solo en el detalle). */
+  calledBy?: PublicProfileName | null;
+};
 
 export type BattleSummary = BattleRow & { casino: CasinoRef | null; entries: BattleEntry[] };
 
-export type PublicBattle = BattleSummary & {
-  matches: BracketMatch[];
-  /** Picks por entry_id. */
-  picks: Record<string, number>;
-  totalPicks: number;
-  /** Quiénes bancaron al campeón (solo cuando terminó). */
-  championBackers: PublicProfileName[];
-};
+export type PublicBattle = BattleSummary & { matches: BracketMatch[] };
 
-const BATTLE_COLUMNS = `id, title, currency, status, winner_entry_id, started_at, finished_at, created_at, ${CASINO_EMBED}, entries:battle_entries!battle_entries_battle_id_fkey(id, seed, slot_name, provider)`;
+const BATTLE_COLUMNS = `id, title, currency, status, size, winner_entry_id, started_at, finished_at, created_at, ${CASINO_EMBED}, entries:battle_entries!battle_entries_battle_id_fkey(id, seed, slot_name, provider, called_by)`;
 
 const ACTIVE = new Set(["open", "live"]);
 
@@ -64,31 +60,16 @@ export async function getPublicBattle(id: string): Promise<PublicBattle | null> 
   const { data: battle } = await supabase.from("battles").select(BATTLE_COLUMNS).eq("id", id).maybeSingle();
   if (!battle) return null;
 
-  const [{ data: matches }, { data: counts }, { data: backers }] = await Promise.all([
-    supabase
-      .from("battle_matches")
-      .select("id, round, slot, entry_a, entry_b, bet_a, payout_a, bet_b, payout_b, winner_entry_id")
-      .eq("battle_id", id),
-    supabase.rpc("battle_pick_counts", { p_battle: id }),
-    battle.status === "finished" && battle.winner_entry_id
-      ? supabase
-          .from("battle_picks")
-          .select("user_id")
-          .eq("battle_id", id)
-          .eq("entry_id", battle.winner_entry_id)
-          .order("created_at")
-          .limit(50)
-      : Promise.resolve({ data: [] as { user_id: string }[] }),
-  ]);
-
-  const names = await getProfileNames((backers ?? []).map((b) => b.user_id));
-  const picks = Object.fromEntries((counts ?? []).map((c) => [c.entry_id, c.picks]));
+  const { data: matches } = await supabase
+    .from("battle_matches")
+    .select("id, round, slot, entry_a, entry_b, bet_a, payout_a, bet_b, payout_b, winner_entry_id")
+    .eq("battle_id", id);
+  const names = await getProfileNames(battle.entries.map((e) => e.called_by));
+  const sorted = sortEntries(battle);
 
   return {
-    ...sortEntries(battle),
+    ...sorted,
+    entries: sorted.entries.map((e) => ({ ...e, calledBy: e.called_by ? (names.get(e.called_by) ?? null) : null })),
     matches: matches ?? [],
-    picks,
-    totalPicks: Object.values(picks).reduce((sum, n) => sum + n, 0),
-    championBackers: (backers ?? []).flatMap((b) => names.get(b.user_id) ?? []),
   };
 }

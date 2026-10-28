@@ -10,8 +10,11 @@ import { friendlyError, optionalAmount, optionalUuid, resolveSlot } from "@/lib/
 import { createClient } from "@/lib/supabase/server";
 
 const ERRORS: Record<string, string> = {
-  battle_started: "La battle ya arrancó: volvela a «Bancá a tu slot» para cambiar los slots.",
-  invalid_entry_count: "Para arrancar hacen falta 2, 4, 8 o 16 slots.",
+  battle_started: "La battle ya arrancó: borrá el cuadro para cambiar los slots o la instancia.",
+  invalid_entry_count: "Para arrancar tienen que estar todos los slots de la instancia elegida.",
+  battle_full: "El cuadro ya está completo para la instancia elegida.",
+  size_too_small: "Hay más slots cargados que los que entran en esa instancia.",
+  call_not_pending: "Ese call ya se revisó.",
   invalid_status: "Ese cambio de estado no se puede hacer a mano.",
   next_match_started: "El cruce siguiente ya tiene resultados: borralos primero.",
   forbidden: "No tenés permisos para esto.",
@@ -39,6 +42,11 @@ const battleSchema = z.object({
   currency: z.enum(["ARS", "USD"]),
   // live y finished los manejan start_battle y los resultados.
   status: z.enum(["draft", "open"]).optional(),
+  // Instancia de arranque: cantidad de slots del cuadro.
+  size: z.coerce
+    .number()
+    .refine((n) => [2, 4, 8, 16, 32, 64].includes(n), "Elegí desde qué instancia arranca.")
+    .optional(),
 });
 
 export async function saveBattle(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -100,7 +108,7 @@ export async function resetBattle(_prev: ActionState, formData: FormData): Promi
   const { error } = await supabase.rpc("reset_battle", { p_battle: parsed.data.battle_id });
   if (error) return { error: friendly(error.message) };
   invalidate(parsed.data.battle_id);
-  return { ok: "Cuadro borrado. La battle volvió a «Bancá a tu slot»." };
+  return { ok: "Cuadro borrado. La battle volvió a «Calls abiertos»." };
 }
 
 // -----------------------------------------------------------------------------
@@ -125,12 +133,9 @@ export async function addEntry(_prev: ActionState, formData: FormData): Promise<
   });
   if (!slot) return { error: "No se pudo agregar el slot al catálogo." };
 
-  const { error } = await supabase.from("battle_entries").insert({
-    battle_id: parsed.data.battle_id,
-    slot_id: slot.id,
-    slot_name: slot.name,
-    provider: slot.provider,
-  });
+  const { error } = await supabase
+    .from("battle_entries")
+    .insert({ battle_id: parsed.data.battle_id, slot_id: slot.id, slot_name: slot.name, provider: slot.provider });
   if (error) return { error: friendly(error.message) };
   invalidate(parsed.data.battle_id);
   return { ok: `${slot.name} agregado.` };
@@ -205,4 +210,27 @@ export async function saveMatch(_prev: ActionState, formData: FormData): Promise
   if (error) return { error: friendly(error.message) };
   invalidate(battle_id);
   return { ok: "Guardado." };
+}
+
+// -----------------------------------------------------------------------------
+// Calls de viewers
+// -----------------------------------------------------------------------------
+
+const callSchema = z.object({ id: z.uuid(), battle_id: z.uuid(), decision: z.enum(["accept", "reject"]) });
+
+/** Acepta el call (el slot entra al cuadro a nombre del viewer) o lo rechaza. */
+export async function reviewBattleCall(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("mod");
+  const parsed = callSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Datos inválidos." };
+  const { id, battle_id, decision } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } =
+    decision === "accept"
+      ? await supabase.rpc("accept_battle_call", { p_call: id })
+      : await supabase.rpc("reject_battle_call", { p_call: id });
+  if (error) return { error: friendly(error.message) };
+  invalidate(battle_id);
+  return { ok: decision === "accept" ? "Call aceptado: el slot entró al cuadro." : "Call rechazado." };
 }

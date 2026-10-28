@@ -31,8 +31,13 @@ async function openPoll(session: string, names: string[]) {
 }
 
 async function createBattle(slots: number, status = "open") {
+  // El cuadro es del tamaño justo (o el siguiente, para probar que no arranca incompleto).
+  const size = 2 ** Math.ceil(Math.log2(Math.max(slots, 2)));
   const { rows } = await asMod(() =>
-    db.query<{ id: string }>("insert into public.battles (title, status) values ('Battle', $1) returning id", [status]),
+    db.query<{ id: string }>(
+      "insert into public.battles (title, status, size) values ('Battle', $1, $2) returning id",
+      [status, size],
+    ),
   );
   const battle = rows[0].id;
   for (let i = 1; i <= slots; i++) {

@@ -33,7 +33,8 @@ export default async function PanelBattlesPage() {
         </h2>
         <BattleForm casinos={casinos ?? []} />
         <p className="mt-2 text-xs text-subtle">
-          Se crea como borrador. Cargá los slots y pasala a «Bancá a tu slot» para que los viewers elijan.
+          Se crea como borrador. Elegí desde qué instancia arranca y pasala a «Calls abiertos» para que los viewers
+          callean su slot.
         </p>
       </section>
 

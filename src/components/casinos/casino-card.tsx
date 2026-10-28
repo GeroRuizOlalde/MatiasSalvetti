@@ -34,7 +34,7 @@ export function CasinoCard({ casino }: { casino: PublicCasino }) {
         className={buttonClasses({ className: "mt-5 w-full" })}
       >
         Registrarme <ExternalLink className="size-4" aria-hidden />
-        <span className="sr-only">en {casino.name} (link de referido, se abre en otra pestaña)</span>
+        <span className="sr-only">en {casino.name} (se abre en otra pestaña)</span>
       </a>
     </article>
   );

@@ -20,6 +20,8 @@ export function roundName(round: number, totalRounds: number) {
   if (fromEnd === 1) return "Semifinal";
   if (fromEnd === 2) return "Cuartos";
   if (fromEnd === 3) return "Octavos";
+  if (fromEnd === 4) return "16avos";
+  if (fromEnd === 5) return "32avos";
   return `Ronda ${round}`;
 }
 
@@ -46,4 +48,12 @@ export function currentMatch<T extends BracketMatch>(matches: T[]) {
   );
 }
 
-export const VALID_ENTRY_COUNTS = [2, 4, 8, 16];
+/** Instancias desde las que puede arrancar una battle (cantidad de slots del cuadro). */
+export const BRACKET_SIZES = [
+  { size: 2, label: "Final" },
+  { size: 4, label: "Semifinal" },
+  { size: 8, label: "Cuartos" },
+  { size: 16, label: "Octavos" },
+  { size: 32, label: "16avos" },
+  { size: 64, label: "32avos" },
+] as const;

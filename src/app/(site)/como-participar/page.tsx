@@ -70,7 +70,7 @@ export default async function ComoParticiparPage() {
       title: "Participá y sumá puntos",
       body: (
         <>
-          Pedí un slot en los bonus hunts, adiviná el balance final, pedí la próxima compra en los buys, bancá a tu slot
+          Pedí un slot en los bonus hunts, adiviná el balance final, pedí la próxima compra en los buys, calleá tu slot
           en las battles y entrá a los sorteos. Todo suma XP y puntos en el{" "}
           <Link href="/cuartel" className={linkClass}>
             Cuartel
@@ -132,9 +132,6 @@ export default async function ComoParticiparPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-subtle">
-              Son links de referido: Matías recibe una comisión si te registrás desde acá.
-            </p>
           </section>
         ) : null}
       </div>
