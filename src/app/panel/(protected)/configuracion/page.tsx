@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { requirePanelProfile } from "@/lib/auth/session";
+import { headers } from "next/headers";
 import { publicEnv } from "@/lib/env";
 import { formatDate } from "@/lib/format";
 import { LEGAL_KINDS } from "@/lib/legal-kinds";
@@ -24,6 +25,7 @@ export default async function ConfiguracionPage() {
   ]);
 
   const token = typeof tokenRow.data?.value === "string" ? tokenRow.data.value : null;
+  const siteUrl = await currentOrigin();
   const latest = new Map<string, { version: number; published_at: string | null }>();
   for (const row of legalRows.data ?? []) if (!latest.has(row.kind)) latest.set(row.kind, row);
 
@@ -66,7 +68,7 @@ export default async function ConfiguracionPage() {
                 </div>
                 <code className="num text-xs text-muted">/overlay/{overlay.path}?key=•••</code>
                 <CopyButton
-                  value={`${publicEnv.NEXT_PUBLIC_SITE_URL}/overlay/${overlay.path}?key=${token}`}
+                  value={`${siteUrl}/overlay/${overlay.path}?key=${token}`}
                   label={`Copiar URL del overlay de ${overlay.label}`}
                 />
               </li>
@@ -101,6 +103,18 @@ export default async function ConfiguracionPage() {
       </Section>
     </div>
   );
+}
+
+/**
+ * Dirección desde la que se abrió el panel, para que las URLs de los overlays
+ * sirvan aunque falte NEXT_PUBLIC_SITE_URL o se use otro dominio.
+ */
+async function currentOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (!host) return publicEnv.NEXT_PUBLIC_SITE_URL;
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
 }
 
 function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
