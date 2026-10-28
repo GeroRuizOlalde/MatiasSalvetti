@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense, type ReactNode } from "react";
 import { signOut } from "@/app/auth/actions";
+import { Notifications } from "@/components/notifications/notifications";
 import { PanelSidebar, SIDEBAR_COOKIE } from "@/components/panel/panel-nav";
 import { requirePanelProfile } from "@/lib/auth/session";
 
@@ -30,6 +31,7 @@ async function PanelShell({ children }: { children: ReactNode }) {
         initialCollapsed={collapsed}
         user={{ name, role: profile.role === "admin" ? "Admin" : "Moderador", avatarUrl: profile.avatar_url }}
         signOut={signOut}
+        bell={<Notifications scope="panel" align="sidebar" />}
       />
       <div className="min-w-0 flex-1 px-4 py-6 lg:px-8">{children}</div>
     </div>

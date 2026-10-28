@@ -20,7 +20,7 @@ export default function EntrarPage({ searchParams }: PageProps<"/entrar">) {
       <p className="font-marker text-xl text-accent-text">entrá al casino</p>
       <h1 className="mt-1 font-display text-5xl tracking-wide uppercase">Entrar</h1>
       <p className="mt-4 text-muted">
-        Usamos tu cuenta de Twitch para que participes en calls, apuestas, votaciones, sorteos y el Cuartel.
+        Usamos tu cuenta de Twitch para que participes en calls, apuestas, sorteos y el Cuartel.
       </p>
       <Suspense fallback={<div className="mt-8 h-12 w-full animate-pulse rounded-lg bg-surface-2" />}>
         <LoginBox searchParams={searchParams} />

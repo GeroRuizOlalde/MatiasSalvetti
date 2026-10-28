@@ -9,6 +9,8 @@ import { viewerError } from "@/lib/viewer-actions";
 const ERRORS: Record<string, string> = {
   calls_closed: "Los calls de este hunt ya están cerrados.",
   call_already_accepted: "Tu call ya está en el hunt.",
+  call_already_sent: "Ya mandaste tu call para este hunt. No se puede cambiar.",
+  slot_taken: "Esa máquina ya la pidió otro viewer (o ya está en el hunt). Elegí otra.",
   invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
   guesses_closed: "Las apuestas del balance ya están cerradas.",
   invalid_amount: "Revisá el monto.",

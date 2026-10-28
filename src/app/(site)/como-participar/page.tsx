@@ -9,7 +9,7 @@ import { getActiveCasinos } from "@/lib/casinos";
 
 export const metadata: Metadata = {
   title: "Cómo participar",
-  description: "Los pasos para sumarte a calls, apuestas de balance, votaciones, sorteos y la Wager Race.",
+  description: "Los pasos para sumarte a calls, apuestas de balance, sorteos y la Wager Race.",
 };
 
 const linkClass = "font-semibold text-accent-text underline-offset-2 hover:underline";
@@ -73,8 +73,8 @@ export default async function ComoParticiparPage() {
       title: "Participá y sumá puntos",
       body: (
         <>
-          Pedí un slot en los bonus hunts, adiviná el balance final, votá la próxima compra, bancá a tu slot en las
-          battles y entrá a los sorteos. Todo suma XP y puntos en el{" "}
+          Pedí un slot en los bonus hunts, adiviná el balance final, pedí la próxima compra en los buys, bancá a tu slot
+          en las battles y entrá a los sorteos. Todo suma XP y puntos en el{" "}
           <Link href="/cuartel" className={linkClass}>
             Cuartel
           </Link>
@@ -117,7 +117,9 @@ export default async function ComoParticiparPage() {
           <ul className="mt-3 list-disc space-y-1 pl-6 text-sm text-muted">
             <li>Ser mayor de 18 años.</li>
             <li>Una sola cuenta por persona. Las multicuentas quedan afuera de todo.</li>
-            <li>Algunas dinámicas piden una antigüedad mínima de tu cuenta de Twitch o una cuenta de casino verificada.</li>
+            <li>
+              Algunas dinámicas piden una antigüedad mínima de tu cuenta de Twitch o una cuenta de casino verificada.
+            </li>
           </ul>
         </section>
 

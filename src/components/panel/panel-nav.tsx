@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
 
@@ -69,11 +69,14 @@ export function PanelSidebar({
   initialCollapsed,
   user,
   signOut,
+  bell,
 }: {
   isAdmin: boolean;
   initialCollapsed: boolean;
   user: { name: string; role: string; avatarUrl: string | null };
   signOut: () => Promise<void>;
+  /** Campanita de avisos del panel (componente de servidor). */
+  bell?: ReactNode;
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
@@ -100,7 +103,12 @@ export function PanelSidebar({
         collapsed ? "lg:w-[4.25rem]" : "lg:w-60",
       )}
     >
-      <div className={cn("mb-3 flex items-center gap-2 px-2 lg:mb-6", collapsed ? "lg:justify-center lg:px-0" : "")}>
+      <div
+        className={cn(
+          "mb-3 flex items-center gap-2 px-2 lg:mb-6",
+          collapsed ? "lg:flex-col lg:justify-center lg:px-0" : "",
+        )}
+      >
         <Link
           href="/panel"
           className={cn("font-display text-2xl tracking-wide text-accent-light uppercase", hideWhenCollapsed)}
@@ -113,6 +121,7 @@ export function PanelSidebar({
         >
           Ver web <ExternalLink className="size-3" aria-hidden />
         </Link>
+        {bell}
         <button
           type="button"
           onClick={toggle}

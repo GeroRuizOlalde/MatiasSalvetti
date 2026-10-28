@@ -6,8 +6,8 @@ type StatusInfo<T extends string> = { value: T; label: string; hint: string; ton
 
 export const BUY_STATUSES: StatusInfo<Enums<"buy_session_status">>[] = [
   { value: "draft", label: "Borrador", hint: "No se ve en la web.", tone: "muted" },
-  { value: "live", label: "En vivo", hint: "Se ve en la web. Se cargan compras y votaciones.", tone: "live" },
-  { value: "finished", label: "Terminada", hint: "Cierra la votación abierta y bloquea las compras.", tone: "done" },
+  { value: "live", label: "En vivo", hint: "Se ve en la web. Se cargan compras y los viewers piden slots.", tone: "live" },
+  { value: "finished", label: "Terminada", hint: "Cierra los calls y bloquea las compras.", tone: "done" },
 ];
 
 export const BATTLE_STATUSES: StatusInfo<Enums<"battle_status">>[] = [

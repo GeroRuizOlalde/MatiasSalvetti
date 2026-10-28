@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LayoutDashboard, LogOut, Swords, User } from "lucide-react";
+import { Castle, ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "@/app/auth/actions";
@@ -42,11 +42,11 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
         aria-controls={menuId}
         aria-label={`Menú de ${displayName}`}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface py-1 pr-3 pl-1 hover:border-line-strong"
+        className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface p-1 hover:border-line-strong sm:pr-3"
       >
         <Avatar url={avatarUrl} name={displayName} />
-        <span className="max-w-32 truncate text-sm font-semibold">{displayName}</span>
-        <ChevronDown className="size-4 text-subtle" aria-hidden />
+        <span className="hidden max-w-32 truncate text-sm font-semibold sm:inline">{displayName}</span>
+        <ChevronDown className="hidden size-4 text-subtle sm:block" aria-hidden />
       </button>
       {open ? (
         <div
@@ -61,7 +61,7 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
             <User className="size-4" aria-hidden /> Mi perfil
           </Link>
           <Link href="/cuartel" className={itemClass} onClick={close}>
-            <Swords className="size-4" aria-hidden /> Cuartel
+            <Castle className="size-4" aria-hidden /> Cuartel
           </Link>
           {canUsePanel ? (
             <Link href="/panel" className={itemClass} onClick={close}>

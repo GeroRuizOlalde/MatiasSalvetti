@@ -13,27 +13,58 @@ export const metadata: Metadata = { title: "Tipeos" };
 export default async function PanelTipeosPage() {
   await requirePanelProfile("mod");
   const supabase = await createClient();
-  const [{ data: tipeos, error }, { data: hits }] = await Promise.all([
+  const [{ data: tipeoRows, error }, { data: bonusHits }, { data: buyHits }] = await Promise.all([
     supabase
       .from("tipeos")
       .select(
-        "id, bonus_id, user_id, slot_name, bet, payout, multi, status, created_at, hunt:hunts(id, title, currency)",
+        "id, bonus_id, buy_id, user_id, slot_name, bet, payout, multi, status, created_at, hunt:hunts(id, title, currency), session:buy_sessions(id, title, currency)",
       )
       .order("created_at", { ascending: false })
       .limit(500),
-    // Bonos de calls que pasaron los 110x: los que todavía no tienen decisión son las recomendaciones.
+    // Bonos y compras de calls que pasaron los 110x: los que no tienen decisión son las recomendaciones.
     supabase
       .from("hunt_bonuses")
-      .select("id, called_by, slot_name, bet, payout, multi, opened_at, hunt:hunts(id, title, currency)")
+      .select("id, called_by, slot_name, multi, opened_at, hunt:hunts(id, title)")
+      .not("called_by", "is", null)
+      .gt("multi", TIPEO_MIN_MULTI)
+      .order("opened_at", { ascending: false })
+      .limit(200),
+    supabase
+      .from("buys")
+      .select("id, called_by, slot_name, multi, opened_at, session:buy_sessions(id, title)")
       .not("called_by", "is", null)
       .gt("multi", TIPEO_MIN_MULTI)
       .order("opened_at", { ascending: false })
       .limit(200),
   ]);
 
-  const decided = new Set((tipeos ?? []).map((t) => t.bonus_id));
-  const pending = (hits ?? []).filter((b) => !decided.has(b.id));
-  const given = (tipeos ?? []).filter((t) => t.status === "given");
+  // Hunts y buys en un mismo formato: de dónde viene y a qué página del panel lleva.
+  const tipeos = (tipeoRows ?? []).map((t) => ({
+    ...t,
+    kind: t.buy_id ? ("buy" as const) : ("bonus" as const),
+    targetId: (t.buy_id ?? t.bonus_id) as string,
+    source: t.hunt
+      ? { title: t.hunt.title, href: `/panel/hunts/${t.hunt.id}`, currency: t.hunt.currency }
+      : t.session
+        ? { title: t.session.title, href: `/panel/buys/${t.session.id}`, currency: t.session.currency }
+        : null,
+  }));
+  const decided = new Set(tipeos.map((t) => t.targetId));
+  const pending = [
+    ...(bonusHits ?? []).map((b) => ({
+      ...b,
+      kind: "bonus" as const,
+      source: b.hunt ? { title: b.hunt.title, href: `/panel/hunts/${b.hunt.id}` } : null,
+    })),
+    ...(buyHits ?? []).map((b) => ({
+      ...b,
+      kind: "buy" as const,
+      source: b.session ? { title: b.session.title, href: `/panel/buys/${b.session.id}` } : null,
+    })),
+  ]
+    .filter((b) => !decided.has(b.id))
+    .sort((a, b) => (b.opened_at ?? "").localeCompare(a.opened_at ?? ""));
+  const given = tipeos.filter((t) => t.status === "given");
 
   const ids = [...new Set([...given.map((t) => t.user_id), ...pending.map((b) => b.called_by)])].filter(
     (u): u is string => Boolean(u),
@@ -62,8 +93,8 @@ export default async function PanelTipeosPage() {
       <div>
         <h1 className="font-display text-4xl tracking-wide uppercase">Tipeos</h1>
         <p className="text-sm text-muted">
-          Cuando un bono que vino del call de un viewer paga más de {TIPEO_MIN_MULTI}x, se recomienda darle tipeo. Acá
-          ves los que faltan decidir y la lista de tipeos dados.
+          Cuando un bono (de un hunt o de buys) que vino del call de un viewer paga más de {TIPEO_MIN_MULTI}x, se
+          recomienda darle tipeo. Acá ves los que faltan decidir y la lista de tipeos dados.
         </p>
       </div>
 
@@ -80,17 +111,17 @@ export default async function PanelTipeosPage() {
                   <p className="text-sm text-muted">
                     {bonus.slot_name} ·{" "}
                     <span className="num font-semibold text-gold">{formatMulti(bonus.multi ?? 0)}</span>
-                    {bonus.hunt ? (
+                    {bonus.source ? (
                       <>
                         {" · "}
-                        <Link href={`/panel/hunts/${bonus.hunt.id}`} className="hover:text-text hover:underline">
-                          {bonus.hunt.title}
+                        <Link href={bonus.source.href} className="hover:text-text hover:underline">
+                          {bonus.source.title}
                         </Link>
                       </>
                     ) : null}
                   </p>
                 </div>
-                <TipeoButtons bonusId={bonus.id} />
+                <TipeoButtons kind={bonus.kind} id={bonus.id} />
               </li>
             ))}
           </ul>
@@ -137,24 +168,24 @@ export default async function PanelTipeosPage() {
                   <p className="font-semibold">{nameOf(tipeo.user_id)}</p>
                   <p className="text-xs text-subtle">
                     {tipeo.slot_name} · {formatDate(tipeo.created_at)}
-                    {tipeo.hunt ? (
+                    {tipeo.source ? (
                       <>
                         {" · "}
-                        <Link href={`/panel/hunts/${tipeo.hunt.id}`} className="hover:text-text hover:underline">
-                          {tipeo.hunt.title}
+                        <Link href={tipeo.source.href} className="hover:text-text hover:underline">
+                          {tipeo.source.title}
                         </Link>
                       </>
                     ) : null}
                   </p>
                 </div>
                 <p className="num text-sm text-muted">
-                  {formatMoney(tipeo.bet, tipeo.hunt?.currency ?? "ARS")} →{" "}
-                  {formatMoney(tipeo.payout, tipeo.hunt?.currency ?? "ARS")}
+                  {formatMoney(tipeo.bet, tipeo.source?.currency ?? "ARS")} →{" "}
+                  {formatMoney(tipeo.payout, tipeo.source?.currency ?? "ARS")}
                 </p>
                 <span className="num rounded-full bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">
                   {formatMulti(tipeo.multi)}
                 </span>
-                <TipeoButtons bonusId={tipeo.bonus_id} given />
+                <TipeoButtons kind={tipeo.kind} id={tipeo.targetId} given />
               </li>
             ))}
           </ul>

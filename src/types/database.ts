@@ -7,6 +7,30 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          id: string;
+          audience: "user" | "all" | "panel";
+          user_id: string | null;
+          kind: string;
+          title: string;
+          body: string | null;
+          link: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          audience: "user" | "all" | "panel";
+          user_id?: string | null;
+          kind: string;
+          title: string;
+          body?: string | null;
+          link?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;
@@ -25,6 +49,8 @@ export type Database = {
           level: number;
           points: number;
           tickets: number;
+          notifications_read_at: string;
+          panel_notifications_read_at: string;
           created_at: string;
           updated_at: string;
         };
@@ -45,6 +71,8 @@ export type Database = {
           level?: number;
           points?: number;
           tickets?: number;
+          notifications_read_at?: string;
+          panel_notifications_read_at?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -308,6 +336,7 @@ export type Database = {
           casino_id: string | null;
           currency: Database["public"]["Enums"]["currency_code"];
           status: Database["public"]["Enums"]["buy_session_status"];
+          calls_open: boolean;
           finished_at: string | null;
           created_by: string | null;
           created_at: string;
@@ -319,6 +348,7 @@ export type Database = {
           casino_id?: string | null;
           currency?: Database["public"]["Enums"]["currency_code"];
           status?: Database["public"]["Enums"]["buy_session_status"];
+          calls_open?: boolean;
           finished_at?: string | null;
           created_by?: string | null;
           created_at?: string;
@@ -348,6 +378,7 @@ export type Database = {
           payout: number | null;
           multi: number | null;
           opened_at: string | null;
+          called_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -361,12 +392,51 @@ export type Database = {
           cost: number;
           payout?: number | null;
           opened_at?: string | null;
+          called_by?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["buys"]["Insert"]>;
         Relationships: [
           {
             foreignKeyName: "buys_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      buy_calls: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string;
+          slot_id: string | null;
+          slot_name: string;
+          status: Database["public"]["Enums"]["call_status"];
+          buy_id: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_id: string;
+          slot_id?: string | null;
+          slot_name: string;
+          status?: Database["public"]["Enums"]["call_status"];
+          buy_id?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["buy_calls"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buy_calls_session_id_fkey";
             columns: ["session_id"];
             isOneToOne: false;
             referencedRelation: "buy_sessions";
@@ -1014,8 +1084,10 @@ export type Database = {
       tipeos: {
         Row: {
           id: string;
-          bonus_id: string;
-          hunt_id: string;
+          bonus_id: string | null;
+          hunt_id: string | null;
+          buy_id: string | null;
+          session_id: string | null;
           user_id: string | null;
           slot_name: string;
           bet: number;
@@ -1027,8 +1099,10 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          bonus_id: string;
-          hunt_id: string;
+          bonus_id?: string | null;
+          hunt_id?: string | null;
+          buy_id?: string | null;
+          session_id?: string | null;
           user_id?: string | null;
           slot_name: string;
           bet: number;
@@ -1040,6 +1114,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["tipeos"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "tipeos_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_sessions";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "tipeos_hunt_id_fkey";
             columns: ["hunt_id"];
@@ -1071,6 +1152,7 @@ export type Database = {
       };
     };
     Functions: {
+      accept_buy_call: { Args: { p_call: string; p_bet: number; p_cost: number }; Returns: string };
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       admin_adjust_points: {
@@ -1084,6 +1166,7 @@ export type Database = {
       can_participate: { Args: Record<PropertyKey, never>; Returns: boolean };
       cast_buy_vote: { Args: { p_option: string }; Returns: undefined };
       check_overlay_token: { Args: { p_key: string }; Returns: boolean };
+      decide_buy_tipeo: { Args: { p_buy: string; p_give: boolean }; Returns: string };
       decide_tipeo: { Args: { p_bonus: string; p_give: boolean }; Returns: string };
       claim_mission: { Args: { p_mission: string; p_code?: string | null }; Returns: undefined };
       close_buy_poll: { Args: { p_session: string }; Returns: undefined };
@@ -1093,6 +1176,14 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      buy_taken_slots: { Args: { p_session: string }; Returns: { slot_name: string }[] };
+      reject_buy_call: { Args: { p_call: string }; Returns: undefined };
+      submit_buy_call: {
+        Args: { p_session: string; p_slot?: string | null; p_slot_name?: string | null };
+        Returns: string;
+      };
+      mark_notifications_read: { Args: { p_panel?: boolean }; Returns: undefined };
+      hunt_taken_slots: { Args: { p_hunt: string }; Returns: { slot_name: string }[] };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };

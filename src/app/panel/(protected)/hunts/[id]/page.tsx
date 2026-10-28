@@ -116,7 +116,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
                     <span className="num font-semibold text-gold">{formatMulti((bonus.payout ?? 0) / bonus.bet)}</span>
                   </p>
                 </div>
-                <TipeoButtons bonusId={bonus.id} />
+                <TipeoButtons kind="bonus" id={bonus.id} />
               </li>
             ))}
           </ul>

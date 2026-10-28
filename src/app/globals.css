@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Estado del menú lateral de la web (ver components/layout/sidebar.tsx). */
+@custom-variant collapsed (&:where([data-sidebar="collapsed"] *));
+@custom-variant drawer-open (&:where([data-drawer="open"] *));
+
 /* Tokens de marca. Tailwind v4 los expone como utilidades (bg-surface, text-muted,
    border-line…) y como variables CSS (--color-surface, …). */
 @theme {
@@ -143,5 +147,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Con el cajón del menú abierto en celular, la página de atrás no scrollea. */
+@media (width < 64rem) {
+  html[data-drawer="open"] body {
+    overflow: hidden;
   }
 }
