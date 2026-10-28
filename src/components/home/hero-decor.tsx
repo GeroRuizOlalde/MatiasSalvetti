@@ -5,7 +5,7 @@ import { Card, Chip } from "./floating-decor";
 
 // Decoración alrededor del personaje del hero. Las imágenes de slots y el señor
 // Monopoly son arte de sus dueños (Pragmatic Play, Hasbro): están todas en esta
-// lista para poder sacarlas de un saque si alguna vez lo piden.
+// lista y en ORBIT para poder sacarlas de un saque si alguna vez lo piden.
 const STICKERS = [
   {
     src: "/decor/orbe.webp",
@@ -26,15 +26,6 @@ const STICKERS = [
     rotate: -8,
   },
   {
-    src: "/decor/cohete.webp",
-    w: 320,
-    h: 360,
-    className: "-right-2 bottom-[22%] w-16 sm:-right-12 sm:w-24",
-    duration: 6.5,
-    delay: -4,
-    rotate: 10,
-  },
-  {
     src: "/decor/monopoly.webp",
     w: 238,
     h: 339,
@@ -45,15 +36,38 @@ const STICKERS = [
   },
 ] as const;
 
-/** Cartas de blackjack y fichas que giran alrededor del personaje. */
-const ORBIT: { kind: "chip" | "card"; label?: string; red?: boolean; angle: number; size: number }[] = [
-  { kind: "card", label: "A♠︎", angle: 20, size: 34 },
+type OrbitItem =
+  | { kind: "chip"; angle: number; size: number }
+  | { kind: "card"; label: string; red?: boolean; angle: number; size: number }
+  | { kind: "image"; src: string; w: number; h: number; angle: number; size: number };
+
+/** Cartas, fichas y símbolos de slots que giran alrededor del personaje (uno cada 40°). */
+const ORBIT: OrbitItem[] = [
+  { kind: "card", label: "A♠︎", angle: 0, size: 34 },
+  { kind: "image", src: "/decor/uva.webp", w: 240, h: 196, angle: 40, size: 48 },
   { kind: "chip", angle: 80, size: 30 },
-  { kind: "card", label: "K♥︎", red: true, angle: 150, size: 32 },
-  { kind: "chip", angle: 215, size: 26 },
-  { kind: "card", label: "J♣︎", angle: 270, size: 30 },
-  { kind: "card", label: "Q♦︎", red: true, angle: 330, size: 32 },
+  { kind: "card", label: "K♥︎", red: true, angle: 120, size: 32 },
+  { kind: "image", src: "/decor/caramelo.webp", w: 240, h: 221, angle: 160, size: 42 },
+  { kind: "card", label: "J♣︎", angle: 200, size: 30 },
+  { kind: "chip", angle: 240, size: 26 },
+  { kind: "image", src: "/decor/banana.webp", w: 240, h: 165, angle: 280, size: 48 },
+  { kind: "card", label: "Q♦︎", red: true, angle: 320, size: 32 },
 ];
+
+function OrbitPiece({ item }: { item: OrbitItem }) {
+  if (item.kind === "chip") return <Chip />;
+  if (item.kind === "card") return <Card label={item.label} red={item.red} />;
+  return (
+    <Image
+      src={item.src}
+      alt=""
+      width={item.w}
+      height={item.h}
+      sizes="64px"
+      className="h-auto w-full drop-shadow-[0_6px_16px_rgb(157_59_255/0.45)]"
+    />
+  );
+}
 
 export function HeroDecor() {
   return (
@@ -75,7 +89,7 @@ export function HeroDecor() {
             }}
           >
             <div className="animate-orbit-reverse">
-              {item.kind === "chip" ? <Chip /> : <Card label={item.label ?? ""} red={item.red} />}
+              <OrbitPiece item={item} />
             </div>
           </div>
         ))}
