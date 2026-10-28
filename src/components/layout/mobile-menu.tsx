@@ -31,7 +31,7 @@ export function MobileMenu({ children }: { children?: ReactNode }) {
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         aria-label={open ? "Cerrar menú" : "Abrir menú"}

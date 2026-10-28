@@ -94,3 +94,18 @@ export function toArgentinaInput(date: Date | string) {
 export function isPast(date: Date | string) {
   return new Date(date).getTime() <= Date.now();
 }
+
+/** `1M ARS` · `500K ARS` · `1,5M USD` · `750 ARS`: montos redondos para titulares y podios. */
+export function formatMoneyShort(amount: number, currency: Enums<"currency_code"> = "ARS") {
+  const abs = Math.abs(amount);
+  const [value, suffix] =
+    abs >= 1_000_000 ? [amount / 1_000_000, "M"] : abs >= 1_000 ? [amount / 1_000, "K"] : [amount, ""];
+  const text = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: suffix ? 1 : 0 }).format(value);
+  return `${text}${suffix} ${currency}`;
+}
+
+/** `28/10` en hora de Buenos Aires. */
+export function formatDayMonth(date: Date | string) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
+}

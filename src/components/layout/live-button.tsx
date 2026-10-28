@@ -36,11 +36,13 @@ export async function LiveButton({ compact = false }: { compact?: boolean }) {
       href={settings.socials[settings.primary_platform]}
       target="_blank"
       rel="noopener noreferrer"
+      title={`Próximo stream: ${when}`}
       className={buttonClasses({ variant: "secondary", size: "sm", className: compact ? "w-full" : undefined })}
     >
       <CalendarClock className="size-4 text-accent-text" aria-hidden />
       <span>
-        Próximo stream <span className="num text-accent-light">{when}</span>
+        Próximo stream {/* En el header la fecha entra recién en pantallas anchas; en el menú del celular, siempre. */}
+        <span className={compact ? "num text-accent-light" : "num hidden text-accent-light 2xl:inline"}>{when}</span>
       </span>
     </a>
   );
