@@ -1,4 +1,4 @@
-import { BadgeCheck, Crosshair, Inbox, Megaphone, Radio, ShoppingCart, Swords } from "lucide-react";
+import { BadgeCheck, Crosshair, Gift, Inbox, Megaphone, Radio, ShoppingCart, Swords } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -18,7 +18,7 @@ const QUICK_ACTIONS = [
 
 export default async function PanelHomePage() {
   const supabase = isSupabaseConfigured() ? await createClient() : null;
-  const [settings, pendingCalls, pendingVerifications] = await Promise.all([
+  const [settings, pendingCalls, pendingVerifications, pendingOrders] = await Promise.all([
     getPublicSettings(),
     supabase
       ?.from("hunt_calls")
@@ -28,6 +28,11 @@ export default async function PanelHomePage() {
     // RLS: solo el admin ve las cuentas de casino; para un mod da 0.
     supabase
       ?.from("casino_accounts")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending")
+      .then((r) => r.count ?? 0),
+    supabase
+      ?.from("shop_orders")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending")
       .then((r) => r.count ?? 0),
@@ -67,8 +72,19 @@ export default async function PanelHomePage() {
         <h2 id="pending" className="mb-3 text-sm font-semibold text-subtle">
           Pendientes
         </h2>
-        {pendingByHunt.size || pendingVerifications ? (
+        {pendingByHunt.size || pendingVerifications || pendingOrders ? (
           <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
+            {pendingOrders ? (
+              <li>
+                <Link href="/panel/puntos" className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2">
+                  <Gift className="size-4 text-gold" aria-hidden />
+                  <span className="text-sm">
+                    <span className="num font-semibold text-gold">{formatInteger(pendingOrders)}</span>{" "}
+                    {pendingOrders === 1 ? "canje de la tienda por entregar" : "canjes de la tienda por entregar"}
+                  </span>
+                </Link>
+              </li>
+            ) : null}
             {pendingVerifications ? (
               <li>
                 <Link href="/panel/verificaciones" className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2">

@@ -89,3 +89,8 @@ export function toArgentinaInput(date: Date | string) {
   );
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }
+
+/** ¿La fecha ya pasó? (para páginas dinámicas; en las cacheadas, calcularlo dentro del caché). */
+export function isPast(date: Date | string) {
+  return new Date(date).getTime() <= Date.now();
+}

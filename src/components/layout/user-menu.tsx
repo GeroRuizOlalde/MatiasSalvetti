@@ -11,6 +11,8 @@ export async function UserMenu() {
       displayName={profile.display_name || profile.twitch_login || "Usuario"}
       avatarUrl={profile.avatar_url}
       canUsePanel={isPanelRole(profile.role) && !profile.banned_at}
+      level={profile.level}
+      points={profile.points}
     />
   );
 }
