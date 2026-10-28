@@ -25,7 +25,7 @@ export default async function PanelBuysPage() {
   ]);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Bonus Buys</h1>
 
       <section aria-labelledby="new-session" className="rounded-2xl border border-line bg-surface p-5">

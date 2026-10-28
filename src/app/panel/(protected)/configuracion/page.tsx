@@ -31,7 +31,7 @@ export default async function ConfiguracionPage() {
   for (const row of legalRows.data ?? []) if (!latest.has(row.kind)) latest.set(row.kind, row);
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Configuración</h1>
 
       <Section title="Redes">

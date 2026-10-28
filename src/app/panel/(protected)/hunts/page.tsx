@@ -28,7 +28,7 @@ export default async function PanelHuntsPage() {
   for (const call of pending ?? []) pendingByHunt.set(call.hunt_id, (pendingByHunt.get(call.hunt_id) ?? 0) + 1);
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Bonus Hunt</h1>
 
       <section aria-labelledby="new-hunt" className="rounded-2xl border border-line bg-surface p-5">

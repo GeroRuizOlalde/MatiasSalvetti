@@ -67,7 +67,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
   const lastBet = list.at(-1)?.bet;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <Link href="/panel/hunts" className="flex items-center gap-1 text-sm text-subtle hover:text-text">
         <ArrowLeft className="size-4" aria-hidden /> Hunts
       </Link>
