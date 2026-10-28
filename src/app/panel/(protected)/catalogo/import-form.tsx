@@ -3,7 +3,7 @@
 import { useActionState, useId } from "react";
 import { FormMessage, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
-import { importSlots } from "./actions";
+import { importFromSlotReport, importSlots } from "./actions";
 
 export function ImportSlotsForm() {
   const [state, formAction] = useActionState<ActionState, FormData>(importSlots, INITIAL_ACTION_STATE);
@@ -32,6 +32,28 @@ export function ImportSlotsForm() {
         </SubmitButton>
       </div>
       <FormMessage state={state} />
+    </form>
+  );
+}
+
+export function SlotReportImport() {
+  const [state, formAction] = useActionState<ActionState, FormData>(importFromSlotReport, INITIAL_ACTION_STATE);
+
+  return (
+    <form action={formAction} className="space-y-3">
+      <p className="text-sm text-muted">
+        Carga de una vez los nombres y proveedores de miles de slots desde{" "}
+        <a href="https://slot.report" target="_blank" rel="noopener" className="text-accent-text underline">
+          slot.report
+        </a>
+        . No trae imágenes. Se puede repetir para sumar los nuevos: los que ya están se saltean.
+      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <SubmitButton variant="secondary" pendingLabel="Importando… (puede tardar)">
+          Importar desde slot.report
+        </SubmitButton>
+        <FormMessage state={state} />
+      </div>
     </form>
   );
 }

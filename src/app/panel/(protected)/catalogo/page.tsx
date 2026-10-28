@@ -7,7 +7,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { formatInteger } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { CatalogTabs } from "./catalog-tabs";
-import { ImportSlotsForm } from "./import-form";
+import { ImportSlotsForm, SlotReportImport } from "./import-form";
 import { SlotForm } from "./slot-form";
 
 export const metadata: Metadata = { title: "Catálogo de slots" };
@@ -45,6 +45,13 @@ export default async function CatalogoSlotsPage({ searchParams }: PageProps<"/pa
         </h2>
         <SlotForm />
       </section>
+
+      <details className="rounded-2xl border border-line bg-surface p-5" open={(count ?? 0) === 0 && !q}>
+        <summary className="cursor-pointer font-semibold">Importar desde slot.report</summary>
+        <div className="mt-4">
+          <SlotReportImport />
+        </div>
+      </details>
 
       <details className="rounded-2xl border border-line bg-surface p-5">
         <summary className="cursor-pointer font-semibold">Importar slots desde CSV</summary>
