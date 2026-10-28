@@ -8,9 +8,10 @@ import { createClient } from "@/lib/supabase/client";
 type Option = { id: string; name: string; provider: string | null };
 
 /**
- * Autocompletado contra el catálogo (`search_slots`). Manda `slot_id` si se
- * eligió una opción y siempre `slot_name` con el texto, para poder escribir
- * un slot que todavía no está cargado.
+ * Autocompletado contra el catálogo (`search_slots`): busca por palabras en
+ * cualquier orden, en el nombre y el proveedor. Manda `slot_id` si se eligió
+ * una opción y siempre `slot_name` con el texto, para poder escribir un slot
+ * que todavía no está cargado.
  */
 export function SlotPicker({
   id,
@@ -34,7 +35,7 @@ export function SlotPicker({
     if (term.length < 2 || selected?.name === query) return;
     const current = ++request.current;
     const timer = setTimeout(async () => {
-      const { data } = await createClient().rpc("search_slots", { p_query: term, p_limit: 8 });
+      const { data } = await createClient().rpc("search_slots", { p_query: term, p_limit: 12 });
       if (current !== request.current) return;
       setOptions((data ?? []).map(({ id, name, provider }) => ({ id, name, provider })));
       setActive(-1);
@@ -113,6 +114,13 @@ export function SlotPicker({
             </li>
           ))}
         </ul>
+      ) : open && query.trim().length >= 2 && selected?.name !== query ? (
+        <p
+          aria-live="polite"
+          className="absolute z-20 mt-1 w-full rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-xs text-muted shadow-xl"
+        >
+          No está en el catálogo. Podés usar «{query.trim()}» igual.
+        </p>
       ) : null}
     </div>
   );
