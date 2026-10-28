@@ -12,22 +12,27 @@ export function ClipsSection({ videos, channelUrl }: { videos: YoutubeVideo[]; c
       <SectionHeading id="clips-title" kicker="lo mejor del stream" title="Últimos clips" />
 
       {videos.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
+        <div className="reveal flex flex-col items-center gap-4 rounded-2xl border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
           <BrandIcon name="youtube" className="size-10 text-accent-text" />
           <p className="max-w-md text-sm text-muted">Mirá todos los clips en el canal de YouTube.</p>
-          <a href={channelUrl} target="_blank" rel="noopener noreferrer" className={buttonClasses({ variant: "secondary" })}>
+          <a
+            href={channelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClasses({ variant: "secondary" })}
+          >
             Ir al canal
           </a>
         </div>
       ) : (
         <ul className="grid gap-4 md:grid-cols-3">
           {videos.map((video) => (
-            <li key={video.id}>
+            <li key={video.id} className="reveal">
               <a
                 href={video.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block overflow-hidden rounded-2xl border border-line bg-surface transition-colors hover:border-accent/60"
+                className="group lift block overflow-hidden rounded-2xl border border-line bg-surface hover:border-accent/60"
               >
                 <div className="relative aspect-video overflow-hidden">
                   <Image
