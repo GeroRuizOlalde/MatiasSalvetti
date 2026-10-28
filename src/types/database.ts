@@ -531,6 +531,7 @@ export type Database = {
           casino_id: string | null;
           currency: Database["public"]["Enums"]["currency_code"];
           status: Database["public"]["Enums"]["battle_status"];
+          size: number;
           winner_entry_id: string | null;
           started_at: string | null;
           finished_at: string | null;
@@ -544,6 +545,7 @@ export type Database = {
           casino_id?: string | null;
           currency?: Database["public"]["Enums"]["currency_code"];
           status?: Database["public"]["Enums"]["battle_status"];
+          size?: number;
           winner_entry_id?: string | null;
           started_at?: string | null;
           finished_at?: string | null;
@@ -562,6 +564,44 @@ export type Database = {
           },
         ];
       };
+      battle_calls: {
+        Row: {
+          id: string;
+          battle_id: string;
+          user_id: string;
+          slot_id: string | null;
+          slot_name: string;
+          status: Database["public"]["Enums"]["call_status"];
+          entry_id: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          battle_id: string;
+          user_id: string;
+          slot_id?: string | null;
+          slot_name: string;
+          status?: Database["public"]["Enums"]["call_status"];
+          entry_id?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["battle_calls"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "battle_calls_battle_id_fkey";
+            columns: ["battle_id"];
+            isOneToOne: false;
+            referencedRelation: "battles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       battle_entries: {
         Row: {
           id: string;
@@ -570,6 +610,7 @@ export type Database = {
           slot_id: string | null;
           slot_name: string;
           provider: string | null;
+          called_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -579,6 +620,7 @@ export type Database = {
           slot_id?: string | null;
           slot_name: string;
           provider?: string | null;
+          called_by?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["battle_entries"]["Insert"]>;
@@ -1152,6 +1194,7 @@ export type Database = {
       };
     };
     Functions: {
+      accept_battle_call: { Args: { p_call: string }; Returns: string };
       accept_buy_call: { Args: { p_call: string; p_bet: number; p_cost: number }; Returns: string };
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
@@ -1176,6 +1219,12 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      battle_taken_slots: { Args: { p_battle: string }; Returns: { slot_name: string }[] };
+      reject_battle_call: { Args: { p_call: string }; Returns: undefined };
+      submit_battle_call: {
+        Args: { p_battle: string; p_slot?: string | null; p_slot_name?: string | null };
+        Returns: string;
+      };
       buy_taken_slots: { Args: { p_session: string }; Returns: { slot_name: string }[] };
       reject_buy_call: { Args: { p_call: string }; Returns: undefined };
       submit_buy_call: {

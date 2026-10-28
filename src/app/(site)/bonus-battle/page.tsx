@@ -7,7 +7,7 @@ import { getPublicBattles } from "@/lib/battles";
 
 export const metadata: Metadata = {
   title: "Bonus Battle",
-  description: "Slots cara a cara en eliminación directa. ¿A quién bancás?",
+  description: "Slots cara a cara en eliminación directa. Calleá el tuyo y pasá de ronda.",
 };
 
 export default async function BonusBattlePage() {
@@ -18,8 +18,8 @@ export default async function BonusBattlePage() {
   return (
     <>
       <PageHeader kicker="cara a cara" title="Bonus Battle">
-        Slots en eliminación directa: en cada cruce gana el de mayor multiplicador. Antes de que arranque, bancá al que
-        creas que se lleva todo.
+        Slots en eliminación directa: cada viewer callea su slot y en cada cruce pasa el que pagó más. El último que
+        queda es el campeón.
       </PageHeader>
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 pb-16">

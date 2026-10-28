@@ -1,23 +1,41 @@
 "use server";
 
-import { refresh, updateTag } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
-import { battleTag } from "@/lib/battles";
 import { createClient } from "@/lib/supabase/server";
 import { viewerError } from "@/lib/viewer-actions";
 
-export async function pickEntry(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const entry = z.uuid().safeParse(formData.get("entry_id"));
-  if (!entry.success) return { error: "Elegí un slot." };
+const ERRORS: Record<string, string> = {
+  calls_closed: "Los calls de esta battle están cerrados.",
+  call_already_accepted: "Tu slot ya está en la battle.",
+  call_already_sent: "Ya mandaste tu call para esta battle. No se puede cambiar.",
+  slot_taken: "Esa máquina ya la pidió otro viewer. Elegí otra.",
+  battle_full: "El cuadro ya está completo.",
+  invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
+};
+
+const callSchema = z.object({
+  battle_id: z.uuid(),
+  slot_id: z
+    .union([z.uuid(), z.literal("")])
+    .optional()
+    .transform((v) => v || null),
+  slot_name: z.string().trim().min(1, "Elegí o escribí el slot.").max(120),
+});
+
+/** El viewer callea el slot con el que entra a la battle. */
+export async function submitBattleCall(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = callSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("pick_battle_entry", { p_entry: entry.data });
-  if (error)
-    return { error: viewerError(error.message, { picks_closed: "La battle ya arrancó: no se puede cambiar." }) };
-  // Quien vota ve su voto en el conteo enseguida (la base limita a 10 por minuto).
-  const owner = z.uuid().safeParse(formData.get("battle_id"));
-  if (owner.success) updateTag(battleTag(owner.data));
+  const { error } = await supabase.rpc("submit_battle_call", {
+    p_battle: parsed.data.battle_id,
+    p_slot: parsed.data.slot_id,
+    p_slot_name: parsed.data.slot_name,
+  });
+  if (error) return { error: viewerError(error.message, ERRORS) };
   refresh();
-  return { ok: "¡Listo! Podés cambiarlo hasta que arranque la battle." };
+  return { ok: "¡Listo! Tu call quedó pendiente de revisión." };
 }

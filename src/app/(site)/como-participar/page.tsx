@@ -70,7 +70,7 @@ export default async function ComoParticiparPage() {
       title: "Participá y sumá puntos",
       body: (
         <>
-          Pedí un slot en los bonus hunts, adiviná el balance final, pedí la próxima compra en los buys, bancá a tu slot
+          Pedí un slot en los bonus hunts, adiviná el balance final, pedí la próxima compra en los buys, calleá tu slot
           en las battles y entrá a los sorteos. Todo suma XP y puntos en el{" "}
           <Link href="/cuartel" className={linkClass}>
             Cuartel

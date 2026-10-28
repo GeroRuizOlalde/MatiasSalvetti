@@ -12,7 +12,7 @@ export const BUY_STATUSES: StatusInfo<Enums<"buy_session_status">>[] = [
 
 export const BATTLE_STATUSES: StatusInfo<Enums<"battle_status">>[] = [
   { value: "draft", label: "Borrador", hint: "No se ve en la web.", tone: "muted" },
-  { value: "open", label: "Bancá a tu slot", hint: "Se ve en la web y los viewers eligen su slot.", tone: "next" },
+  { value: "open", label: "Calls abiertos", hint: "Se ve en la web y los viewers callean su slot.", tone: "next" },
   { value: "live", label: "En juego", hint: "El cuadro está armado y se juegan los cruces.", tone: "live" },
   { value: "finished", label: "Terminada", hint: "Ya hay campeón.", tone: "done" },
 ];

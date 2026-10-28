@@ -5,12 +5,12 @@ import { SlotPicker } from "@/components/hunts/slot-picker";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { SessionFields } from "@/components/panel/session-fields";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
-import { sideMulti } from "@/lib/calc/bracket";
+import { BRACKET_SIZES, sideMulti } from "@/lib/calc/bracket";
 import { cn } from "@/lib/cn";
 import { formatMulti } from "@/lib/format";
 import { BATTLE_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
-import { addEntry, saveBattle, saveMatch } from "./actions";
+import { addEntry, reviewBattleCall, saveBattle, saveMatch } from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
 
 const moneyInput = cn(inputClass, "num");
@@ -21,6 +21,7 @@ type Battle = {
   casino_id: string | null;
   currency: Enums<"currency_code">;
   status: Enums<"battle_status">;
+  size: number;
 };
 
 export function BattleForm({ battle, casinos }: { battle?: Battle; casinos: { id: string; name: string }[] }) {
@@ -40,6 +41,17 @@ export function BattleForm({ battle, casinos }: { battle?: Battle; casinos: { id
         casinos={casinos}
         placeholder="Battle de los domingos"
       />
+      {!battle || editableStatus ? (
+        <Field id={`${id}-size`} label="Arranca en" hint="Define cuántos slots entran al cuadro.">
+          <select id={`${id}-size`} name="size" defaultValue={battle?.size ?? 16} className={inputClass}>
+            {BRACKET_SIZES.map((b) => (
+              <option key={b.size} value={b.size}>
+                {b.label} ({b.size} slots)
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
       {editableStatus ? (
         <Field
           id={`${id}-status`}
@@ -81,6 +93,35 @@ export function AddEntryForm({ battleId }: { battleId: string }) {
       </Field>
       <SubmitButton className="h-10 sm:mt-5">Agregar</SubmitButton>
       <FormMessage state={state} className="sm:col-span-2" />
+    </form>
+  );
+}
+
+/** Aceptar o rechazar el call de un viewer: si se acepta, su slot entra al cuadro. */
+export function BattleCallReviewForm({ battleId, callId }: { battleId: string; callId: string }) {
+  const [state, formAction] = useActionState<ActionState, FormData>(reviewBattleCall, INITIAL_ACTION_STATE);
+
+  return (
+    <form action={formAction} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="id" value={callId} />
+      <input type="hidden" name="battle_id" value={battleId} />
+      <button
+        type="submit"
+        name="decision"
+        value="accept"
+        className="h-9 rounded-lg bg-accent px-3 text-sm font-semibold text-white hover:bg-[#8a2cec]"
+      >
+        Aceptar
+      </button>
+      <button
+        type="submit"
+        name="decision"
+        value="reject"
+        className="h-9 rounded-lg px-3 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-live"
+      >
+        Rechazar
+      </button>
+      {state.error ? <FormMessage state={{ error: state.error }} className="w-full" /> : null}
     </form>
   );
 }
