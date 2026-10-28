@@ -79,6 +79,7 @@ Todos (viewers, mods y admin) entran con Twitch. El primer admin se crea así:
 | `npm run lint` | ESLint |
 | `npm run typecheck` | tipos de rutas + `tsc` |
 | `npm test` | Vitest: lógica de cálculo **y migraciones + RLS** sobre PGlite (no necesita Docker) |
+| `npm run test:e2e` | Playwright contra el build de producción (sin Supabase): navegación, gate +18, permisos, overlays y SEO, en escritorio y celular |
 | `npm run db:push` | aplica las migraciones al proyecto vinculado |
 | `npm run db:types` | genera los tipos de la base |
 | `npm run make-admin -- <login> [admin\|mod]` | asigna rol a un usuario existente |
@@ -132,12 +133,42 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 - **Sorteos** (`/panel/sorteos`): gratis (una chance) o con tickets (cada ticket es una chance, con máximo por persona), nivel mínimo y cuenta verificada en un casino opcionales. `draw_giveaway` sortea en la base, ponderado por chances y sin repetir; si un ganador no responde se anula y se vuelve a sortear. Los ganadores se ven en `/sorteos`.
 - El admin puede sumar o restar puntos a mano con motivo; queda en el historial del viewer, que lo ve en `/cuartel`.
 
+## Roles
+
+Hay tres roles: **viewer** (todos al entrar con Twitch), **mod** y **admin**. El admin los asigna desde `/panel/usuarios` (la persona tiene que haber entrado una vez a la web). La base es la que hace cumplir los permisos (RLS y funciones), no solo el panel.
+
+| Puede… | Mod | Admin |
+|---|:-:|:-:|
+| Bonus Hunt, Buys y Battle: crear, cargar, abrir votaciones, aceptar calls, arrancar battles | ✓ | ✓ |
+| Catálogo de slots (agregar, importar) y estado del stream | ✓ | ✓ |
+| Borrar hunts, sesiones o battles **ya publicados** (los borradores los borra cualquiera de los dos) | | ✓ |
+| Casinos, configuración, textos legales y overlays | | ✓ |
+| Wager Race, verificaciones de cuentas, sorteos, puntos, misiones y tienda | | ✓ |
+| Cambiar roles y banear usuarios | | ✓ |
+
+## Overlays de OBS (fase 7)
+
+En `/panel/configuracion` → «Overlays de OBS» están las URLs para copiar: Bonus Hunt, Bonus Buys (con la votación), Bonus Battle, Wager Race y Sorteo. Se agregan en OBS como **Fuente de navegador** con el tamaño sugerido, tienen fondo transparente y se actualizan solas cada 5 segundos. Muestran lo que esté en curso. Llevan el token en `?key=`; si se regenera, las URLs viejas dejan de andar.
+
+## Deploy (checklist)
+
+1. Variables en Vercel (Production y Preview): `NEXT_PUBLIC_SITE_URL` (el dominio final), las de Supabase, Twitch, Kick y YouTube de la tabla de arriba. `SUPABASE_SECRET_KEY` solo del lado servidor.
+2. Migraciones aplicadas en Supabase (`npm run db:push` o el SQL Editor, en orden).
+3. Supabase → Authentication → URL Configuration: Site URL = dominio final; Redirect URLs con el dominio y los previews de Vercel.
+4. Twitch: el callback de Supabase en las OAuth Redirect URLs de la app.
+5. Primer admin con `npm run make-admin -- <login>`.
+6. Revisar en Configuración los textos legales (son borradores), la línea de ayuda y las redes.
+7. CI: `.github/workflows/ci.yml` corre lint, tipos, unitarios y E2E en cada PR.
+
+La web manda cabeceras de seguridad (`X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`), imagen para redes (`/opengraph-image`), `manifest.webmanifest` y datos estructurados en la home.
+
 ## Seguridad
 
 - RLS en todas las tablas. Rol, baneo y saldos solo cambian por funciones `SECURITY DEFINER` o desde el servidor.
 - Los perfiles de otros usuarios se leen por la vista `public_profiles`, que solo muestra nombre, avatar y nivel.
 - El proxy hace un chequeo rápido del rol en `/panel/*`, y cada layout y cada Server Action del panel lo vuelven a verificar.
 
-## Pendiente (por fase)
+## Ideas para después
 
-- **Fase 7**: overlays de OBS, E2E, SEO y deploy.
+- Permisos más finos por mod (por ejemplo, un mod que solo maneje Buys) si el equipo crece.
+- Imágenes de slots: pedirlas a los casinos o proveedores con permiso y cargarlas desde el catálogo.

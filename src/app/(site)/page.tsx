@@ -1,4 +1,5 @@
 import { CasinosSection } from "@/components/home/casinos-section";
+import { JsonLd } from "@/components/json-ld";
 import { ClipsSection } from "@/components/home/clips-section";
 import { CommunitySection } from "@/components/home/community-section";
 import { Hero } from "@/components/home/hero";
@@ -6,6 +7,7 @@ import { EMPTY_SESSIONS, Sessions, type SessionCard } from "@/components/home/se
 import { StatsStrip, type Stat } from "@/components/home/stats-strip";
 import { WagerTeaser } from "@/components/home/wager-teaser";
 import { getActiveCasinos } from "@/lib/casinos";
+import { publicEnv } from "@/lib/env";
 import { getLatestVideos } from "@/lib/external/youtube";
 import { getPublicBattles, type BattleSummary } from "@/lib/battles";
 import { getPublicBuySessions, type BuySessionSummary } from "@/lib/buys";
@@ -103,6 +105,26 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              name: "Matías Salvetti · Chupetti",
+              url: publicEnv.NEXT_PUBLIC_SITE_URL,
+              inLanguage: "es-AR",
+            },
+            {
+              "@type": "Person",
+              name: "Matías Salvetti",
+              alternateName: "Chupetti",
+              url: publicEnv.NEXT_PUBLIC_SITE_URL,
+              sameAs: Object.values(settings.socials),
+            },
+          ],
+        }}
+      />
       <Hero settings={settings} live={live} />
       <StatsStrip stats={buildStats(settings, records)} />
       <Sessions cards={buildSessions(hunts[0], buySessions[0], battles[0])} />

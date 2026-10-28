@@ -2,9 +2,12 @@ import { FileText } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CopyButton } from "@/components/ui/copy-button";
 import { requirePanelProfile } from "@/lib/auth/session";
+import { publicEnv } from "@/lib/env";
 import { formatDate } from "@/lib/format";
 import { LEGAL_KINDS } from "@/lib/legal-kinds";
+import { OVERLAYS } from "@/lib/overlay";
 import { getPublicSettings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
 import { GeneralForm, HomeStatsForm, OverlayTokenForm, SocialsForm } from "./settings-forms";
@@ -32,19 +35,44 @@ export default async function ConfiguracionPage() {
         <SocialsForm socials={settings.socials} primary={settings.primary_platform} />
       </Section>
 
-      <Section title="Stats de la Home" description="Hunts y mejor multiplicador se calculan solos desde los hunts cargados.">
+      <Section
+        title="Stats de la Home"
+        description="Hunts y mejor multiplicador se calculan solos desde los hunts cargados."
+      >
         <HomeStatsForm years={settings.home_stats.years_streaming} prizes={settings.home_stats.monthly_prizes} />
       </Section>
 
       <Section title="General">
-        <GeneralForm helpline={settings.responsible_gaming_helpline} minAgeDays={settings.twitch_min_account_age_days} />
+        <GeneralForm
+          helpline={settings.responsible_gaming_helpline}
+          minAgeDays={settings.twitch_min_account_age_days}
+        />
       </Section>
 
       <Section
-        title="Token de overlays"
-        description="Va en la URL de cada overlay de OBS (?key=…). Si lo regenerás, los overlays viejos dejan de funcionar."
+        title="Overlays de OBS"
+        description="Agregá cada URL como «Fuente de navegador» en OBS (se actualizan solas cada 5 segundos). Si regenerás el token, las URLs viejas dejan de funcionar."
       >
         <OverlayTokenForm token={token} />
+        {token ? (
+          <ul className="mt-5 divide-y divide-line rounded-xl border border-line">
+            {OVERLAYS.map((overlay) => (
+              <li key={overlay.path} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">{overlay.label}</p>
+                  <p className="text-xs text-subtle">
+                    {overlay.description} Fuente de navegador de {overlay.size}.
+                  </p>
+                </div>
+                <code className="num text-xs text-muted">/overlay/{overlay.path}?key=•••</code>
+                <CopyButton
+                  value={`${publicEnv.NEXT_PUBLIC_SITE_URL}/overlay/${overlay.path}?key=${token}`}
+                  label={`Copiar URL del overlay de ${overlay.label}`}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </Section>
 
       <Section title="Textos legales" description="Cada cambio se publica como versión nueva y queda el historial.">
