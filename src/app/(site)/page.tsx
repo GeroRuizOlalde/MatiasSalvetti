@@ -1,4 +1,5 @@
 import { JsonLd } from "@/components/json-ld";
+import { ClipsSection } from "@/components/home/clips-section";
 import { CommunitySection } from "@/components/home/community-section";
 import { Hero } from "@/components/home/hero";
 import { PartnerSection } from "@/components/home/partner-section";
@@ -17,6 +18,7 @@ import { getHuntRecords, getPublicHunts, type HuntSummary } from "@/lib/hunts";
 import { getLiveStatus } from "@/lib/live-status";
 import { getPublicSettings, type PublicSettings } from "@/lib/settings";
 import { getLeaderboard, getWagerOverview } from "@/lib/wager";
+import { getLatestVideos } from "@/lib/external/youtube";
 
 function buildStats(settings: PublicSettings, records: { bestMulti: number | null }, openHunts: number): Stat[] {
   const { years_streaming, monthly_prizes } = settings.home_stats;
@@ -94,7 +96,7 @@ function buildSessions(hunt?: HuntSummary, buys?: BuySessionSummary, battle?: Ba
 }
 
 export default async function HomePage() {
-  const [settings, live, casinos, hunts, records, buySessions, battles, wager] = await Promise.all([
+  const [settings, live, casinos, hunts, records, buySessions, battles, wager, videos] = await Promise.all([
     getPublicSettings(),
     getLiveStatus(),
     getActiveCasinos(),
@@ -103,6 +105,7 @@ export default async function HomePage() {
     getPublicBuySessions(),
     getPublicBattles(),
     getWagerOverview(),
+    getLatestVideos(3),
   ]);
   const race = wager.featured && wager.featured.phase !== "ended" ? wager.featured : null;
   const top = race ? await getLeaderboard(race.id, 3) : [];
@@ -144,6 +147,7 @@ export default async function HomePage() {
       {partnerCasino ? <PartnerSection casino={partnerCasino} partner={settings.partner} /> : null}
       <Sessions cards={buildSessions(hunts[0], buySessions[0], battles[0])} />
       <WagerTeaser race={wager.featured} top={top} />
+      <ClipsSection videos={videos} channelUrl={settings.socials.youtube} />
       <CommunitySection socials={settings.socials} />
     </>
   );
