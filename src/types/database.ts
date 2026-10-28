@@ -7,6 +7,30 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          id: string;
+          audience: "user" | "all" | "panel";
+          user_id: string | null;
+          kind: string;
+          title: string;
+          body: string | null;
+          link: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          audience: "user" | "all" | "panel";
+          user_id?: string | null;
+          kind: string;
+          title: string;
+          body?: string | null;
+          link?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;
@@ -25,6 +49,8 @@ export type Database = {
           level: number;
           points: number;
           tickets: number;
+          notifications_read_at: string;
+          panel_notifications_read_at: string;
           created_at: string;
           updated_at: string;
         };
@@ -45,6 +71,8 @@ export type Database = {
           level?: number;
           points?: number;
           tickets?: number;
+          notifications_read_at?: string;
+          panel_notifications_read_at?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -1093,6 +1121,7 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      mark_notifications_read: { Args: { p_panel?: boolean }; Returns: undefined };
       hunt_taken_slots: { Args: { p_hunt: string }; Returns: { slot_name: string }[] };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
