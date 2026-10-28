@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -31,6 +32,7 @@ const PROFILE_COLUMNS =
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
   // Leer cookies siempre marca la ruta como dinámica, aunque Supabase no esté configurado.
   await cookies();
+  await connection();
   if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
@@ -54,7 +56,10 @@ export async function requirePanelProfile(minRole: "mod" | "admin" = "mod") {
   return profile;
 }
 
-export function needsOnboarding(profile: Pick<CurrentProfile, "adult_confirmed_at" | "terms_version">, termsVersion: number | null) {
+export function needsOnboarding(
+  profile: Pick<CurrentProfile, "adult_confirmed_at" | "terms_version">,
+  termsVersion: number | null,
+) {
   if (!profile.adult_confirmed_at) return true;
   if (termsVersion !== null && (profile.terms_version ?? 0) < termsVersion) return true;
   return false;

@@ -3,7 +3,9 @@ import { z } from "zod";
 
 // slot.report: base pública de slots (https://slot.report/api/). Se usa solo
 // para cargar nombres y proveedores en el catálogo; las imágenes no se toman
-// de acá. Su uso pide un link a slot.report, que está en el pie de la web.
+// de acá. Desde 2026 dan 24 h de prueba y después piden un link "editorial" a
+// slot.report en el texto de una página pública del sitio (el del pie no
+// alcanza); si no lo encuentran responden 403.
 
 export const SLOT_REPORT_URL = "https://slot.report";
 const SLOTS_ENDPOINT = `${SLOT_REPORT_URL}/api/v1/slots.json`;
@@ -40,12 +42,18 @@ export function parseSlotReport(payload: unknown): SlotReportSlot[] {
   return slots;
 }
 
+export class SlotReportError extends Error {
+  constructor(readonly status: number) {
+    super(`slot.report respondió ${status}`);
+  }
+}
+
 export async function fetchSlotReportSlots(): Promise<SlotReportSlot[]> {
   const res = await fetch(SLOTS_ENDPOINT, {
     headers: { Accept: "application/json", "User-Agent": "chupetti-web (catálogo de slots)" },
     signal: AbortSignal.timeout(30_000),
     cache: "no-store",
   });
-  if (!res.ok) throw new Error(`slot.report respondió ${res.status}`);
+  if (!res.ok) throw new SlotReportError(res.status);
   return parseSlotReport(await res.json());
 }
