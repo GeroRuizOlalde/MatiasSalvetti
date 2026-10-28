@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/** Tablas que la base "toca" cuando cambia algo de su sesión (bonos, compras, cruces, votaciones). */
+/** Tablas que la base "toca" cuando cambia algo de su sesión (bonos, compras, cruces). */
 type LiveTable = "hunts" | "buy_sessions" | "battles";
 
 /**

@@ -9,7 +9,10 @@ import type { Tables } from "@/types/database";
 export const BUYS_TAG = "buy-sessions";
 export const buySessionTag = (id: string) => `buy-session:${id}`;
 
-type SessionRow = Pick<Tables<"buy_sessions">, "id" | "title" | "currency" | "status" | "finished_at" | "created_at">;
+type SessionRow = Pick<
+  Tables<"buy_sessions">,
+  "id" | "title" | "currency" | "status" | "calls_open" | "finished_at" | "created_at"
+>;
 
 export type BuySessionSummary = SessionRow & {
   casino: CasinoRef | null;
@@ -21,21 +24,9 @@ export type PublicBuy = Pick<
   "id" | "position" | "slot_name" | "provider" | "bet" | "cost" | "payout" | "multi" | "opened_at"
 >;
 
-export type PublicPollOption = { id: string; position: number; slotName: string; votes: number };
+export type PublicBuySession = BuySessionSummary & { buyList: PublicBuy[] };
 
-export type PublicPoll = {
-  id: string;
-  isOpen: boolean;
-  createdAt: string;
-  closedAt: string | null;
-  winnerOptionId: string | null;
-  options: PublicPollOption[];
-  totalVotes: number;
-};
-
-export type PublicBuySession = BuySessionSummary & { buyList: PublicBuy[]; polls: PublicPoll[] };
-
-const SESSION_COLUMNS = `id, title, currency, status, finished_at, created_at, ${CASINO_EMBED}`;
+const SESSION_COLUMNS = `id, title, currency, status, calls_open, finished_at, created_at, ${CASINO_EMBED}`;
 
 /** Sesiones públicas: las en vivo primero, después las terminadas más recientes. */
 export async function getPublicBuySessions(limit = 24): Promise<BuySessionSummary[]> {
@@ -65,43 +56,13 @@ export async function getPublicBuySession(id: string): Promise<PublicBuySession 
   const { data: session } = await supabase.from("buy_sessions").select(SESSION_COLUMNS).eq("id", id).maybeSingle();
   if (!session) return null;
 
-  const [{ data: buys }, { data: polls }, { data: counts }] = await Promise.all([
-    supabase
-      .from("buys")
-      .select("id, position, slot_name, provider, bet, cost, payout, multi, opened_at")
-      .eq("session_id", id)
-      .order("position")
-      .order("created_at"),
-    supabase
-      .from("buy_polls")
-      .select(
-        "id, is_open, created_at, closed_at, winner_option_id, options:buy_poll_options!buy_poll_options_poll_id_fkey(id, position, slot_name)",
-      )
-      .eq("session_id", id)
-      .order("created_at", { ascending: false }),
-    supabase.rpc("buy_poll_counts", { p_session: id }),
-  ]);
-
-  const votes = new Map((counts ?? []).map((c) => [c.option_id, c.votes]));
+  const { data: buys } = await supabase
+    .from("buys")
+    .select("id, position, slot_name, provider, bet, cost, payout, multi, opened_at")
+    .eq("session_id", id)
+    .order("position")
+    .order("created_at");
   const buyList = buys ?? [];
 
-  return {
-    ...session,
-    buys: buyList.map(({ bet, cost, payout }) => ({ bet, cost, payout })),
-    buyList,
-    polls: (polls ?? []).map((poll) => {
-      const options = [...poll.options]
-        .sort((a, b) => a.position - b.position)
-        .map((o) => ({ id: o.id, position: o.position, slotName: o.slot_name, votes: votes.get(o.id) ?? 0 }));
-      return {
-        id: poll.id,
-        isOpen: poll.is_open,
-        createdAt: poll.created_at,
-        closedAt: poll.closed_at,
-        winnerOptionId: poll.winner_option_id,
-        options,
-        totalVotes: options.reduce((sum, o) => sum + o.votes, 0),
-      };
-    }),
-  };
+  return { ...session, buys: buyList.map(({ bet, cost, payout }) => ({ bet, cost, payout })), buyList };
 }

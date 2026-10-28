@@ -26,7 +26,7 @@ export const OVERLAYS = [
     path: "buys",
     label: "Bonus Buys",
     size: "480 × 700",
-    description: "Resultado de la sesión y la votación abierta.",
+    description: "Resultado de la sesión y las últimas compras.",
   },
   { path: "battle", label: "Bonus Battle", size: "1280 × 360", description: "El cruce en juego y el cuadro." },
   { path: "wager", label: "Wager Race", size: "420 × 520", description: "Cuenta regresiva y top 5." },

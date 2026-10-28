@@ -6,14 +6,13 @@ import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { BUYS_TAG, buySessionTag } from "@/lib/buys";
-import { friendlyError, optionalAmount, optionalUuid, positiveAmount, resolveSlot } from "@/lib/panel-forms";
+import { checkbox, friendlyError, optionalAmount, optionalUuid, positiveAmount, resolveSlot } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
 
 const ERRORS: Record<string, string> = {
   session_finished: "La sesión está terminada. Pasala a «En vivo» para corregir algo.",
-  session_not_live: "Poné la sesión «En vivo» para abrir una votación.",
-  invalid_options: "La votación necesita entre 2 y 8 slots.",
-  no_open_poll: "No hay ninguna votación abierta.",
+  call_not_pending: "Ese call ya se revisó.",
+  invalid_amount: "Revisá la apuesta y el costo.",
   forbidden: "No tenés permisos para esto.",
 };
 
@@ -36,17 +35,23 @@ const sessionSchema = z.object({
   casino_id: optionalUuid,
   currency: z.enum(["ARS", "USD"]),
   status: z.enum(["draft", "live", "finished"]).default("draft"),
+  calls_open: checkbox,
 });
 
 export async function saveBuySession(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const profile = await requirePanelProfile("mod");
   const parsed = sessionSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
-  const { id, ...values } = parsed.data;
+  const { id, calls_open, ...values } = parsed.data;
 
   const supabase = await createClient();
   if (id) {
-    const { error } = await supabase.from("buy_sessions").update(values).eq("id", id);
+    // Al terminar la sesión se cierran los calls.
+    const callsOpen = values.status === "finished" ? false : calls_open;
+    const { error } = await supabase
+      .from("buy_sessions")
+      .update({ ...values, calls_open: callsOpen })
+      .eq("id", id);
     if (error) return { error: friendly(error.message) };
     invalidate(id);
     return { ok: "Sesión actualizada." };
@@ -151,37 +156,37 @@ export async function deleteBuy(_prev: ActionState, formData: FormData): Promise
 }
 
 // -----------------------------------------------------------------------------
-// Votaciones
+// Calls de viewers
 // -----------------------------------------------------------------------------
 
-export async function openPoll(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requirePanelProfile("mod");
-  const sessionId = z.uuid().safeParse(formData.get("session_id"));
-  if (!sessionId.success) return { error: "Datos inválidos." };
+const callSchema = z.object({
+  id: z.uuid(),
+  session_id: z.uuid(),
+  decision: z.enum(["accept", "reject"]),
+  bet: z.string().optional(),
+  cost: z.string().optional(),
+});
 
-  // Cada buscador manda su par slot_id / slot_name, en el mismo orden.
-  const ids = formData.getAll("slot_id").map(String);
-  const options = formData
-    .getAll("slot_name")
-    .map((name, i) => ({ slot_name: String(name).trim().slice(0, 120), slot_id: ids[i] || null }))
-    .filter((o) => o.slot_name);
-  if (options.length < 2) return { error: "Elegí al menos 2 slots." };
+/** Acepta el call (se vuelve una compra del viewer, con apuesta y costo) o lo rechaza. */
+export async function reviewBuyCall(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("mod");
+  const parsed = callSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Datos inválidos." };
+  const { id, session_id, decision } = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("open_buy_poll", { p_session: sessionId.data, p_options: options });
-  if (error) return { error: friendly(error.message) };
-  invalidate(sessionId.data);
-  return { ok: "¡Votación abierta!" };
-}
+  if (decision === "reject") {
+    const { error } = await supabase.rpc("reject_buy_call", { p_call: id });
+    if (error) return { error: friendly(error.message) };
+    refresh();
+    return { ok: "Call rechazado." };
+  }
 
-export async function closePoll(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requirePanelProfile("mod");
-  const sessionId = z.uuid().safeParse(formData.get("session_id"));
-  if (!sessionId.success) return { error: "Datos inválidos." };
-
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("close_buy_poll", { p_session: sessionId.data });
+  const bet = Number(parsed.data.bet);
+  const cost = Number(parsed.data.cost);
+  if (!(bet > 0) || !(cost > 0)) return { error: "Poné la apuesta y el costo para aceptar el call." };
+  const { error } = await supabase.rpc("accept_buy_call", { p_call: id, p_bet: bet, p_cost: cost });
   if (error) return { error: friendly(error.message) };
-  invalidate(sessionId.data);
-  return { ok: "Votación cerrada." };
+  invalidate(session_id);
+  return { ok: "Call aceptado." };
 }

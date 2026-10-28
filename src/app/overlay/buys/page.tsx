@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { PollResults } from "@/components/buys/poll-results";
 import { OverlayGate, overlayPanel } from "@/components/overlay/overlay-gate";
 import { getPublicBuySession, getPublicBuySessions } from "@/lib/buys";
 import { buysStats } from "@/lib/calc/buys";
@@ -22,7 +21,6 @@ async function BuysOverlay() {
   if (!session) return <p className={cn(overlayPanel, "text-sm text-muted")}>No hay una sesión de Buys en vivo.</p>;
 
   const stats = buysStats(session.buyList);
-  const poll = session.polls.find((p) => p.isOpen);
   const last = session.buyList.slice(-5).reverse();
 
   return (
@@ -59,15 +57,6 @@ async function BuysOverlay() {
           </ol>
         ) : null}
       </div>
-      {poll ? (
-        <div className={cn(overlayPanel, "space-y-2")}>
-          <p className="flex items-center justify-between font-display text-xl tracking-wide uppercase">
-            ¿Qué compramos?{" "}
-            <span className="num text-xs font-normal text-muted">{formatInteger(poll.totalVotes)} votos</span>
-          </p>
-          <PollResults options={poll.options} totalVotes={poll.totalVotes} />
-        </div>
-      ) : null}
     </div>
   );
 }

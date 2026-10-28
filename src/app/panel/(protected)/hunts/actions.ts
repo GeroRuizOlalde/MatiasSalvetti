@@ -199,9 +199,9 @@ export async function reviewCall(_prev: ActionState, formData: FormData): Promis
 // Tipeos
 // -----------------------------------------------------------------------------
 
-const tipeoSchema = z.object({ bonus_id: z.uuid(), give: z.enum(["1", "0"]) });
+const tipeoSchema = z.object({ kind: z.enum(["bonus", "buy"]), id: z.uuid(), give: z.enum(["1", "0"]) });
 
-/** Da o descarta el tipeo de un bono abierto que vino de un call y pagó más de 110x. */
+/** Da o descarta el tipeo de un bono (o compra) abierto que vino de un call y pagó más de 110x. */
 export async function decideTipeo(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requirePanelProfile("mod");
   const parsed = tipeoSchema.safeParse(Object.fromEntries(formData));
@@ -209,7 +209,11 @@ export async function decideTipeo(_prev: ActionState, formData: FormData): Promi
   const give = parsed.data.give === "1";
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("decide_tipeo", { p_bonus: parsed.data.bonus_id, p_give: give });
+  const { kind, id } = parsed.data;
+  const { error } =
+    kind === "bonus"
+      ? await supabase.rpc("decide_tipeo", { p_bonus: id, p_give: give })
+      : await supabase.rpc("decide_buy_tipeo", { p_buy: id, p_give: give });
   if (error) return { error: friendly(error.message) };
   refresh();
   return { ok: give ? "Tipeo dado." : "Tipeo descartado." };

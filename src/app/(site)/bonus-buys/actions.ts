@@ -1,22 +1,40 @@
 "use server";
 
-import { refresh, updateTag } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
-import { buySessionTag } from "@/lib/buys";
 import { createClient } from "@/lib/supabase/server";
 import { viewerError } from "@/lib/viewer-actions";
 
-export async function castVote(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const option = z.uuid().safeParse(formData.get("option_id"));
-  if (!option.success) return { error: "Elegí una opción." };
+const ERRORS: Record<string, string> = {
+  calls_closed: "Los calls de esta sesión están cerrados.",
+  call_already_accepted: "Tu call ya está en la sesión.",
+  call_already_sent: "Ya mandaste tu call para esta sesión. No se puede cambiar.",
+  slot_taken: "Esa máquina ya la pidió otro viewer (o ya se compró). Elegí otra.",
+  invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
+};
+
+const callSchema = z.object({
+  session_id: z.uuid(),
+  slot_id: z
+    .union([z.uuid(), z.literal("")])
+    .optional()
+    .transform((v) => v || null),
+  slot_name: z.string().trim().min(1, "Elegí o escribí el slot.").max(120),
+});
+
+/** El viewer pide la máquina que quiere que se compre. */
+export async function submitBuyCall(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = callSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("cast_buy_vote", { p_option: option.data });
-  if (error) return { error: viewerError(error.message, { poll_closed: "La votación ya se cerró." }) };
-  // Quien vota ve su voto en el conteo enseguida (la base limita a 10 por minuto).
-  const owner = z.uuid().safeParse(formData.get("session_id"));
-  if (owner.success) updateTag(buySessionTag(owner.data));
+  const { error } = await supabase.rpc("submit_buy_call", {
+    p_session: parsed.data.session_id,
+    p_slot: parsed.data.slot_id,
+    p_slot_name: parsed.data.slot_name,
+  });
+  if (error) return { error: viewerError(error.message, ERRORS) };
   refresh();
-  return { ok: "¡Voto guardado! Podés cambiarlo mientras esté abierta." };
+  return { ok: "¡Listo! Tu call quedó pendiente de revisión." };
 }

@@ -5,13 +5,17 @@ import { decideTipeo } from "@/app/panel/(protected)/hunts/actions";
 import { FormMessage } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 
-/** «Dar tipeo» / «Descartar» para una recomendación, o «Quitar» para uno ya dado. */
-export function TipeoButtons({ bonusId, given }: { bonusId: string; given?: boolean }) {
+/**
+ * «Dar tipeo» / «Descartar» para una recomendación, o «Quitar» para uno ya dado.
+ * `kind` dice si es un bono de hunt o una compra de Bonus Buys.
+ */
+export function TipeoButtons({ kind, id, given }: { kind: "bonus" | "buy"; id: string; given?: boolean }) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(decideTipeo, INITIAL_ACTION_STATE);
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
-      <input type="hidden" name="bonus_id" value={bonusId} />
+      <input type="hidden" name="kind" value={kind} />
+      <input type="hidden" name="id" value={id} />
       {given ? null : (
         <button
           type="submit"

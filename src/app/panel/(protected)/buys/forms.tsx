@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useActionState, useId, useState } from "react";
 import { SlotPicker } from "@/components/hunts/slot-picker";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { formatMoney, formatMulti } from "@/lib/format";
 import { BUY_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
-import { addBuy, deleteBuy, openPoll, saveBuySession, updateBuy } from "./actions";
+import { addBuy, deleteBuy, reviewBuyCall, saveBuySession, updateBuy } from "./actions";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -20,6 +20,7 @@ type Session = {
   casino_id: string | null;
   currency: Enums<"currency_code">;
   status: Enums<"buy_session_status">;
+  calls_open: boolean;
 };
 
 export function BuySessionForm({ session, casinos }: { session?: Session; casinos: { id: string; name: string }[] }) {
@@ -55,6 +56,17 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
       ) : (
         <input type="hidden" name="status" value="draft" />
       )}
+      {session ? (
+        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+          <input
+            type="checkbox"
+            name="calls_open"
+            defaultChecked={session.calls_open}
+            className="size-4 accent-accent"
+          />
+          Calls abiertos (con la sesión «En vivo»)
+        </label>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-4">
         <SubmitButton>{session ? "Guardar" : "Crear sesión"}</SubmitButton>
         <FormMessage state={state} />
@@ -215,42 +227,59 @@ export function BuyRowForm({
   );
 }
 
-const MAX_OPTIONS = 8;
-
-/** Abre una votación con 2 a 8 slots (cierra la anterior si había una abierta). */
-export function OpenPollForm({ sessionId }: { sessionId: string }) {
-  const [count, setCount] = useState(3);
-  const [round, setRound] = useState(0);
-  const [state, formAction] = useActionState<ActionState, FormData>(async (prev, data) => {
-    const result = await openPoll(prev, data);
-    if (result.ok) setRound((r) => r + 1);
-    return result;
-  }, INITIAL_ACTION_STATE);
+/** Aceptar un call de buys: la apuesta y el costo de la compra vienen de la última, para no tipear de más. */
+export function BuyCallReviewForm({
+  sessionId,
+  callId,
+  defaults,
+}: {
+  sessionId: string;
+  callId: string;
+  defaults?: { bet: number; cost: number };
+}) {
+  const [state, formAction] = useActionState<ActionState, FormData>(reviewBuyCall, INITIAL_ACTION_STATE);
   const id = useId();
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form action={formAction} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="id" value={callId} />
       <input type="hidden" name="session_id" value={sessionId} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: count }, (_, i) => (
-          <Field key={`${round}-${i}`} id={`${id}-${i}`} label={`Opción ${i + 1}`}>
-            <SlotPicker id={`${id}-${i}`} required={i < 2} />
-          </Field>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        {count < MAX_OPTIONS ? (
-          <button
-            type="button"
-            onClick={() => setCount((c) => c + 1)}
-            className="flex items-center gap-1 text-sm font-semibold text-accent-text hover:text-accent-light"
-          >
-            <Plus className="size-4" aria-hidden /> Otra opción
-          </button>
-        ) : null}
-        <SubmitButton pendingLabel="Abriendo…">Abrir votación</SubmitButton>
-        <FormMessage state={state} />
-      </div>
+      {(["bet", "cost"] as const).map((name) => (
+        <span key={name}>
+          <label htmlFor={`${id}-${name}`} className="sr-only">
+            {name === "bet" ? "Apuesta" : "Costo de la compra"}
+          </label>
+          <input
+            id={`${id}-${name}`}
+            name={name}
+            type="number"
+            inputMode="decimal"
+            min={0.01}
+            step="0.01"
+            placeholder={name === "bet" ? "Apuesta" : "Costo"}
+            defaultValue={defaults?.[name]}
+            className={cn(moneyInput, "h-9 w-28")}
+          />
+        </span>
+      ))}
+      <button
+        type="submit"
+        name="decision"
+        value="accept"
+        className="h-9 rounded-lg bg-accent px-3 text-sm font-semibold text-white hover:bg-[#8a2cec]"
+      >
+        Aceptar
+      </button>
+      <button
+        type="submit"
+        name="decision"
+        value="reject"
+        formNoValidate
+        className="h-9 rounded-lg px-3 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-live"
+      >
+        Rechazar
+      </button>
+      <FormMessage state={state} className="w-full" />
     </form>
   );
 }

@@ -1,22 +1,22 @@
-import { ArrowLeft, ShoppingCart, Vote } from "lucide-react";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { BuysStatsGrid } from "@/components/buys/buys-stats";
 import { BuysTable } from "@/components/buys/buys-table";
-import { PollResults } from "@/components/buys/poll-results";
+import { CallForm } from "@/components/calls/call-form";
 import { ParticipationGate, ParticipationTitle, participationBox } from "@/components/participation-gate";
-import { ChoiceForm } from "@/components/ui/choice-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RealtimeRefresh } from "@/components/ui/realtime-refresh";
 import { StatusPill } from "@/components/ui/status-pill";
-import { getPublicBuySession, type PublicPoll } from "@/lib/buys";
+import { getPublicBuySession } from "@/lib/buys";
 import { buysStats } from "@/lib/calc/buys";
-import { formatDate, formatDateTime, formatInteger } from "@/lib/format";
+import { cn } from "@/lib/cn";
+import { formatDate, formatInteger } from "@/lib/format";
 import { BUY_STATUSES, statusInfo } from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
-import { castVote } from "../actions";
+import { submitBuyCall } from "../actions";
 
 export async function generateMetadata({ params }: PageProps<"/bonus-buys/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/bonus-buys/[id]">
   if (!session) return { title: "Bonus Buys" };
   return {
     title: `${session.title} · Bonus Buys`,
-    description: `${formatInteger(session.buys.length)} compras${session.casino ? ` en ${session.casino.name}` : ""}. Mirá cuánto pagó cada una y votá la próxima.`,
+    description: `${formatInteger(session.buys.length)} compras${session.casino ? ` en ${session.casino.name}` : ""}. Mirá cuánto pagó cada una y pedí la próxima.`,
   };
 }
 
@@ -43,8 +43,6 @@ async function BuySessionDetail({ params }: Pick<PageProps<"/bonus-buys/[id]">, 
 
   const stats = buysStats(session.buyList);
   const status = statusInfo(BUY_STATUSES, session.status);
-  const openPoll = session.polls.find((p) => p.isOpen) ?? null;
-  const pastPolls = session.polls.filter((p) => !p.isOpen && p.totalVotes > 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-10 pb-16">
@@ -81,38 +79,10 @@ async function BuySessionDetail({ params }: Pick<PageProps<"/bonus-buys/[id]">, 
         </section>
 
         <aside className="space-y-4">
-          {openPoll ? (
-            <>
-              <section aria-labelledby="poll-title" className="rounded-2xl border border-line bg-surface p-5">
-                <h2 id="poll-title" className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
-                  <Vote className="size-5 text-live" aria-hidden /> ¿Qué compramos?
-                </h2>
-                <p className="mt-1 mb-3 text-xs text-subtle">
-                  Votación abierta · {formatInteger(openPoll.totalVotes)} votos
-                </p>
-                <PollResults options={openPoll.options} totalVotes={openPoll.totalVotes} />
-              </section>
-              <Suspense fallback={<div className="h-48 animate-pulse rounded-2xl bg-surface" />}>
-                <VoteBox sessionId={session.id} poll={openPoll} />
-              </Suspense>
-            </>
-          ) : null}
-          {pastPolls.length ? (
-            <section aria-labelledby="past-polls" className="rounded-2xl border border-line bg-surface p-5">
-              <h2 id="past-polls" className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
-                <Vote className="size-5 text-accent-text" aria-hidden /> Votaciones
-              </h2>
-              <div className="mt-3 space-y-5">
-                {pastPolls.map((poll) => (
-                  <div key={poll.id} className="space-y-2">
-                    <p className="text-xs text-subtle">
-                      {formatDateTime(poll.createdAt)} · {formatInteger(poll.totalVotes)} votos
-                    </p>
-                    <PollResults options={poll.options} totalVotes={poll.totalVotes} winnerId={poll.winnerOptionId} />
-                  </div>
-                ))}
-              </div>
-            </section>
+          {session.status === "live" ? (
+            <Suspense fallback={<div className="h-48 animate-pulse rounded-2xl bg-surface" />}>
+              <CallBox sessionId={session.id} callsOpen={session.calls_open} />
+            </Suspense>
           ) : null}
           {session.casino ? (
             <a
@@ -136,37 +106,53 @@ async function BuySessionDetail({ params }: Pick<PageProps<"/bonus-buys/[id]">, 
   );
 }
 
+const CALL_STATUS = {
+  pending: "Pendiente de revisión",
+  accepted: "¡Aceptado! Ya está en la sesión.",
+  rejected: "Rechazado. Podés pedir otro.",
+} as const;
+
 /** Lee la sesión: va dentro de un <Suspense>. */
-function VoteBox({ sessionId, poll }: { sessionId: string; poll: PublicPoll }) {
+function CallBox({ sessionId, callsOpen }: { sessionId: string; callsOpen: boolean }) {
   return (
     <ParticipationGate
       next={`/bonus-buys/${sessionId}`}
-      title="Votá"
-      loginHint="Entrá con tu cuenta de Twitch para votar el próximo slot."
+      title="Pedí tu slot"
+      loginHint="Entrá con tu cuenta de Twitch para pedir el próximo slot que se compra."
     >
       {async (profile) => {
         const supabase = await createClient();
-        const { data: vote } = await supabase
-          .from("buy_poll_votes")
-          .select("option_id")
-          .eq("poll_id", poll.id)
-          .eq("user_id", profile.id)
-          .maybeSingle();
+        const [{ data: call }, { data: taken }] = await Promise.all([
+          supabase
+            .from("buy_calls")
+            .select("slot_name, status")
+            .eq("session_id", sessionId)
+            .eq("user_id", profile.id)
+            .maybeSingle(),
+          supabase.rpc("buy_taken_slots", { p_session: sessionId }),
+        ]);
+        if (!callsOpen && !call) return null;
 
         return (
-          <section className={participationBox}>
-            <ParticipationTitle>Votá</ParticipationTitle>
-            <div className="mt-3">
-              <ChoiceForm
-                action={castVote}
-                name="option_id"
-                options={poll.options.map((o) => ({ id: o.id, label: o.slotName }))}
-                current={vote?.option_id ?? null}
-                submitLabel="Votar"
-                changeLabel="Cambiar voto"
+          <section className={cn(participationBox, "space-y-2")}>
+            <ParticipationTitle>Pedí tu slot</ParticipationTitle>
+            {call ? (
+              <p className="text-sm">
+                Tu call: <strong>{call.slot_name}</strong>{" "}
+                <span className={cn("text-xs", call.status === "accepted" ? "text-accent-text" : "text-subtle")}>
+                  · {CALL_STATUS[call.status]}
+                </span>
+              </p>
+            ) : null}
+            {callsOpen && (!call || call.status === "rejected") ? (
+              <CallForm
+                action={submitBuyCall}
                 hidden={{ session_id: sessionId }}
+                scopeLabel="sesión"
+                retry={call?.status === "rejected"}
+                taken={(taken ?? []).map((t) => t.slot_name)}
               />
-            </div>
+            ) : null}
           </section>
         );
       }}

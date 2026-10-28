@@ -15,7 +15,9 @@ import { cn } from "@/lib/cn";
 import { currencyPrefix, formatDate, formatInteger, formatMoney } from "@/lib/format";
 import { getPublicHunt, type PublicHunt } from "@/lib/hunts";
 import { createClient } from "@/lib/supabase/server";
-import { CallForm, GuessForm } from "./participation-forms";
+import { CallForm } from "@/components/calls/call-form";
+import { submitCall } from "../actions";
+import { GuessForm } from "./participation-forms";
 
 export async function generateMetadata({ params }: PageProps<"/bonus-hunt/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -200,7 +202,9 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
                 ) : null}
                 {hunt.calls_open && (!call || call.status === "rejected") ? (
                   <CallForm
-                    huntId={hunt.id}
+                    action={submitCall}
+                    hidden={{ hunt_id: hunt.id }}
+                    scopeLabel="hunt"
                     retry={call?.status === "rejected"}
                     taken={(taken ?? []).map((t) => t.slot_name)}
                   />

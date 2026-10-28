@@ -7,7 +7,7 @@ import { getPublicBuySessions } from "@/lib/buys";
 
 export const metadata: Metadata = {
   title: "Bonus Buys",
-  description: "Todas las compras de bonus, sesión por sesión. Votá cuál sigue.",
+  description: "Todas las compras de bonus, sesión por sesión. Pedí cuál sigue.",
 };
 
 export default async function BonusBuysPage() {
@@ -18,8 +18,8 @@ export default async function BonusBuysPage() {
   return (
     <>
       <PageHeader kicker="una atrás de otra" title="Bonus Buys">
-        Compras de bonus en vivo, con lo que costó y lo que pagó cada una. Mientras la sesión esté en vivo, votá qué
-        slot compramos después.
+        Compras de bonus en vivo, con lo que costó y lo que pagó cada una. Mientras la sesión esté en vivo, pedí qué
+        slot compramos.
       </PageHeader>
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 pb-16">
