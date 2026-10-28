@@ -1,4 +1,5 @@
 import { AgeGate } from "@/components/layout/age-gate";
+import { BackToTop } from "@/components/layout/back-to-top";
 import { Footer } from "@/components/layout/footer";
 import { Header, TopBar } from "@/components/layout/header";
 
@@ -17,6 +18,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <Footer />
+      <BackToTop />
       <AgeGate />
     </>
   );

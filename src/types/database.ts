@@ -1011,6 +1011,53 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["rate_limits"]["Insert"]>;
         Relationships: [];
       };
+      tipeos: {
+        Row: {
+          id: string;
+          hunt_id: string;
+          call_id: string | null;
+          bonus_id: string | null;
+          user_id: string | null;
+          slot_id: string | null;
+          slot_name: string;
+          ref_multi: number;
+          ref_source: "hunt" | "buy";
+          ref_title: string;
+          accepted_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          hunt_id: string;
+          call_id?: string | null;
+          bonus_id?: string | null;
+          user_id?: string | null;
+          slot_id?: string | null;
+          slot_name: string;
+          ref_multi: number;
+          ref_source: "hunt" | "buy";
+          ref_title: string;
+          accepted_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tipeos"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "tipeos_hunt_id_fkey";
+            columns: ["hunt_id"];
+            isOneToOne: false;
+            referencedRelation: "hunts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tipeos_bonus_id_fkey";
+            columns: ["bonus_id"];
+            isOneToOne: false;
+            referencedRelation: "hunt_bonuses";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       public_profiles: {
@@ -1027,6 +1074,7 @@ export type Database = {
     };
     Functions: {
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
+      accept_hunt_call_as_tipeo: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       admin_adjust_points: {
         Args: { p_user: string; p_points: number; p_xp: number; p_note: string };
@@ -1047,6 +1095,10 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      hunt_tipeo_candidates: {
+        Args: { p_hunt: string };
+        Returns: { call_id: string; multi: number; source: "hunt" | "buy"; title: string }[];
+      };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };

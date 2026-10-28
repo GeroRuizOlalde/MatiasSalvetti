@@ -14,6 +14,7 @@ const ERRORS: Record<string, string> = {
   bonuses_pending: "Faltan abrir bonos: cargá el pago de todos antes de terminar.",
   hunt_without_bonuses: "Cargá al menos un bono antes de terminar el hunt.",
   call_not_pending: "Ese call ya se revisó.",
+  not_tipeo: "Ese slot no pagó más de 110x antes: aceptalo como call normal.",
   invalid_amount: "Revisá el monto.",
   forbidden: "No tenés permisos para esto.",
 };
@@ -167,7 +168,7 @@ export async function deleteBonus(_prev: ActionState, formData: FormData): Promi
 const callSchema = z.object({
   id: z.uuid(),
   hunt_id: z.uuid(),
-  decision: z.enum(["accept", "reject"]),
+  decision: z.enum(["accept", "tipeo", "reject"]),
   bet: z.string().optional(),
 });
 
@@ -187,8 +188,12 @@ export async function reviewCall(_prev: ActionState, formData: FormData): Promis
 
   const bet = Number(parsed.data.bet);
   if (!Number.isFinite(bet) || bet <= 0) return { error: "Poné la apuesta para aceptar el call." };
-  const { error } = await supabase.rpc("accept_hunt_call", { p_call: id, p_bet: bet });
+  const tipeo = decision === "tipeo";
+  const { error } = await supabase.rpc(tipeo ? "accept_hunt_call_as_tipeo" : "accept_hunt_call", {
+    p_call: id,
+    p_bet: bet,
+  });
   if (error) return { error: friendly(error.message) };
   invalidate(hunt_id);
-  return { ok: "Call aceptado." };
+  return { ok: tipeo ? "Tipeo aceptado." : "Call aceptado." };
 }

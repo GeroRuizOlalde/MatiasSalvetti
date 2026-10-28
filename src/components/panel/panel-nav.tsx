@@ -13,6 +13,7 @@ import {
   PanelLeftOpen,
   Settings,
   ShoppingCart,
+  Sparkles,
   Swords,
   Trophy,
   Users,
@@ -35,6 +36,7 @@ const GROUPS: Group[] = [
       { href: "/panel/hunts", label: "Bonus Hunt", icon: Crosshair },
       { href: "/panel/buys", label: "Bonus Buys", icon: ShoppingCart },
       { href: "/panel/battles", label: "Bonus Battle", icon: Swords },
+      { href: "/panel/tipeos", label: "Tipeos", icon: Sparkles },
     ],
   },
   {
