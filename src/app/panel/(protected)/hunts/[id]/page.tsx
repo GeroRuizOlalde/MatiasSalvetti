@@ -1,4 +1,4 @@
-import { ArrowLeft, ExternalLink, Inbox, Trophy } from "lucide-react";
+import { ArrowLeft, ExternalLink, Inbox, Sparkles, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,7 +8,7 @@ import { HuntStatusBadge } from "@/components/hunts/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { huntStats } from "@/lib/calc/hunt";
-import { formatDateTime, formatInteger, formatMoney } from "@/lib/format";
+import { formatDateTime, formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteHuntForm, HuntForm } from "../hunt-form";
 import { AddBonusForm, BonusRowForm, CallReviewForm } from "./bonus-forms";
@@ -30,22 +30,25 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
     .maybeSingle();
   if (!hunt) notFound();
 
-  const [{ data: bonuses }, { data: calls }, { data: casinos }, { data: guessCount }] = await Promise.all([
-    supabase
-      .from("hunt_bonuses")
-      .select("id, position, slot_name, provider, bet, payout, called_by")
-      .eq("hunt_id", id)
-      .order("position")
-      .order("created_at"),
-    supabase
-      .from("hunt_calls")
-      .select("id, user_id, slot_name, created_at")
-      .eq("hunt_id", id)
-      .eq("status", "pending")
-      .order("created_at"),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
-    supabase.rpc("hunt_guess_count", { p_hunt: id }),
-  ]);
+  const [{ data: bonuses }, { data: calls }, { data: casinos }, { data: guessCount }, { data: tipeos }] =
+    await Promise.all([
+      supabase
+        .from("hunt_bonuses")
+        .select("id, position, slot_name, provider, bet, payout, called_by")
+        .eq("hunt_id", id)
+        .order("position")
+        .order("created_at"),
+      supabase
+        .from("hunt_calls")
+        .select("id, user_id, slot_name, created_at")
+        .eq("hunt_id", id)
+        .eq("status", "pending")
+        .order("created_at"),
+      supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+      supabase.rpc("hunt_guess_count", { p_hunt: id }),
+      supabase.rpc("hunt_tipeo_candidates", { p_hunt: id }),
+    ]);
+  const tipeoOf = (callId: string) => tipeos?.find((t) => t.call_id === callId);
 
   const userIds = [
     ...(bonuses ?? []).map((b) => b.called_by),
@@ -126,17 +129,35 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
         </h2>
         {calls?.length ? (
           <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
-            {calls.map((call) => (
-              <li key={call.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{call.slot_name}</p>
-                  <p className="text-xs text-subtle">
-                    {nameOf(call.user_id) ?? "Viewer"} · {formatDateTime(call.created_at)}
-                  </p>
-                </div>
-                {locked ? null : <CallReviewForm huntId={hunt.id} callId={call.id} defaultBet={lastBet} />}
-              </li>
-            ))}
+            {calls.map((call) => {
+              const tipeo = tipeoOf(call.id);
+              return (
+                <li key={call.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-2 font-semibold">
+                      {call.slot_name}
+                      {tipeo ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold">
+                          <Sparkles className="size-3" aria-hidden /> Tipeo
+                        </span>
+                      ) : null}
+                    </p>
+                    <p className="text-xs text-subtle">
+                      {nameOf(call.user_id) ?? "Viewer"} · {formatDateTime(call.created_at)}
+                    </p>
+                    {tipeo ? (
+                      <p className="text-xs text-gold">
+                        Ya pagó <span className="num">{formatMulti(tipeo.multi)}</span> en{" "}
+                        {tipeo.source === "hunt" ? "el hunt" : "los buys"} «{tipeo.title}»
+                      </p>
+                    ) : null}
+                  </div>
+                  {locked ? null : (
+                    <CallReviewForm huntId={hunt.id} callId={call.id} defaultBet={lastBet} tipeo={Boolean(tipeo)} />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-subtle">
