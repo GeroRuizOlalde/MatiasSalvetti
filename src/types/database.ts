@@ -1014,30 +1014,28 @@ export type Database = {
       tipeos: {
         Row: {
           id: string;
+          bonus_id: string;
           hunt_id: string;
-          call_id: string | null;
-          bonus_id: string | null;
           user_id: string | null;
-          slot_id: string | null;
           slot_name: string;
-          ref_multi: number;
-          ref_source: "hunt" | "buy";
-          ref_title: string;
-          accepted_by: string | null;
+          bet: number;
+          payout: number;
+          multi: number;
+          status: Database["public"]["Enums"]["tipeo_status"];
+          decided_by: string | null;
           created_at: string;
         };
         Insert: {
           id?: string;
+          bonus_id: string;
           hunt_id: string;
-          call_id?: string | null;
-          bonus_id?: string | null;
           user_id?: string | null;
-          slot_id?: string | null;
           slot_name: string;
-          ref_multi: number;
-          ref_source: "hunt" | "buy";
-          ref_title: string;
-          accepted_by?: string | null;
+          bet: number;
+          payout: number;
+          multi: number;
+          status: Database["public"]["Enums"]["tipeo_status"];
+          decided_by?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["tipeos"]["Insert"]>;
@@ -1052,7 +1050,7 @@ export type Database = {
           {
             foreignKeyName: "tipeos_bonus_id_fkey";
             columns: ["bonus_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "hunt_bonuses";
             referencedColumns: ["id"];
           },
@@ -1074,7 +1072,6 @@ export type Database = {
     };
     Functions: {
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
-      accept_hunt_call_as_tipeo: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       admin_adjust_points: {
         Args: { p_user: string; p_points: number; p_xp: number; p_note: string };
@@ -1087,6 +1084,7 @@ export type Database = {
       can_participate: { Args: Record<PropertyKey, never>; Returns: boolean };
       cast_buy_vote: { Args: { p_option: string }; Returns: undefined };
       check_overlay_token: { Args: { p_key: string }; Returns: boolean };
+      decide_tipeo: { Args: { p_bonus: string; p_give: boolean }; Returns: string };
       claim_mission: { Args: { p_mission: string; p_code?: string | null }; Returns: undefined };
       close_buy_poll: { Args: { p_session: string }; Returns: undefined };
       current_legal_version: { Args: { p_kind: Database["public"]["Enums"]["legal_kind"] }; Returns: number };
@@ -1095,10 +1093,6 @@ export type Database = {
       giveaway_stats: { Args: { p_giveaway: string }; Returns: { participants: number; entries: number }[] };
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
-      hunt_tipeo_candidates: {
-        Args: { p_hunt: string };
-        Returns: { call_id: string; multi: number; source: "hunt" | "buy"; title: string }[];
-      };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       import_wagers: { Args: { p_race: string; p_rows: Json }; Returns: Json };
@@ -1163,6 +1157,7 @@ export type Database = {
       mission_type: "daily" | "code" | "link";
       order_status: "pending" | "delivered" | "cancelled";
       shop_item_kind: "reward" | "tickets";
+      tipeo_status: "given" | "dismissed";
       user_role: "viewer" | "mod" | "admin";
       verification_status: "pending" | "approved" | "rejected";
       wager_race_status: "draft" | "published";

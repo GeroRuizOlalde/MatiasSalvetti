@@ -14,7 +14,8 @@ const ERRORS: Record<string, string> = {
   bonuses_pending: "Faltan abrir bonos: cargá el pago de todos antes de terminar.",
   hunt_without_bonuses: "Cargá al menos un bono antes de terminar el hunt.",
   call_not_pending: "Ese call ya se revisó.",
-  not_tipeo: "Ese slot no pagó más de 110x antes: aceptalo como call normal.",
+  not_tipeo: "Ese bono no pagó más de 110x.",
+  bonus_not_called: "Ese bono no vino del call de un viewer.",
   invalid_amount: "Revisá el monto.",
   forbidden: "No tenés permisos para esto.",
 };
@@ -168,7 +169,7 @@ export async function deleteBonus(_prev: ActionState, formData: FormData): Promi
 const callSchema = z.object({
   id: z.uuid(),
   hunt_id: z.uuid(),
-  decision: z.enum(["accept", "tipeo", "reject"]),
+  decision: z.enum(["accept", "reject"]),
   bet: z.string().optional(),
 });
 
@@ -188,12 +189,28 @@ export async function reviewCall(_prev: ActionState, formData: FormData): Promis
 
   const bet = Number(parsed.data.bet);
   if (!Number.isFinite(bet) || bet <= 0) return { error: "Poné la apuesta para aceptar el call." };
-  const tipeo = decision === "tipeo";
-  const { error } = await supabase.rpc(tipeo ? "accept_hunt_call_as_tipeo" : "accept_hunt_call", {
-    p_call: id,
-    p_bet: bet,
-  });
+  const { error } = await supabase.rpc("accept_hunt_call", { p_call: id, p_bet: bet });
   if (error) return { error: friendly(error.message) };
   invalidate(hunt_id);
-  return { ok: tipeo ? "Tipeo aceptado." : "Call aceptado." };
+  return { ok: "Call aceptado." };
+}
+
+// -----------------------------------------------------------------------------
+// Tipeos
+// -----------------------------------------------------------------------------
+
+const tipeoSchema = z.object({ bonus_id: z.uuid(), give: z.enum(["1", "0"]) });
+
+/** Da o descarta el tipeo de un bono abierto que vino de un call y pagó más de 110x. */
+export async function decideTipeo(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("mod");
+  const parsed = tipeoSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Datos inválidos." };
+  const give = parsed.data.give === "1";
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("decide_tipeo", { p_bonus: parsed.data.bonus_id, p_give: give });
+  if (error) return { error: friendly(error.message) };
+  refresh();
+  return { ok: give ? "Tipeo dado." : "Tipeo descartado." };
 }
