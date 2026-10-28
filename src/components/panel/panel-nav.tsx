@@ -23,7 +23,7 @@ type Item = { href: string; label: string; icon: LucideIcon; adminOnly?: boolean
 // `phase` marca las pantallas que todavía no existen.
 const ITEMS: Item[] = [
   { href: "/panel", label: "Inicio", icon: House },
-  { href: "/panel/hunts", label: "Bonus Hunt", icon: Crosshair, phase: 3 },
+  { href: "/panel/hunts", label: "Bonus Hunt", icon: Crosshair },
   { href: "/panel/buys", label: "Bonus Buys", icon: ShoppingCart, phase: 4 },
   { href: "/panel/battles", label: "Bonus Battle", icon: Swords, phase: 4 },
   { href: "/panel/wager-race", label: "Wager Race", icon: Trophy, adminOnly: true, phase: 5 },

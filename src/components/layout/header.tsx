@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { LiveButton } from "./live-button";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
-import { NavLinks } from "./nav-links";
+import { MobileMenuFallback } from "./mobile-menu-fallback";
+import { NavLinkList, NavLinks } from "./nav-links";
 import { UserMenu, UserMenuFallback } from "./user-menu";
 
 export function TopBar() {
@@ -28,7 +29,10 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
         <Logo className="shrink-0" />
-        <NavLinks className="hidden lg:block" />
+        {/* usePathname() en rutas dinámicas (ej. /bonus-hunt/[id]) necesita un Suspense para prerenderizar. */}
+        <Suspense fallback={<NavLinkList className="hidden lg:block" pathname={null} />}>
+          <NavLinks className="hidden lg:block" />
+        </Suspense>
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden md:block">
             <LiveButton />
@@ -38,12 +42,14 @@ export function Header() {
               <UserMenu />
             </Suspense>
           </div>
-          <MobileMenu>
-            <LiveButton compact />
-            <Suspense fallback={<UserMenuFallback />}>
-              <UserMenu />
-            </Suspense>
-          </MobileMenu>
+          <Suspense fallback={<MobileMenuFallback />}>
+            <MobileMenu>
+              <LiveButton compact />
+              <Suspense fallback={<UserMenuFallback />}>
+                <UserMenu />
+              </Suspense>
+            </MobileMenu>
+          </Suspense>
         </div>
       </div>
     </header>

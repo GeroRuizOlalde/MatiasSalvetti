@@ -1,19 +1,34 @@
-import { Crosshair, Inbox, Radio, ShoppingCart, Swords } from "lucide-react";
+import { Crosshair, Inbox, Megaphone, Radio, ShoppingCart, Swords } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
+import { isSupabaseConfigured } from "@/lib/env";
+import { formatInteger } from "@/lib/format";
 import { getPublicSettings } from "@/lib/settings";
+import { createClient } from "@/lib/supabase/server";
 import { StreamStatusForm } from "./stream-status-form";
 
 export const metadata: Metadata = { title: "Inicio" };
 
 const QUICK_ACTIONS = [
-  { label: "Nuevo Bonus Hunt", icon: Crosshair, phase: 3 },
+  { label: "Nuevo Bonus Hunt", icon: Crosshair, href: "/panel/hunts" },
   { label: "Nueva sesión de Buys", icon: ShoppingCart, phase: 4 },
   { label: "Nueva Battle", icon: Swords, phase: 4 },
 ];
 
 export default async function PanelHomePage() {
-  const settings = await getPublicSettings();
+  const supabase = isSupabaseConfigured() ? await createClient() : null;
+  const [settings, pendingCalls] = await Promise.all([
+    getPublicSettings(),
+    supabase?.from("hunt_calls").select("hunt_id, hunt:hunts(title)").eq("status", "pending").then((r) => r.data),
+  ]);
+
+  const pendingByHunt = new Map<string, { title: string; count: number }>();
+  for (const call of pendingCalls ?? []) {
+    const entry = pendingByHunt.get(call.hunt_id) ?? { title: call.hunt?.title ?? "Hunt", count: 0 };
+    entry.count += 1;
+    pendingByHunt.set(call.hunt_id, entry);
+  }
 
   return (
     <div className="max-w-5xl space-y-8">
@@ -24,14 +39,23 @@ export default async function PanelHomePage() {
           Accesos rápidos
         </h2>
         <ul className="grid gap-3 sm:grid-cols-3">
-          {QUICK_ACTIONS.map(({ label, icon: Icon, phase }) => (
-            <li
-              key={label}
-              className="flex items-center gap-3 rounded-xl border border-dashed border-line bg-surface/60 p-4 text-subtle"
-            >
-              <Icon className="size-5" aria-hidden />
-              <span className="text-sm font-semibold">{label}</span>
-              <span className="ml-auto text-[10px]">fase {phase}</span>
+          {QUICK_ACTIONS.map(({ label, icon: Icon, phase, href }) => (
+            <li key={label}>
+              {href ? (
+                <Link
+                  href={href}
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-accent/60"
+                >
+                  <Icon className="size-5 text-accent-text" aria-hidden />
+                  <span className="text-sm font-semibold">{label}</span>
+                </Link>
+              ) : (
+                <span className="flex items-center gap-3 rounded-xl border border-dashed border-line bg-surface/60 p-4 text-subtle">
+                  <Icon className="size-5" aria-hidden />
+                  <span className="text-sm font-semibold">{label}</span>
+                  <span className="ml-auto text-[10px]">fase {phase}</span>
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -41,9 +65,25 @@ export default async function PanelHomePage() {
         <h2 id="pending" className="mb-3 text-sm font-semibold text-subtle">
           Pendientes
         </h2>
-        <EmptyState icon={Inbox} title="Nada pendiente">
-          Acá vas a ver los calls por aceptar, las verificaciones y los sorteos a cerrar.
-        </EmptyState>
+        {pendingByHunt.size ? (
+          <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
+            {[...pendingByHunt].map(([huntId, { title, count }]) => (
+              <li key={huntId}>
+                <Link href={`/panel/hunts/${huntId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2">
+                  <Megaphone className="size-4 text-gold" aria-hidden />
+                  <span className="text-sm">
+                    <span className="num font-semibold text-gold">{formatInteger(count)}</span>{" "}
+                    {count === 1 ? "call por revisar" : "calls por revisar"} en <strong>{title}</strong>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState icon={Inbox} title="Nada pendiente">
+            Acá vas a ver los calls por aceptar, las verificaciones y los sorteos a cerrar.
+          </EmptyState>
+        )}
       </section>
 
       <section aria-labelledby="stream" className="rounded-2xl border border-line bg-surface p-5">

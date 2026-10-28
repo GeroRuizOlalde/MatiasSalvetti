@@ -14,7 +14,7 @@ export type SessionCard = {
   facts: { label: string; value: string }[];
 };
 
-// Hasta las fases 3 y 4 no hay sesiones: las tarjetas muestran su estado vacío.
+// Estado vacío de cada tarjeta. La home completa el hunt con datos; Buys y Battle llegan en la fase 4.
 export const EMPTY_SESSIONS: SessionCard[] = [
   {
     key: "hunt",

@@ -103,6 +103,13 @@ scripts/             make-admin
 
 El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/channels`) con tokens de app, como mucho una vez por minuto (perfil de caché `live` en `next.config.ts`). Twitch tiene prioridad. Si las dos APIs fallan o no están configuradas, se usa el interruptor manual de `/panel`.
 
+## Bonus Hunt (fase 3)
+
+- **Panel** (`/panel/hunts`): un mod crea el hunt (queda en borrador), carga los bonos con el buscador del catálogo (si el slot no existe, se agrega) y el pago de cada uno al abrirlo. Desde el mismo hunt abre o cierra los **calls** y el **adiviná el balance** (GTB), y acepta o rechaza los calls de los viewers.
+- **Estados**: borrador (no se ve) → juntando bonos → abriendo → terminado. Al pasar a *terminado* la base exige que todos los bonos tengan pago, calcula el balance final y elige al ganador del GTB (el más cercano; en empate, el que apostó primero; los baneados no ganan). Si se vuelve a *abriendo*, los resultados se borran y se recalculan al cerrar de nuevo.
+- **Viewers**: un call por hunt (editable mientras esté pendiente; si lo rechazan, pueden pedir otro) y una apuesta de balance (editable mientras esté abierto). Las dos cosas pasan por funciones `SECURITY DEFINER` que chequean `can_participate()` y un rate limit. Los montos del GTB se ven recién cuando el hunt termina.
+- **En vivo**: la página `/bonus-hunt/[id]` escucha la tabla `hunts` por Supabase Realtime (cada cambio de un bono también actualiza su hunt) y se vuelve a pedir. Los datos públicos se cachean (perfil `hunt`) y el panel invalida el caché en cada cambio.
+
 ## Seguridad
 
 - RLS en todas las tablas. Rol, baneo y saldos solo cambian por funciones `SECURITY DEFINER` o desde el servidor.
@@ -111,5 +118,5 @@ El servidor consulta Twitch (Helix `streams`) y Kick (`api.kick.com/public/v1/ch
 
 ## Pendiente (por fase)
 
-- **Fases 3 a 6**: Bonus Hunt, Buys, Battle, Wager Race, Cuartel, sorteos.
+- **Fases 4 a 6**: Buys, Battle, Wager Race, Cuartel, sorteos. XP y puntos por participar en los hunts llegan con el Cuartel (fase 6).
 - **Fase 7**: overlays de OBS, E2E, SEO y deploy.
