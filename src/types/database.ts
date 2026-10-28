@@ -301,6 +301,293 @@ export type Database = {
           },
         ];
       };
+      buy_sessions: {
+        Row: {
+          id: string;
+          title: string;
+          casino_id: string | null;
+          currency: Database["public"]["Enums"]["currency_code"];
+          status: Database["public"]["Enums"]["buy_session_status"];
+          finished_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          casino_id?: string | null;
+          currency?: Database["public"]["Enums"]["currency_code"];
+          status?: Database["public"]["Enums"]["buy_session_status"];
+          finished_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["buy_sessions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buy_sessions_casino_id_fkey";
+            columns: ["casino_id"];
+            isOneToOne: false;
+            referencedRelation: "casinos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      buys: {
+        Row: {
+          id: string;
+          session_id: string;
+          position: number;
+          slot_id: string | null;
+          slot_name: string;
+          provider: string | null;
+          bet: number;
+          cost: number;
+          payout: number | null;
+          multi: number | null;
+          opened_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          position?: number;
+          slot_id?: string | null;
+          slot_name: string;
+          provider?: string | null;
+          bet: number;
+          cost: number;
+          payout?: number | null;
+          opened_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["buys"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buys_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      buy_polls: {
+        Row: {
+          id: string;
+          session_id: string;
+          is_open: boolean;
+          winner_option_id: string | null;
+          created_at: string;
+          closed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          is_open?: boolean;
+          winner_option_id?: string | null;
+          created_at?: string;
+          closed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["buy_polls"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buy_polls_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      buy_poll_options: {
+        Row: {
+          id: string;
+          poll_id: string;
+          position: number;
+          slot_id: string | null;
+          slot_name: string;
+        };
+        Insert: {
+          id?: string;
+          poll_id: string;
+          position: number;
+          slot_id?: string | null;
+          slot_name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["buy_poll_options"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buy_poll_options_poll_id_fkey";
+            columns: ["poll_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_polls";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      buy_poll_votes: {
+        Row: {
+          poll_id: string;
+          user_id: string;
+          option_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          poll_id: string;
+          user_id: string;
+          option_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["buy_poll_votes"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "buy_poll_votes_poll_id_fkey";
+            columns: ["poll_id"];
+            isOneToOne: false;
+            referencedRelation: "buy_polls";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      battles: {
+        Row: {
+          id: string;
+          title: string;
+          casino_id: string | null;
+          currency: Database["public"]["Enums"]["currency_code"];
+          status: Database["public"]["Enums"]["battle_status"];
+          winner_entry_id: string | null;
+          started_at: string | null;
+          finished_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          casino_id?: string | null;
+          currency?: Database["public"]["Enums"]["currency_code"];
+          status?: Database["public"]["Enums"]["battle_status"];
+          winner_entry_id?: string | null;
+          started_at?: string | null;
+          finished_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["battles"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "battles_casino_id_fkey";
+            columns: ["casino_id"];
+            isOneToOne: false;
+            referencedRelation: "casinos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      battle_entries: {
+        Row: {
+          id: string;
+          battle_id: string;
+          seed: number;
+          slot_id: string | null;
+          slot_name: string;
+          provider: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          battle_id: string;
+          seed?: number;
+          slot_id?: string | null;
+          slot_name: string;
+          provider?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["battle_entries"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "battle_entries_battle_id_fkey";
+            columns: ["battle_id"];
+            isOneToOne: false;
+            referencedRelation: "battles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      battle_matches: {
+        Row: {
+          id: string;
+          battle_id: string;
+          round: number;
+          slot: number;
+          entry_a: string | null;
+          entry_b: string | null;
+          bet_a: number | null;
+          payout_a: number | null;
+          bet_b: number | null;
+          payout_b: number | null;
+          winner_entry_id: string | null;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          battle_id: string;
+          round: number;
+          slot: number;
+          entry_a?: string | null;
+          entry_b?: string | null;
+          bet_a?: number | null;
+          payout_a?: number | null;
+          bet_b?: number | null;
+          payout_b?: number | null;
+          winner_entry_id?: string | null;
+          decided_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["battle_matches"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "battle_matches_battle_id_fkey";
+            columns: ["battle_id"];
+            isOneToOne: false;
+            referencedRelation: "battles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      battle_picks: {
+        Row: {
+          battle_id: string;
+          user_id: string;
+          entry_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          battle_id: string;
+          user_id: string;
+          entry_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["battle_picks"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "battle_picks_battle_id_fkey";
+            columns: ["battle_id"];
+            isOneToOne: false;
+            referencedRelation: "battles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       rate_limits: {
         Row: { key: string; window_start: string; count: number };
         Insert: { key: string; window_start: string; count: number };
@@ -325,14 +612,21 @@ export type Database = {
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       auth_role: { Args: Record<PropertyKey, never>; Returns: Database["public"]["Enums"]["user_role"] };
+      battle_pick_counts: { Args: { p_battle: string }; Returns: { entry_id: string; picks: number }[] };
+      buy_poll_counts: { Args: { p_session: string }; Returns: { option_id: string; votes: number }[] };
       can_participate: { Args: Record<PropertyKey, never>; Returns: boolean };
+      cast_buy_vote: { Args: { p_option: string }; Returns: undefined };
+      close_buy_poll: { Args: { p_session: string }; Returns: undefined };
       current_legal_version: { Args: { p_kind: Database["public"]["Enums"]["legal_kind"] }; Returns: number };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
       hunt_guess_count: { Args: { p_hunt: string }; Returns: number };
       import_slots: { Args: { p_rows: Json }; Returns: number };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_mod: { Args: Record<PropertyKey, never>; Returns: boolean };
+      open_buy_poll: { Args: { p_session: string; p_options: Json }; Returns: string };
+      pick_battle_entry: { Args: { p_entry: string }; Returns: undefined };
       reject_hunt_call: { Args: { p_call: string }; Returns: undefined };
+      reset_battle: { Args: { p_battle: string }; Returns: undefined };
       search_slots: {
         Args: { p_query: string; p_limit?: number };
         Returns: Database["public"]["Tables"]["slots"]["Row"][];
@@ -342,14 +636,17 @@ export type Database = {
         Args: { p_user: string; p_role: Database["public"]["Enums"]["user_role"] };
         Returns: undefined;
       };
+      setting_int: { Args: { p_key: string; p_default: number }; Returns: number };
+      start_battle: { Args: { p_battle: string }; Returns: undefined };
       submit_hunt_call: {
         Args: { p_hunt: string; p_slot?: string | null; p_slot_name?: string | null };
         Returns: string;
       };
       submit_hunt_guess: { Args: { p_hunt: string; p_amount: number }; Returns: undefined };
-      setting_int: { Args: { p_key: string; p_default: number }; Returns: number };
     };
     Enums: {
+      battle_status: "draft" | "open" | "live" | "finished";
+      buy_session_status: "draft" | "live" | "finished";
       call_status: "pending" | "accepted" | "rejected";
       currency_code: "ARS" | "USD";
       hunt_status: "draft" | "collecting" | "opening" | "finished";

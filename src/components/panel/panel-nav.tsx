@@ -24,8 +24,8 @@ type Item = { href: string; label: string; icon: LucideIcon; adminOnly?: boolean
 const ITEMS: Item[] = [
   { href: "/panel", label: "Inicio", icon: House },
   { href: "/panel/hunts", label: "Bonus Hunt", icon: Crosshair },
-  { href: "/panel/buys", label: "Bonus Buys", icon: ShoppingCart, phase: 4 },
-  { href: "/panel/battles", label: "Bonus Battle", icon: Swords, phase: 4 },
+  { href: "/panel/buys", label: "Bonus Buys", icon: ShoppingCart },
+  { href: "/panel/battles", label: "Bonus Battle", icon: Swords },
   { href: "/panel/wager-race", label: "Wager Race", icon: Trophy, adminOnly: true, phase: 5 },
   { href: "/panel/verificaciones", label: "Verificaciones", icon: BadgeCheck, adminOnly: true, phase: 5 },
   { href: "/panel/sorteos", label: "Sorteos", icon: Gift, adminOnly: true, phase: 6 },

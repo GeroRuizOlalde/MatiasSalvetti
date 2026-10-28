@@ -1,21 +1,19 @@
-import { ArrowLeft, Crosshair, Megaphone, Target, Trophy } from "lucide-react";
+import { ArrowLeft, Crosshair, Target, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { LoginButton } from "@/components/layout/login-button";
 import { BonusTable } from "@/components/hunts/bonus-table";
-import { HuntLive } from "@/components/hunts/hunt-live";
+import { ParticipationGate, ParticipationTitle, participationBox } from "@/components/participation-gate";
 import { HuntStatsGrid } from "@/components/hunts/hunt-stats";
 import { HuntStatusBadge } from "@/components/hunts/status-badge";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { getCurrentProfile, needsOnboarding } from "@/lib/auth/session";
+import { RealtimeRefresh } from "@/components/ui/realtime-refresh";
 import { huntStats } from "@/lib/calc/hunt";
 import { cn } from "@/lib/cn";
 import { currencyPrefix, formatDate, formatInteger, formatMoney } from "@/lib/format";
 import { getPublicHunt, type PublicHunt } from "@/lib/hunts";
-import { getLegalDocument } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/server";
 import { CallForm, GuessForm } from "./participation-forms";
 
@@ -47,7 +45,7 @@ async function HuntDetail({ params }: Pick<PageProps<"/bonus-hunt/[id]">, "param
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-10 pb-16">
-      {finished ? null : <HuntLive huntId={hunt.id} />}
+      {finished ? null : <RealtimeRefresh table="hunts" id={hunt.id} />}
       <Link href="/bonus-hunt" className="flex items-center gap-1 text-sm text-subtle hover:text-text">
         <ArrowLeft className="size-4" aria-hidden /> Todos los hunts
       </Link>
@@ -161,108 +159,67 @@ function Results({ hunt }: { hunt: PublicHunt }) {
   );
 }
 
+const CALL_STATUS = {
+  pending: "Pendiente de revisión",
+  accepted: "¡Aceptado! Ya está en el hunt.",
+  rejected: "Rechazado. Podés pedir otro.",
+} as const;
+
 /** Lee la sesión: va dentro de un <Suspense>. */
-async function Participation({ hunt }: { hunt: PublicHunt }) {
-  const box = "rounded-2xl border border-accent/40 bg-accent/5 p-5";
-  const title = (
-    <h2 className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
-      <Megaphone className="size-5 text-accent-text" aria-hidden /> Participá
-    </h2>
-  );
-
-  const profile = await getCurrentProfile();
-  if (!profile) {
-    return (
-      <section className={box}>
-        {title}
-        <p className="mt-2 mb-4 text-sm text-muted">
-          Entrá con tu cuenta de Twitch para pedir un slot o adivinar el balance.
-        </p>
-        <LoginButton next={`/bonus-hunt/${hunt.id}`} />
-      </section>
-    );
-  }
-
-  const terms = await getLegalDocument("terms");
-  if (needsOnboarding(profile, terms?.version ?? null)) {
-    return (
-      <section className={box}>
-        {title}
-        <p className="mt-2 text-sm text-muted">
-          Antes de participar tenés que{" "}
-          <Link href={`/bienvenida?next=/bonus-hunt/${hunt.id}`} className="font-semibold text-accent-text underline">
-            confirmar tu edad y aceptar las bases
-          </Link>
-          .
-        </p>
-      </section>
-    );
-  }
-
-  const supabase = await createClient();
-  const [{ data: canParticipate }, { data: call }, { data: guess }] = await Promise.all([
-    supabase.rpc("can_participate"),
-    supabase
-      .from("hunt_calls")
-      .select("slot_name, status")
-      .eq("hunt_id", hunt.id)
-      .eq("user_id", profile.id)
-      .maybeSingle(),
-    supabase.from("hunt_guesses").select("amount").eq("hunt_id", hunt.id).eq("user_id", profile.id).maybeSingle(),
-  ]);
-
-  if (!canParticipate) {
-    return (
-      <section className={box}>
-        {title}
-        <p className="mt-2 text-sm text-muted">
-          {profile.banned_at
-            ? "Tu cuenta no puede participar."
-            : "Tu cuenta de Twitch todavía no cumple la antigüedad mínima para participar."}
-        </p>
-      </section>
-    );
-  }
-
-  const CALL_STATUS = {
-    pending: "Pendiente de revisión",
-    accepted: "¡Aceptado! Ya está en el hunt.",
-    rejected: "Rechazado. Podés pedir otro.",
-  } as const;
-
+function Participation({ hunt }: { hunt: PublicHunt }) {
   return (
-    <section className={cn(box, "space-y-5")}>
-      {title}
-      {hunt.calls_open || call ? (
-        <div className="space-y-2">
-          {call ? (
-            <p className="text-sm">
-              Tu call: <strong>{call.slot_name}</strong>{" "}
-              <span className={cn("text-xs", call.status === "accepted" ? "text-accent-text" : "text-subtle")}>
-                · {CALL_STATUS[call.status]}
-              </span>
-            </p>
-          ) : null}
-          {hunt.calls_open && call?.status !== "accepted" ? (
-            <CallForm huntId={hunt.id} hasCall={Boolean(call)} />
-          ) : null}
-        </div>
-      ) : null}
-      {hunt.guesses_open ? (
-        <div className="space-y-2">
-          {guess ? (
-            <p className="text-sm">
-              Tu apuesta: <strong className="num text-gold">{formatMoney(guess.amount, hunt.currency)}</strong>
-            </p>
-          ) : null}
-          <GuessForm
-            huntId={hunt.id}
-            currentGuess={guess?.amount ?? null}
-            currencyPrefix={currencyPrefix(hunt.currency)}
-          />
-        </div>
-      ) : null}
-    </section>
+    <ParticipationGate
+      next={`/bonus-hunt/${hunt.id}`}
+      loginHint="Entrá con tu cuenta de Twitch para pedir un slot o adivinar el balance."
+    >
+      {async (profile) => {
+        const supabase = await createClient();
+        const [{ data: call }, { data: guess }] = await Promise.all([
+          supabase
+            .from("hunt_calls")
+            .select("slot_name, status")
+            .eq("hunt_id", hunt.id)
+            .eq("user_id", profile.id)
+            .maybeSingle(),
+          supabase.from("hunt_guesses").select("amount").eq("hunt_id", hunt.id).eq("user_id", profile.id).maybeSingle(),
+        ]);
+
+        return (
+          <section className={cn(participationBox, "space-y-5")}>
+            <ParticipationTitle />
+            {hunt.calls_open || call ? (
+              <div className="space-y-2">
+                {call ? (
+                  <p className="text-sm">
+                    Tu call: <strong>{call.slot_name}</strong>{" "}
+                    <span className={cn("text-xs", call.status === "accepted" ? "text-accent-text" : "text-subtle")}>
+                      · {CALL_STATUS[call.status]}
+                    </span>
+                  </p>
+                ) : null}
+                {hunt.calls_open && call?.status !== "accepted" ? (
+                  <CallForm huntId={hunt.id} hasCall={Boolean(call)} />
+                ) : null}
+              </div>
+            ) : null}
+            {hunt.guesses_open ? (
+              <div className="space-y-2">
+                {guess ? (
+                  <p className="text-sm">
+                    Tu apuesta: <strong className="num text-gold">{formatMoney(guess.amount, hunt.currency)}</strong>
+                  </p>
+                ) : null}
+                <GuessForm
+                  huntId={hunt.id}
+                  currentGuess={guess?.amount ?? null}
+                  currencyPrefix={currencyPrefix(hunt.currency)}
+                />
+              </div>
+            ) : null}
+          </section>
+        );
+      }}
+    </ParticipationGate>
   );
 }
 

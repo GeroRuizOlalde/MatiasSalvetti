@@ -6,6 +6,7 @@ import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { HUNTS_TAG, huntTag } from "@/lib/hunts";
+import { checkbox, friendlyError, optionalAmount, optionalUuid, positiveAmount, resolveSlot } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
 
 const ERRORS: Record<string, string> = {
@@ -17,10 +18,8 @@ const ERRORS: Record<string, string> = {
   forbidden: "No tenés permisos para esto.",
 };
 
-function friendly(message: string | undefined, fallback = "No se pudo guardar. Probá de nuevo.") {
-  const key = Object.keys(ERRORS).find((k) => message?.includes(k));
-  return key ? ERRORS[key] : fallback;
-}
+const friendly = (message: string | undefined, fallback = "No se pudo guardar. Probá de nuevo.") =>
+  friendlyError(ERRORS, message, fallback);
 
 function invalidate(huntId: string) {
   updateTag(HUNTS_TAG);
@@ -28,25 +27,8 @@ function invalidate(huntId: string) {
   refresh();
 }
 
-const checkbox = z
-  .literal("on")
-  .optional()
-  .transform((v) => v === "on");
-
 const money = (message: string) => z.coerce.number({ error: message }).min(0, message).max(999_999_999_999, message);
-const optionalMoney = z
-  .string()
-  .trim()
-  .optional()
-  .transform((v, ctx) => {
-    if (!v) return null;
-    const n = Number(v);
-    if (!Number.isFinite(n) || n < 0) {
-      ctx.addIssue({ code: "custom", message: "El pago tiene que ser un número mayor o igual a 0." });
-      return z.NEVER;
-    }
-    return n;
-  });
+const optionalMoney = optionalAmount("El pago tiene que ser un número mayor o igual a 0.");
 
 // -----------------------------------------------------------------------------
 // Hunts
@@ -55,10 +37,7 @@ const optionalMoney = z
 const huntSchema = z.object({
   id: z.uuid().optional(),
   title: z.string().trim().min(1, "Poné un título.").max(80),
-  casino_id: z
-    .union([z.uuid(), z.literal("")])
-    .optional()
-    .transform((v) => v || null),
+  casino_id: optionalUuid,
   currency: z.enum(["ARS", "USD"]),
   start_cost: money("La inversión tiene que ser un número mayor o igual a 0."),
   status: z.enum(["draft", "collecting", "opening", "finished"]).default("draft"),
@@ -115,12 +94,9 @@ export async function deleteHunt(_prev: ActionState, formData: FormData): Promis
 
 const bonusSchema = z.object({
   hunt_id: z.uuid(),
-  slot_id: z
-    .union([z.uuid(), z.literal("")])
-    .optional()
-    .transform((v) => v || null),
+  slot_id: optionalUuid,
   slot_name: z.string().trim().min(1, "Elegí o escribí el slot.").max(120),
-  bet: z.coerce.number({ error: "Poné la apuesta." }).gt(0, "La apuesta tiene que ser mayor a 0.").max(999_999_999),
+  bet: positiveAmount("la apuesta"),
   payout: optionalMoney,
 });
 
@@ -131,32 +107,11 @@ export async function addBonus(_prev: ActionState, formData: FormData): Promise<
   const { hunt_id, bet, payout } = parsed.data;
 
   const supabase = await createClient();
-  let slot: { id: string; name: string; provider: string | null } | null = null;
-  if (parsed.data.slot_id) {
-    const { data } = await supabase
-      .from("slots")
-      .select("id, name, provider")
-      .eq("id", parsed.data.slot_id)
-      .maybeSingle();
-    slot = data;
-  }
-  if (!slot) {
-    // Escrito a mano: se busca en el catálogo y, si no está, se agrega.
-    const name = parsed.data.slot_name;
-    const { data: existing } = await supabase
-      .from("slots")
-      .select("id, name, provider")
-      .ilike(
-        "name",
-        name.replace(/[\\%_]/g, (c) => `\\${c}`),
-      )
-      .limit(1)
-      .maybeSingle();
-    slot =
-      existing ??
-      (await supabase.from("slots").insert({ name, created_by: profile.id }).select("id, name, provider").single())
-        .data;
-  }
+  const slot = await resolveSlot(supabase, {
+    slotId: parsed.data.slot_id,
+    slotName: parsed.data.slot_name,
+    userId: profile.id,
+  });
   if (!slot) return { error: "No se pudo agregar el slot al catálogo." };
 
   const { error } = await supabase
@@ -170,7 +125,7 @@ export async function addBonus(_prev: ActionState, formData: FormData): Promise<
 const bonusUpdateSchema = z.object({
   id: z.uuid(),
   hunt_id: z.uuid(),
-  bet: z.coerce.number({ error: "Poné la apuesta." }).gt(0, "La apuesta tiene que ser mayor a 0.").max(999_999_999),
+  bet: positiveAmount("la apuesta"),
   payout: optionalMoney,
 });
 

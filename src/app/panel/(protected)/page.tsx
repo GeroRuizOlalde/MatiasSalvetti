@@ -12,15 +12,19 @@ export const metadata: Metadata = { title: "Inicio" };
 
 const QUICK_ACTIONS = [
   { label: "Nuevo Bonus Hunt", icon: Crosshair, href: "/panel/hunts" },
-  { label: "Nueva sesión de Buys", icon: ShoppingCart, phase: 4 },
-  { label: "Nueva Battle", icon: Swords, phase: 4 },
+  { label: "Nueva sesión de Buys", icon: ShoppingCart, href: "/panel/buys" },
+  { label: "Nueva Battle", icon: Swords, href: "/panel/battles" },
 ];
 
 export default async function PanelHomePage() {
   const supabase = isSupabaseConfigured() ? await createClient() : null;
   const [settings, pendingCalls] = await Promise.all([
     getPublicSettings(),
-    supabase?.from("hunt_calls").select("hunt_id, hunt:hunts(title)").eq("status", "pending").then((r) => r.data),
+    supabase
+      ?.from("hunt_calls")
+      .select("hunt_id, hunt:hunts(title)")
+      .eq("status", "pending")
+      .then((r) => r.data),
   ]);
 
   const pendingByHunt = new Map<string, { title: string; count: number }>();
@@ -39,23 +43,15 @@ export default async function PanelHomePage() {
           Accesos rápidos
         </h2>
         <ul className="grid gap-3 sm:grid-cols-3">
-          {QUICK_ACTIONS.map(({ label, icon: Icon, phase, href }) => (
+          {QUICK_ACTIONS.map(({ label, icon: Icon, href }) => (
             <li key={label}>
-              {href ? (
-                <Link
-                  href={href}
-                  className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-accent/60"
-                >
-                  <Icon className="size-5 text-accent-text" aria-hidden />
-                  <span className="text-sm font-semibold">{label}</span>
-                </Link>
-              ) : (
-                <span className="flex items-center gap-3 rounded-xl border border-dashed border-line bg-surface/60 p-4 text-subtle">
-                  <Icon className="size-5" aria-hidden />
-                  <span className="text-sm font-semibold">{label}</span>
-                  <span className="ml-auto text-[10px]">fase {phase}</span>
-                </span>
-              )}
+              <Link
+                href={href}
+                className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-accent/60"
+              >
+                <Icon className="size-5 text-accent-text" aria-hidden />
+                <span className="text-sm font-semibold">{label}</span>
+              </Link>
             </li>
           ))}
         </ul>

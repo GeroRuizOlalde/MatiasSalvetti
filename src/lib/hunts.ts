@@ -3,14 +3,15 @@ import { cacheLife, cacheTag } from "next/cache";
 import { z } from "zod";
 import { rankGuesses, type Guess } from "@/lib/calc/hunt";
 import { isHuntActive } from "@/lib/hunt-status";
+import { getProfileNames, type CasinoRef, type PublicProfileName } from "@/lib/public-data";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Tables } from "@/types/database";
+
+export type { PublicProfileName } from "@/lib/public-data";
 
 /** Listados y home. Cada hunt además tiene su propio tag (`huntTag`). */
 export const HUNTS_TAG = "hunts";
 export const huntTag = (id: string) => `hunt:${id}`;
-
-export type PublicProfileName = { id: string; name: string; avatarUrl: string | null };
 
 type HuntRow = Pick<
   Tables<"hunts">,
@@ -25,7 +26,6 @@ type HuntRow = Pick<
   | "finished_at"
   | "created_at"
 >;
-type CasinoRef = Pick<Tables<"casinos">, "name" | "slug" | "referral_url" | "code">;
 
 export type HuntSummary = HuntRow & {
   casino: CasinoRef | null;
@@ -49,22 +49,6 @@ export type PublicHunt = HuntSummary & {
 
 const HUNT_COLUMNS =
   "id, title, currency, start_cost, status, calls_open, guesses_open, final_balance, finished_at, created_at, casino:casinos(name, slug, referral_url, code)";
-
-async function getProfileNames(ids: (string | null)[]) {
-  const unique = [...new Set(ids.filter((id): id is string => Boolean(id)))];
-  const names = new Map<string, PublicProfileName>();
-  const supabase = createPublicClient();
-  if (!supabase || unique.length === 0) return names;
-  const { data } = await supabase
-    .from("public_profiles")
-    .select("id, display_name, twitch_login, avatar_url")
-    .in("id", unique);
-  for (const p of data ?? []) {
-    if (!p.id) continue;
-    names.set(p.id, { id: p.id, name: p.display_name || p.twitch_login || "Viewer", avatarUrl: p.avatar_url });
-  }
-  return names;
-}
 
 /** Hunts públicos: los activos primero, después los terminados más recientes. */
 export async function getPublicHunts(limit = 24): Promise<HuntSummary[]> {

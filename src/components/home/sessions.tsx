@@ -14,7 +14,7 @@ export type SessionCard = {
   facts: { label: string; value: string }[];
 };
 
-// Estado vacío de cada tarjeta. La home completa el hunt con datos; Buys y Battle llegan en la fase 4.
+// Estado vacío de cada tarjeta. La home las completa con la sesión en curso o la última de cada una.
 export const EMPTY_SESSIONS: SessionCard[] = [
   {
     key: "hunt",
@@ -64,7 +64,9 @@ export function Sessions({ cards }: { cards: SessionCard[] }) {
             >
               <div className="flex items-center justify-between gap-3">
                 <Icon className="size-7 text-accent-text" aria-hidden />
-                <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", status ? TONE[status.tone] : TONE.past)}>
+                <span
+                  className={cn("rounded-full px-3 py-1 text-xs font-semibold", status ? TONE[status.tone] : TONE.past)}
+                >
                   {status?.label ?? "Sin sesiones todavía"}
                 </span>
               </div>
