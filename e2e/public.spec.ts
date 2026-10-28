@@ -42,7 +42,7 @@ test.describe("páginas públicas", () => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-      await expect(page.getByRole("contentinfo")).toContainText("Jugá con responsabilidad");
+      await expect(page.getByRole("contentinfo")).toContainText("Juego responsable");
     });
   }
 

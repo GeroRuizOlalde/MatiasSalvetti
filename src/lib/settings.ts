@@ -34,6 +34,11 @@ export const SETTING_SCHEMAS = {
   responsible_gaming_helpline: z.string(),
   twitch_min_account_age_days: z.number().int().min(0),
   level_curve: z.object({ base: z.number().positive(), exponent: z.number().positive() }),
+  partner: z.object({
+    casino_slug: z.string(),
+    description: z.string(),
+    perks: z.array(z.object({ label: z.string(), value: z.string() })).max(6),
+  }),
   rewards: z.object({
     hunt_call: rewardSchema,
     gtb_participation: rewardSchema,
@@ -63,6 +68,16 @@ export const DEFAULT_SETTINGS: PublicSettings = {
   responsible_gaming_helpline: "[LÍNEA DE AYUDA]",
   twitch_min_account_age_days: 0,
   level_curve: DEFAULT_LEVEL_CURVE,
+  partner: {
+    casino_slug: "1xslots",
+    description:
+      "1xSlot es el casino donde juego en el stream. Registrate con mi link y mi código para entrar a la Wager Race, a los sorteos y a los beneficios de la comunidad.",
+    perks: [
+      { label: "Bono de bienvenida", value: "[BONO]" },
+      { label: "Cuenta para la Wager Race", value: "1M ARS" },
+      { label: "Sorteos exclusivos de la comunidad", value: "[FRECUENCIA]" },
+    ],
+  },
   rewards: {
     hunt_call: { points: 50, xp: 40 },
     gtb_participation: { points: 10, xp: 15 },

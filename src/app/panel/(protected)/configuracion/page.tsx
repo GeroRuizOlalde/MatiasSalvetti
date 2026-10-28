@@ -11,17 +11,18 @@ import { LEGAL_KINDS } from "@/lib/legal-kinds";
 import { OVERLAYS } from "@/lib/overlay";
 import { getPublicSettings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
-import { GeneralForm, HomeStatsForm, OverlayTokenForm, SocialsForm } from "./settings-forms";
+import { GeneralForm, HomeStatsForm, OverlayTokenForm, PartnerForm, SocialsForm } from "./settings-forms";
 
 export const metadata: Metadata = { title: "Configuración" };
 
 export default async function ConfiguracionPage() {
   await requirePanelProfile("admin");
   const supabase = await createClient();
-  const [settings, tokenRow, legalRows] = await Promise.all([
+  const [settings, tokenRow, legalRows, casinosRows] = await Promise.all([
     getPublicSettings(),
     supabase.from("site_settings").select("value").eq("key", "overlay_token").maybeSingle(),
     supabase.from("legal_documents").select("kind, version, published_at").order("version", { ascending: false }),
+    supabase.from("casinos").select("slug, name").order("sort_order").order("name"),
   ]);
 
   const token = typeof tokenRow.data?.value === "string" ? tokenRow.data.value : null;
@@ -38,9 +39,13 @@ export default async function ConfiguracionPage() {
       </Section>
 
       <Section
-        title="Stats de la Home"
-        description="Hunts y mejor multiplicador se calculan solos desde los hunts cargados."
+        title="Partner oficial (home)"
+        description="El bloque «Chupetti by 1xSlots» de la home. Si el casino no está activo, el bloque no se muestra."
       >
+        <PartnerForm partner={settings.partner} casinos={casinosRows.data ?? []} />
+      </Section>
+
+      <Section title="Stats de la Home" description="Los hunts abiertos y el mejor multiplicador se calculan solos.">
         <HomeStatsForm years={settings.home_stats.years_streaming} prizes={settings.home_stats.monthly_prizes} />
       </Section>
 

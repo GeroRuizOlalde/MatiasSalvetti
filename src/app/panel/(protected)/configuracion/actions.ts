@@ -58,6 +58,31 @@ export async function saveHomeStats(_prev: ActionState, formData: FormData): Pro
   return (await saveSetting("home_stats", parsed.data)) ?? { ok: "Stats guardadas." };
 }
 
+const MAX_PERKS = 4;
+
+const partnerSchema = z.object({
+  casino_slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]+$/, "Elegí el casino partner."),
+  description: z.string().trim().min(1, "Escribí el texto del bloque.").max(400),
+});
+
+/** Bloque «Partner oficial» de la home: casino, texto y hasta 4 beneficios (etiqueta + valor). */
+export async function savePartner(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = partnerSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+  const perks = Array.from({ length: MAX_PERKS }, (_, i) => ({
+    label: String(formData.get(`perk_label_${i}`) ?? "")
+      .trim()
+      .slice(0, 60),
+    value: String(formData.get(`perk_value_${i}`) ?? "")
+      .trim()
+      .slice(0, 30),
+  })).filter((perk) => perk.label);
+  return (await saveSetting("partner", { ...parsed.data, perks })) ?? { ok: "Bloque de partner guardado." };
+}
+
 const generalSchema = z.object({
   helpline: z.string().trim().min(1, "Completá la línea de ayuda.").max(200),
   min_age_days: z.coerce.number().int().min(0).max(3650),
