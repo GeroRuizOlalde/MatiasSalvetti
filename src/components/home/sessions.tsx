@@ -61,10 +61,10 @@ export function Sessions({ cards }: { cards: SessionCard[] }) {
       <SectionHeading id="sessions-title" kicker="lo que pasa en el stream" title="Seguí cada sesión" />
       <ul className="grid gap-4 md:grid-cols-3">
         {cards.map(({ key, title, href, description, status, meta, facts }) => (
-          <li key={key}>
+          <li key={key} className="reveal">
             <Link
               href={href}
-              className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-accent/60"
+              className="group lift flex h-full flex-col rounded-2xl border border-line bg-surface p-5 hover:border-accent/60"
             >
               <div className="flex items-center justify-between gap-3">
                 <span

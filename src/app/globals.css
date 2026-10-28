@@ -23,6 +23,10 @@
   --animate-spin-slow: spin 60s linear infinite;
   --animate-drift: drift 13s ease-in-out infinite;
   --animate-live-pulse: live-pulse 1.6s ease-in-out infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-bob: bob 7s ease-in-out infinite;
+  --animate-orbit: spin 40s linear infinite;
+  --animate-orbit-reverse: spin 40s linear infinite reverse;
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -35,6 +39,15 @@
   @keyframes drift {
     0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--drift-rotate, 0deg)); }
     50% { transform: translate3d(0, -18px, 0) rotate(calc(var(--drift-rotate, 0deg) + 8deg)); }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
+  }
+  /* Flota y se balancea: cada elemento usa su propia duración, demora y giro (--bob-rotate). */
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(calc(var(--bob-rotate, 0deg) * -1)); }
+    50% { transform: translateY(-14px) rotate(var(--bob-rotate, 0deg)); }
   }
   @keyframes live-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
@@ -86,6 +99,40 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Las secciones aparecen al hacer scroll (sin JavaScript; donde el navegador no lo soporta, se ven directo). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(36px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Tarjetas que se levantan y brillan al pasar el mouse. */
+.lift {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px -18px rgb(157 59 255 / 0.7);
 }
 
 @media (prefers-reduced-motion: reduce) {

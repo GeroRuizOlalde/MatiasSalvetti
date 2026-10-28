@@ -12,7 +12,7 @@ export function WagerTeaser({ race, top }: { race: PublicRace | null; top: Leade
 
   return (
     <section aria-labelledby="wager-title" className="mx-auto max-w-7xl px-4">
-      <div className="grid gap-8 rounded-3xl border border-line bg-[linear-gradient(135deg,rgb(157_59_255/0.18),transparent_60%)] p-6 sm:p-8 lg:grid-cols-2 lg:items-center">
+      <div className="reveal grid gap-8 rounded-3xl border border-line bg-[linear-gradient(135deg,rgb(157_59_255/0.18),transparent_60%)] p-6 sm:p-8 lg:grid-cols-2 lg:items-center">
         <div>
           <p className="num text-xs tracking-[0.2em] text-subtle uppercase">
             {active ? (
@@ -42,7 +42,7 @@ export function WagerTeaser({ race, top }: { race: PublicRace | null; top: Leade
               <li
                 key={row.user_id}
                 className={cn(
-                  "flex items-center gap-4 rounded-xl border bg-bg/60 px-4 py-3",
+                  "lift flex items-center gap-4 rounded-xl border bg-bg/60 px-4 py-3",
                   row.rank === 1 ? "border-gold/50" : "border-line",
                 )}
               >

@@ -39,7 +39,7 @@ export default async function BonusBuysPage() {
               </h2>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {list.map((session) => (
-                  <li key={session.id}>
+                  <li key={session.id} className="reveal">
                     <BuySessionCard session={session} />
                   </li>
                 ))}

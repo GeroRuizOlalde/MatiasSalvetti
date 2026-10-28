@@ -39,7 +39,7 @@ export default async function BonusBattlePage() {
               </h2>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {list.map((battle) => (
-                  <li key={battle.id}>
+                  <li key={battle.id} className="reveal">
                     <BattleCard battle={battle} />
                   </li>
                 ))}

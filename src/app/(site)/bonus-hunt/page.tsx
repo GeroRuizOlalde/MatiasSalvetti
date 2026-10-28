@@ -37,7 +37,7 @@ export default async function BonusHuntPage() {
             </h2>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {active.map((hunt) => (
-                <li key={hunt.id}>
+                <li key={hunt.id} className="reveal">
                   <HuntCard hunt={hunt} />
                 </li>
               ))}
@@ -52,7 +52,7 @@ export default async function BonusHuntPage() {
             </h2>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {past.map((hunt) => (
-                <li key={hunt.id}>
+                <li key={hunt.id} className="reveal">
                   <HuntCard hunt={hunt} />
                 </li>
               ))}
