@@ -6,21 +6,28 @@ import type { Enums } from "@/types/database";
 type Props = {
   stats: HuntStats;
   startCost: number;
+  /** Con cuánto se empezó a abrir los bonos. */
+  openingBalance: number;
   currency: Enums<"currency_code">;
   finalBalance: number | null;
   className?: string;
 };
 
-export function HuntStatsGrid({ stats, startCost, currency, finalBalance, className }: Props) {
+export function HuntStatsGrid({ stats, startCost, openingBalance, currency, finalBalance, className }: Props) {
   const finished = finalBalance !== null;
   const profit = finished ? finalBalance - startCost : null;
 
-  const items: { label: string; value: string; tone?: "gold" | "good" | "bad" }[] = [
-    { label: "Inversión", value: formatMoney(startCost, currency) },
+  const items: { label: string; value: string; note?: string; tone?: "gold" | "good" | "bad" }[] = [
+    {
+      label: "Inversión",
+      value: formatMoney(startCost, currency),
+      note: openingBalance > 0 ? `Saldo al abrir: ${formatMoney(openingBalance, currency)}` : undefined,
+    },
     { label: "Bonos", value: `${formatInteger(stats.opened)}/${formatInteger(stats.bonuses)}` },
     {
-      label: finished ? "Balance final" : "Ganado",
-      value: formatMoney(finalBalance ?? stats.won, currency),
+      // Con saldo de apertura, lo que importa es el balance (saldo + lo pagado), no solo lo pagado.
+      label: finished ? "Balance final" : openingBalance > 0 ? "Balance actual" : "Ganado",
+      value: formatMoney(finalBalance ?? stats.balance, currency),
       tone: "gold",
     },
     finished
@@ -53,6 +60,7 @@ export function HuntStatsGrid({ stats, startCost, currency, finalBalance, classN
           >
             {item.value}
           </dd>
+          {item.note ? <dd className="num mt-0.5 text-xs text-subtle">{item.note}</dd> : null}
         </div>
       ))}
     </dl>

@@ -42,6 +42,11 @@ const huntSchema = z.object({
   casino_id: optionalUuid,
   currency: z.enum(["ARS", "USD"]),
   start_cost: money("La inversión tiene que ser un número mayor o igual a 0."),
+  // Vacío = arranca sin saldo.
+  opening_balance: z.preprocess(
+    (v) => (v === "" || v === undefined ? 0 : v),
+    money("El saldo al empezar a abrir tiene que ser un número mayor o igual a 0."),
+  ),
   status: z.enum(["draft", "collecting", "opening", "finished"]).default("draft"),
   calls_open: checkbox,
   guesses_open: checkbox,

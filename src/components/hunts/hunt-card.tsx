@@ -5,13 +5,13 @@ import type { HuntSummary } from "@/lib/hunts";
 import { HuntStatusBadge } from "./status-badge";
 
 export function HuntCard({ hunt }: { hunt: HuntSummary }) {
-  const stats = huntStats(hunt.start_cost, hunt.bonuses);
+  const stats = huntStats(hunt.start_cost, hunt.bonuses, hunt.opening_balance);
   const facts = [
     { label: "Bonos", value: `${formatInteger(stats.opened)}/${formatInteger(stats.bonuses)}` },
     { label: "Inversión", value: formatMoney(hunt.start_cost, hunt.currency) },
     {
-      label: hunt.final_balance !== null ? "Balance final" : "Ganado",
-      value: formatMoney(hunt.final_balance ?? stats.won, hunt.currency),
+      label: hunt.final_balance !== null ? "Balance final" : hunt.opening_balance > 0 ? "Balance actual" : "Ganado",
+      value: formatMoney(hunt.final_balance ?? stats.balance, hunt.currency),
     },
     { label: "Mejor multi", value: stats.best ? formatMulti(stats.best.multi) : "—" },
   ];

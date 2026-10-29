@@ -18,7 +18,9 @@ export default async function PanelHuntsPage() {
   const [{ data: hunts, error }, { data: casinos }, { data: pending }] = await Promise.all([
     supabase
       .from("hunts")
-      .select("id, title, status, currency, start_cost, final_balance, created_at, bonuses:hunt_bonuses(bet, payout)")
+      .select(
+        "id, title, status, currency, start_cost, opening_balance, final_balance, created_at, bonuses:hunt_bonuses(bet, payout)",
+      )
       .order("created_at", { ascending: false })
       .limit(100),
     casinoOptions(supabase),
@@ -53,7 +55,7 @@ export default async function PanelHuntsPage() {
       ) : (
         <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
           {hunts.map((hunt) => {
-            const stats = huntStats(hunt.start_cost, hunt.bonuses);
+            const stats = huntStats(hunt.start_cost, hunt.bonuses, hunt.opening_balance);
             const calls = pendingByHunt.get(hunt.id) ?? 0;
             return (
               <li key={hunt.id}>
@@ -70,7 +72,7 @@ export default async function PanelHuntsPage() {
                   ) : null}
                   <span className="num ml-auto text-sm text-muted">
                     {formatInteger(stats.opened)}/{formatInteger(stats.bonuses)} bonos ·{" "}
-                    {formatMoney(hunt.final_balance ?? stats.won, hunt.currency)}
+                    {formatMoney(hunt.final_balance ?? stats.balance, hunt.currency)}
                   </span>
                   <span className="text-xs text-subtle">{formatDate(hunt.created_at)}</span>
                 </Link>

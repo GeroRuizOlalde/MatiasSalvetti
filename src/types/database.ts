@@ -180,6 +180,7 @@ export type Database = {
           casino_id: string | null;
           currency: Database["public"]["Enums"]["currency_code"];
           start_cost: number;
+          opening_balance: number;
           status: Database["public"]["Enums"]["hunt_status"];
           calls_open: boolean;
           guesses_open: boolean;
@@ -196,6 +197,7 @@ export type Database = {
           casino_id?: string | null;
           currency?: Database["public"]["Enums"]["currency_code"];
           start_cost: number;
+          opening_balance?: number;
           status?: Database["public"]["Enums"]["hunt_status"];
           calls_open?: boolean;
           guesses_open?: boolean;

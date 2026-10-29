@@ -1,6 +1,7 @@
 // Números de un Bonus Hunt a partir de la inversión inicial y los bonos.
 // "Multi" es payout / apuesta. El multi necesario es el promedio que tienen que
-// pagar los bonos que faltan abrir para recuperar la inversión.
+// pagar los bonos que faltan abrir para recuperar la inversión. El saldo de apertura
+// (con cuánto se empieza a abrir) ya cuenta como recuperado.
 
 export type HuntBonusAmounts = { bet: number; payout: number | null };
 
@@ -10,16 +11,18 @@ export type HuntStats = {
   totalBet: number;
   /** Suma de lo pagado por los bonos abiertos. */
   won: number;
+  /** Saldo de apertura + lo pagado: lo que hay en la cuenta ahora. */
+  balance: number;
   /** Apuestas de los bonos que faltan abrir. */
   remainingBet: number;
   /** Multi promedio de los bonos abiertos (ponderado por apuesta), o null si no hay. */
   averageMulti: number | null;
   /** Multi promedio necesario en los bonos sin abrir para empatar. null si ya no faltan bonos. 0 si ya se recuperó. */
   requiredMulti: number | null;
-  /** Multi para empatar antes de abrir ninguno (inversión / apuestas totales). */
+  /** Multi para empatar antes de abrir ninguno ((inversión - saldo de apertura) / apuestas totales). */
   breakEvenMulti: number | null;
   best: { index: number; multi: number } | null;
-  /** Ganado menos inversión. */
+  /** Balance (saldo de apertura + ganado) menos inversión. */
   profit: number;
 };
 
@@ -29,7 +32,7 @@ export function bonusMulti(bonus: HuntBonusAmounts) {
   return bonus.payout === null || bonus.bet <= 0 ? null : bonus.payout / bonus.bet;
 }
 
-export function huntStats(startCost: number, bonuses: HuntBonusAmounts[]): HuntStats {
+export function huntStats(startCost: number, bonuses: HuntBonusAmounts[], openingBalance = 0): HuntStats {
   let totalBet = 0;
   let won = 0;
   let openedBet = 0;
@@ -47,19 +50,21 @@ export function huntStats(startCost: number, bonuses: HuntBonusAmounts[]): HuntS
   });
 
   const remainingBet = totalBet - openedBet;
-  const missing = startCost - won;
+  const balance = openingBalance + won;
+  const missing = startCost - balance;
 
   return {
     bonuses: bonuses.length,
     opened,
     totalBet: round2(totalBet),
     won: round2(won),
+    balance: round2(balance),
     remainingBet: round2(remainingBet),
     averageMulti: openedBet > 0 ? won / openedBet : null,
     requiredMulti: remainingBet > 0 ? Math.max(0, missing) / remainingBet : null,
-    breakEvenMulti: totalBet > 0 ? startCost / totalBet : null,
+    breakEvenMulti: totalBet > 0 ? Math.max(0, startCost - openingBalance) / totalBet : null,
     best,
-    profit: round2(won - startCost),
+    profit: round2(balance - startCost),
   };
 }
 
