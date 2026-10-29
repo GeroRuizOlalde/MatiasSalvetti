@@ -15,7 +15,7 @@ export default function PanelLoginPage({ searchParams }: PageProps<"/panel/login
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-center">
-        <h1 className="font-display text-4xl tracking-wide text-accent-light uppercase">Panel MS</h1>
+        <h1 className="font-display text-4xl tracking-wide text-accent-light uppercase">Panel</h1>
         <p className="mt-2 text-sm text-muted">Entrá con la cuenta de Twitch que tiene permisos de mod o admin.</p>
         <Suspense fallback={<div className="mt-6 h-11 animate-pulse rounded-lg bg-surface-2" />}>
           <PanelLoginBox searchParams={searchParams} />
