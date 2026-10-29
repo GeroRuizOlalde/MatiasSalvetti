@@ -5,7 +5,6 @@ import {
   Crosshair,
   Gift,
   House,
-  ShieldCheck,
   ShoppingCart,
   Swords,
   Trophy,
@@ -35,13 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/cuartel", label: "Cuartel", icon: Castle },
     ],
   },
-  {
-    title: "Info",
-    items: [
-      { href: "/como-participar", label: "Cómo participar", icon: BookOpen },
-      { href: "/juego-responsable", label: "Juego responsable", icon: ShieldCheck },
-    ],
-  },
+  { title: "Info", items: [{ href: "/como-participar", label: "Cómo participar", icon: BookOpen }] },
 ];
 
 export function isActivePath(pathname: string, href: string) {

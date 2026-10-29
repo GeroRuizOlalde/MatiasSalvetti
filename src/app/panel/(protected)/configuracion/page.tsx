@@ -43,10 +43,7 @@ export default async function ConfiguracionPage() {
       </Section>
 
       <Section title="General">
-        <GeneralForm
-          helpline={settings.responsible_gaming_helpline}
-          minAgeDays={settings.twitch_min_account_age_days}
-        />
+        <GeneralForm minAgeDays={settings.twitch_min_account_age_days} />
       </Section>
 
       <Section

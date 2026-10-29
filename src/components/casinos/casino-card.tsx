@@ -12,7 +12,14 @@ export function CasinoCard({ casino }: { casino: PublicCasino }) {
     <article className="flex h-full flex-col rounded-2xl border border-line bg-surface p-5">
       <div className="flex h-16 items-center">
         {logo ? (
-          <Image src={logo} alt={`Logo de ${casino.name}`} width={160} height={64} className="h-12 w-auto object-contain" />
+          // Caja fija: cada logo tiene otra proporción y así todos quedan del mismo tamaño.
+          <Image
+            src={logo}
+            alt={`Logo de ${casino.name}`}
+            width={192}
+            height={48}
+            className="h-12 w-48 object-contain object-left"
+          />
         ) : (
           <span className="font-display text-3xl tracking-wide uppercase">{casino.name}</span>
         )}

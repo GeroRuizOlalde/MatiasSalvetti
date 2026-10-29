@@ -15,7 +15,6 @@ const ROUTES = [
   { path: "/sorteos", priority: 0.8 },
   { path: "/replays", priority: 0.7 },
   { path: "/como-participar", priority: 0.6 },
-  { path: "/juego-responsable", priority: 0.4 },
   { path: "/bases-y-condiciones", priority: 0.3 },
   { path: "/privacidad", priority: 0.3 },
 ];

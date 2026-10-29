@@ -4,7 +4,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { casinoLogoUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { CatalogTabs } from "../catalog-tabs";
-import { CasinoForm } from "./casino-form";
+import { CasinoForm, DeleteCasinoForm } from "./casino-form";
 
 export const metadata: Metadata = { title: "Casinos" };
 
@@ -42,6 +42,9 @@ export default async function CatalogoCasinosPage() {
                   ) : null}
                 </div>
                 <CasinoForm casino={casino} />
+                <div className="mt-3 border-t border-line pt-3">
+                  <DeleteCasinoForm casinoId={casino.id} name={casino.name} />
+                </div>
               </li>
             );
           })}
