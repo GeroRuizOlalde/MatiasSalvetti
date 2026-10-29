@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 export const BRAND_ASSETS = {
-  logo: { src: "/brand/logo.webp", width: 300, height: 240 },
+  logo: { src: "/brand/logo-cara.webp", width: 376, height: 574 },
   personaje: { src: "/brand/personaje.png", width: 1080, height: 1350 },
   partner: { src: "/brand/1xslots.png", width: 784, height: 124 },
 } as const;
