@@ -1125,6 +1125,54 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["rate_limits"]["Insert"]>;
         Relationships: [];
       };
+      replay_providers: {
+        Row: { id: string; name: string; domain: string; embeddable: boolean; created_at: string };
+        Insert: { id?: string; name: string; domain: string; embeddable?: boolean; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["replay_providers"]["Insert"]>;
+        Relationships: [];
+      };
+      replays: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          host: string;
+          slot_id: string | null;
+          slot_name: string;
+          multi: number | null;
+          note: string | null;
+          status: "pending" | "approved" | "rejected";
+          reject_reason: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          host: string;
+          slot_id?: string | null;
+          slot_name: string;
+          multi?: number | null;
+          note?: string | null;
+          status?: "pending" | "approved" | "rejected";
+          reject_reason?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["replays"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "replays_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tipeos: {
         Row: {
           id: string;
@@ -1215,6 +1263,17 @@ export type Database = {
       check_overlay_token: { Args: { p_key: string }; Returns: boolean };
       decide_buy_tipeo: { Args: { p_buy: string; p_give: boolean }; Returns: string };
       give_manual_tipeo: { Args: { p_user: string; p_note: string; p_slot?: string | null }; Returns: string };
+      submit_replay: {
+        Args: {
+          p_url: string;
+          p_slot?: string | null;
+          p_slot_name?: string | null;
+          p_multi?: number | null;
+          p_note?: string | null;
+        };
+        Returns: string;
+      };
+      review_replay: { Args: { p_id: string; p_approve: boolean; p_reason?: string | null }; Returns: undefined };
       remove_manual_tipeo: { Args: { p_tipeo: string }; Returns: undefined };
       decide_tipeo: { Args: { p_bonus: string; p_give: boolean }; Returns: string };
       claim_mission: { Args: { p_mission: string; p_code?: string | null }; Returns: undefined };

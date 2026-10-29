@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Castle,
+  Clapperboard,
   Crosshair,
   Gift,
   House,
@@ -30,6 +31,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/wager-race", label: "Wager Race", icon: Trophy },
       { href: "/sorteos", label: "Sorteos", icon: Gift },
+      { href: "/replays", label: "Replays", icon: Clapperboard },
       { href: "/cuartel", label: "Cuartel", icon: Castle },
     ],
   },

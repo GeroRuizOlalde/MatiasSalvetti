@@ -31,6 +31,7 @@ test.describe("páginas públicas", () => {
     { path: "/bonus-battle", heading: "Bonus Battle" },
     { path: "/wager-race", heading: "Wager Race" },
     { path: "/sorteos", heading: "Sorteos" },
+    { path: "/replays", heading: "Replays" },
     { path: "/como-participar", heading: "Cómo participar" },
     { path: "/juego-responsable", heading: "Juego responsable" },
     { path: "/bases-y-condiciones", heading: "Bases y condiciones" },

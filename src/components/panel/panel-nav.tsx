@@ -2,6 +2,7 @@
 
 import {
   BadgeCheck,
+  Clapperboard,
   Coins,
   Crosshair,
   ExternalLink,
@@ -45,6 +46,7 @@ const GROUPS: Group[] = [
       { href: "/panel/wager-race", label: "Wager Race", icon: Trophy, adminOnly: true },
       { href: "/panel/verificaciones", label: "Verificaciones", icon: BadgeCheck, adminOnly: true },
       { href: "/panel/sorteos", label: "Sorteos", icon: Gift, adminOnly: true },
+      { href: "/panel/replays", label: "Replays", icon: Clapperboard },
       { href: "/panel/puntos", label: "Puntos y misiones", icon: Coins, adminOnly: true },
     ],
   },
