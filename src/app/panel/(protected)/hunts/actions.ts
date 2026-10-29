@@ -199,7 +199,7 @@ export async function reviewCall(_prev: ActionState, formData: FormData): Promis
 // Tipeos
 // -----------------------------------------------------------------------------
 
-const tipeoSchema = z.object({ kind: z.enum(["bonus", "buy"]), id: z.uuid(), give: z.enum(["1", "0"]) });
+const tipeoSchema = z.object({ kind: z.enum(["bonus", "buy", "manual"]), id: z.uuid(), give: z.enum(["1", "0"]) });
 
 /** Da o descarta el tipeo de un bono (o compra) abierto que vino de un call y pagó más de 110x. */
 export async function decideTipeo(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -210,6 +210,13 @@ export async function decideTipeo(_prev: ActionState, formData: FormData): Promi
 
   const supabase = await createClient();
   const { kind, id } = parsed.data;
+  // Los tipeos a mano solo se pueden quitar (no hay bono que «descartar»).
+  if (kind === "manual") {
+    const { error } = await supabase.rpc("remove_manual_tipeo", { p_tipeo: id });
+    if (error) return { error: friendly(error.message) };
+    refresh();
+    return { ok: "Tipeo quitado." };
+  }
   const { error } =
     kind === "bonus"
       ? await supabase.rpc("decide_tipeo", { p_bonus: id, p_give: give })

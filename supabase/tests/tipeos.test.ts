@@ -103,3 +103,49 @@ describe("tipeos", () => {
     expect(left.rows).toHaveLength(0);
   });
 });
+
+describe("tipeo a mano", () => {
+  it("el panel le da tipeo a un usuario con una descripción y se puede quitar", async () => {
+    const { rows } = await as(db, mod, () =>
+      db.query<{ id: string }>("select public.give_manual_tipeo($1, $2, $3) as id", [
+        viewer.id,
+        "  Gran call en el stream del sábado  ",
+        "Sugar Rush",
+      ]),
+    );
+    const tipeo = await as(db, mod, () =>
+      db.query("select user_id, slot_name, note, status, bonus_id, buy_id from public.tipeos where id = $1", [
+        rows[0].id,
+      ]),
+    );
+    expect(tipeo.rows).toEqual([
+      {
+        user_id: viewer.id,
+        slot_name: "Sugar Rush",
+        note: "Gran call en el stream del sábado",
+        status: "given",
+        bonus_id: null,
+        buy_id: null,
+      },
+    ]);
+    const notice = await as(db, viewer, () =>
+      db.query<{ body: string; link: string }>(
+        "select body, link from public.notifications where kind = 'tipeo_given' order by created_at desc limit 1",
+      ),
+    );
+    expect(notice.rows[0]).toEqual({ body: "Gran call en el stream del sábado", link: "/cuartel" });
+
+    await as(db, mod, () => db.query("select public.remove_manual_tipeo($1)", [rows[0].id]));
+    const left = await db.query("select id from public.tipeos where id = $1", [rows[0].id]);
+    expect(left.rows).toHaveLength(0);
+  });
+
+  it("pide descripción y solo lo puede dar el panel", async () => {
+    await expect(
+      as(db, mod, () => db.query("select public.give_manual_tipeo($1, '   ')", [viewer.id])),
+    ).rejects.toThrow(/invalid_note/);
+    await expect(
+      as(db, viewer, () => db.query("select public.give_manual_tipeo($1, 'me lo doy')", [viewer.id])),
+    ).rejects.toThrow(/forbidden/);
+  });
+});
