@@ -109,7 +109,7 @@ async function BuySessionDetail({ params }: Pick<PageProps<"/bonus-buys/[id]">, 
 const CALL_STATUS = {
   pending: "Pendiente de revisión",
   accepted: "¡Aceptado! Ya está en la sesión.",
-  rejected: "Rechazado. Podés pedir otro.",
+  rejected: "Rechazado: ya no podés pedir otro en esta sesión.",
 } as const;
 
 /** Lee la sesión: va dentro de un <Suspense>. */
@@ -144,12 +144,11 @@ function CallBox({ sessionId, callsOpen }: { sessionId: string; callsOpen: boole
                 </span>
               </p>
             ) : null}
-            {callsOpen && (!call || call.status === "rejected") ? (
+            {callsOpen && !call ? (
               <CallForm
                 action={submitBuyCall}
                 hidden={{ session_id: sessionId }}
                 scopeLabel="sesión"
-                retry={call?.status === "rejected"}
                 taken={(taken ?? []).map((t) => t.slot_name)}
               />
             ) : null}

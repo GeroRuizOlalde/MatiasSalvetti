@@ -10,6 +10,7 @@ import { viewerError } from "@/lib/viewer-actions";
 const ERRORS: Record<string, string> = {
   calls_closed: "Los calls de esta sesión están cerrados.",
   call_already_accepted: "Tu call ya está en la sesión.",
+  call_rejected: "Tu call ya fue rechazado: no podés pedir otro en esta sesión.",
   call_already_sent: "Ya mandaste tu call para esta sesión. No se puede cambiar.",
   slot_taken: "Esa máquina ya la pidió otro viewer (o ya se compró). Elegí otra.",
   invalid_slot: "Elegí un slot de la lista o escribí su nombre.",

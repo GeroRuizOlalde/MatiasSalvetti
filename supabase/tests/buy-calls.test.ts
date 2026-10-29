@@ -72,6 +72,9 @@ describe("calls en Bonus Buys", () => {
 
     const first = await callOf(session, viewerA);
     await as(db, mod, () => db.query("select public.reject_buy_call($1)", [first.id]));
+    await expect(
+      as(db, viewerA, () => db.query("select public.submit_buy_call($1, null, 'Otro')", [session])),
+    ).rejects.toThrow(/call_rejected/);
     await as(db, viewerB, () => db.query("select public.submit_buy_call($1, null, 'Gates of Olympus')", [session]));
 
     const second = await callOf(session, viewerB);

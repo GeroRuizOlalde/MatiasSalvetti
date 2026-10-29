@@ -12,6 +12,7 @@ import { BATTLE_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
 import { addEntry, reviewBattleCall, saveBattle, saveMatch } from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -100,9 +101,17 @@ export function AddEntryForm({ battleId }: { battleId: string }) {
 /** Aceptar o rechazar el call de un viewer: si se acepta, su slot entra al cuadro. */
 export function BattleCallReviewForm({ battleId, callId }: { battleId: string; callId: string }) {
   const [state, formAction] = useActionState<ActionState, FormData>(reviewBattleCall, INITIAL_ACTION_STATE);
+  // Rechazar es definitivo: se confirma. Aceptar va directo.
+  const confirmReject = useConfirmSubmit(
+    confirmFromText(
+      "¿Rechazar el call? El viewer no va a poder pedir otro slot. Usalo, por ejemplo, si el bono no salió.",
+    ),
+    (b) => b?.getAttribute("value") === "reject",
+  );
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2">
+    <form action={formAction} className="flex flex-wrap items-center gap-2" onSubmit={confirmReject.onSubmit}>
+      {confirmReject.dialog}
       <input type="hidden" name="id" value={callId} />
       <input type="hidden" name="battle_id" value={battleId} />
       <button

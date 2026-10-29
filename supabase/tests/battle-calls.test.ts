@@ -138,6 +138,16 @@ describe("calls en Bonus Battle", () => {
     expect(rows.map((r) => r.n)).toEqual([32, 16, 8, 4, 2, 1]);
   });
 
+  it("un call rechazado no se puede volver a pedir", async () => {
+    const battle = await createBattle();
+    await as(db, viewers[1], () => db.query("select public.submit_battle_call($1, null, 'Sugar Rush')", [battle]));
+    const call = await callOf(battle, viewers[1]);
+    await as(db, mod, () => db.query("select public.reject_battle_call($1)", [call.id]));
+    await expect(
+      as(db, viewers[1], () => db.query("select public.submit_battle_call($1, null, 'Otro')", [battle])),
+    ).rejects.toThrow(/call_rejected/);
+  });
+
   it("quitar el slot antes de arrancar libera al viewer", async () => {
     const battle = await createBattle();
     await as(db, viewers[0], () => db.query("select public.submit_battle_call($1, null, 'Wanted')", [battle]));
