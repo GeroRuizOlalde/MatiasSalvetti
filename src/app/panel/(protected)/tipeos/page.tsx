@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { PenLine, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TipeoButtons } from "@/components/panel/tipeo-buttons";
@@ -7,6 +7,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { formatDate, formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { TIPEO_MIN_MULTI } from "@/lib/tipeos";
+import { ManualTipeoForm } from "./manual-tipeo-form";
 
 export const metadata: Metadata = { title: "Tipeos" };
 
@@ -17,7 +18,7 @@ export default async function PanelTipeosPage() {
     supabase
       .from("tipeos")
       .select(
-        "id, bonus_id, buy_id, user_id, slot_name, bet, payout, multi, status, created_at, hunt:hunts(id, title, currency), session:buy_sessions(id, title, currency)",
+        "id, bonus_id, buy_id, user_id, slot_name, bet, payout, multi, note, status, created_at, hunt:hunts(id, title, currency), session:buy_sessions(id, title, currency)",
       )
       .order("created_at", { ascending: false })
       .limit(500),
@@ -41,8 +42,9 @@ export default async function PanelTipeosPage() {
   // Hunts y buys en un mismo formato: de dónde viene y a qué página del panel lleva.
   const tipeos = (tipeoRows ?? []).map((t) => ({
     ...t,
-    kind: t.buy_id ? ("buy" as const) : ("bonus" as const),
-    targetId: (t.buy_id ?? t.bonus_id) as string,
+    // A mano: sin bono ni compra; se quita por el id del tipeo.
+    kind: t.buy_id ? ("buy" as const) : t.bonus_id ? ("bonus" as const) : ("manual" as const),
+    targetId: t.buy_id ?? t.bonus_id ?? t.id,
     source: t.hunt
       ? { title: t.hunt.title, href: `/panel/hunts/${t.hunt.id}`, currency: t.hunt.currency }
       : t.session
@@ -81,7 +83,7 @@ export default async function PanelTipeosPage() {
   const byViewer = new Map<string, { count: number; best: number }>();
   for (const t of given) {
     const row = byViewer.get(t.user_id ?? "") ?? { count: 0, best: 0 };
-    byViewer.set(t.user_id ?? "", { count: row.count + 1, best: Math.max(row.best, t.multi) });
+    byViewer.set(t.user_id ?? "", { count: row.count + 1, best: Math.max(row.best, t.multi ?? 0) });
   }
   const ranking = [...byViewer.entries()]
     .map(([userId, row]) => ({ userId, ...row }))
@@ -97,6 +99,16 @@ export default async function PanelTipeosPage() {
           recomienda darle tipeo. Acá ves los que faltan decidir y la lista de tipeos dados.
         </p>
       </div>
+
+      <section aria-labelledby="manual" className="rounded-2xl border border-line bg-surface p-5">
+        <h2 id="manual" className="mb-1 flex items-center gap-2 font-semibold">
+          <PenLine className="size-4 text-accent-text" aria-hidden /> Dar tipeo a mano
+        </h2>
+        <p className="mb-4 text-sm text-muted">
+          Para darle tipeo a alguien sin que venga de un bono: elegí el usuario y explicá el motivo.
+        </p>
+        <ManualTipeoForm />
+      </section>
 
       {pending.length ? (
         <section aria-labelledby="pending" className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
@@ -139,7 +151,8 @@ export default async function PanelTipeosPage() {
                 <p className="text-xs text-subtle">#{i + 1}</p>
                 <p className="truncate font-semibold">{nameOf(row.userId || null)}</p>
                 <p className="num text-sm text-gold">
-                  {formatInteger(row.count)} {row.count === 1 ? "tipeo" : "tipeos"} · mejor {formatMulti(row.best)}
+                  {formatInteger(row.count)} {row.count === 1 ? "tipeo" : "tipeos"}
+                  {row.best > 0 ? ` · mejor ${formatMulti(row.best)}` : ""}
                 </p>
               </li>
             ))}
@@ -167,7 +180,13 @@ export default async function PanelTipeosPage() {
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{nameOf(tipeo.user_id)}</p>
                   <p className="text-xs text-subtle">
-                    {tipeo.slot_name} · {formatDate(tipeo.created_at)}
+                    {tipeo.kind === "manual" ? (
+                      <span className="mr-1 inline-flex items-center gap-1 rounded bg-surface-2 px-1.5 py-0.5 font-semibold text-muted">
+                        <PenLine className="size-3" aria-hidden /> A mano
+                      </span>
+                    ) : null}
+                    {tipeo.slot_name ? `${tipeo.slot_name} · ` : ""}
+                    {formatDate(tipeo.created_at)}
                     {tipeo.source ? (
                       <>
                         {" · "}
@@ -177,14 +196,19 @@ export default async function PanelTipeosPage() {
                       </>
                     ) : null}
                   </p>
+                  {tipeo.note ? <p className="mt-1 text-sm text-muted">{tipeo.note}</p> : null}
                 </div>
-                <p className="num text-sm text-muted">
-                  {formatMoney(tipeo.bet, tipeo.source?.currency ?? "ARS")} →{" "}
-                  {formatMoney(tipeo.payout, tipeo.source?.currency ?? "ARS")}
-                </p>
-                <span className="num rounded-full bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">
-                  {formatMulti(tipeo.multi)}
-                </span>
+                {tipeo.bet !== null && tipeo.payout !== null ? (
+                  <p className="num text-sm text-muted">
+                    {formatMoney(tipeo.bet, tipeo.source?.currency ?? "ARS")} →{" "}
+                    {formatMoney(tipeo.payout, tipeo.source?.currency ?? "ARS")}
+                  </p>
+                ) : null}
+                {tipeo.multi !== null ? (
+                  <span className="num rounded-full bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">
+                    {formatMulti(tipeo.multi)}
+                  </span>
+                ) : null}
                 <TipeoButtons kind={tipeo.kind} id={tipeo.targetId} given />
               </li>
             ))}
