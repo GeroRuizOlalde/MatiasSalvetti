@@ -5,7 +5,7 @@ import { ReplayViewer } from "@/components/replays/replay-viewer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
-import { formatDateTime, formatMulti } from "@/lib/format";
+import { formatDateTime, formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import { matchProvider } from "@/lib/replay-providers";
 import { createClient } from "@/lib/supabase/server";
 import { AddProviderForm, ProviderActions, ReplayReviewForm } from "./forms";
@@ -30,7 +30,7 @@ export default async function PanelReplaysPage({ searchParams }: PageProps<"/pan
     supabase
       .from("replays")
       .select(
-        "id, url, host, slot_name, multi, note, status, reject_reason, created_at, user:profiles!replays_user_id_fkey(display_name, twitch_login)",
+        "id, url, host, slot_name, multi, currency, bet, bonus_cost, payout, likes_count, comments_count, note, status, reject_reason, created_at, user:profiles!replays_user_id_fkey(display_name, twitch_login)",
       )
       .eq("status", tab)
       .order("created_at", { ascending: tab === "pending" })
@@ -94,7 +94,23 @@ export default async function PanelReplaysPage({ searchParams }: PageProps<"/pan
                       </p>
                       <p className="text-xs text-subtle">
                         {name} · {formatDateTime(replay.created_at)}
+                        {replay.status === "approved"
+                          ? ` · ${formatInteger(replay.likes_count)} me gusta · ${formatInteger(replay.comments_count)} comentarios`
+                          : ""}
                       </p>
+                      {replay.bet !== null || replay.bonus_cost !== null || replay.payout !== null ? (
+                        <p className="num mt-1 text-sm text-muted">
+                          {[
+                            replay.bet !== null ? `Apuesta ${formatMoney(replay.bet, replay.currency)}` : null,
+                            replay.bonus_cost !== null
+                              ? `Bono ${formatMoney(replay.bonus_cost, replay.currency)}`
+                              : null,
+                            replay.payout !== null ? `Pagó ${formatMoney(replay.payout, replay.currency)}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      ) : null}
                       <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
                         {provider ? (
                           <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-semibold text-muted">
