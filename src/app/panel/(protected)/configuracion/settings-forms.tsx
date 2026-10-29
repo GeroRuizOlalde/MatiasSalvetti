@@ -85,25 +85,11 @@ export function HomeStatsForm({ years, prizes }: { years: number | null; prizes:
   );
 }
 
-export function GeneralForm({ helpline, minAgeDays }: { helpline: string; minAgeDays: number }) {
+export function GeneralForm({ minAgeDays }: { minAgeDays: number }) {
   const [state, action] = useActionState<ActionState, FormData>(saveGeneral, INITIAL_ACTION_STATE);
   const id = useId();
   return (
     <form action={action} className="grid gap-3 sm:grid-cols-2">
-      <Field
-        id={`${id}-help`}
-        label="Línea de ayuda (juego responsable)"
-        hint="Se muestra en el footer y en /juego-responsable."
-      >
-        <input
-          id={`${id}-help`}
-          name="helpline"
-          required
-          maxLength={200}
-          defaultValue={helpline}
-          className={inputClass}
-        />
-      </Field>
       <Field
         id={`${id}-age`}
         label="Antigüedad mínima de la cuenta de Twitch (días)"

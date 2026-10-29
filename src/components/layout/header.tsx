@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { LiveButton } from "./live-button";
 import { Logo } from "./logo";
@@ -12,12 +11,7 @@ export function TopBar() {
     <div className="border-b border-line bg-bg-alt">
       <p className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-1.5 text-xs text-muted">
         <span className="rounded border border-gold/60 px-1 text-[10px] font-bold text-gold">+18</span>
-        <span>
-          Contenido para mayores de edad. Jugá con responsabilidad.{" "}
-          <Link href="/juego-responsable" className="text-text underline underline-offset-2 hover:text-accent-light">
-            ¿Necesitás ayuda?
-          </Link>
-        </span>
+        <span>Contenido para mayores de edad. Jugá con responsabilidad.</span>
       </p>
     </div>
   );

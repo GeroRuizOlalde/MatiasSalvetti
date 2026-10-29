@@ -13,12 +13,11 @@ test.describe("gate +18", () => {
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
-  test("si dice que no, lo manda a juego responsable", async ({ page }) => {
+  test("si dice que no, no lo deja entrar", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "No", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Volvé cuando tengas 18" })).toBeVisible();
-    await page.getByRole("link", { name: "Leer sobre juego responsable" }).click();
-    await expect(page).toHaveURL(/\/juego-responsable$/);
+    await expect(page.getByRole("button", { name: "Sí, tengo 18 o más" })).toHaveCount(0);
   });
 });
 
@@ -31,8 +30,8 @@ test.describe("páginas públicas", () => {
     { path: "/bonus-battle", heading: "Bonus Battle" },
     { path: "/wager-race", heading: "Wager Race" },
     { path: "/sorteos", heading: "Sorteos" },
+    { path: "/replays", heading: "Replays" },
     { path: "/como-participar", heading: "Cómo participar" },
-    { path: "/juego-responsable", heading: "Juego responsable" },
     { path: "/bases-y-condiciones", heading: "Bases y condiciones" },
     { path: "/privacidad", heading: "Política de privacidad" },
   ];
@@ -42,7 +41,7 @@ test.describe("páginas públicas", () => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-      await expect(page.getByRole("contentinfo")).toContainText("Juego responsable");
+      await expect(page.getByRole("contentinfo")).toContainText("Bases y condiciones");
     });
   }
 

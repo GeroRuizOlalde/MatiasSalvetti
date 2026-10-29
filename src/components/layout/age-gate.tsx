@@ -1,7 +1,6 @@
 "use client";
 
 import { ShieldAlert } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -54,11 +53,7 @@ export function AgeGate() {
             ? "Esta web habla de casino online y es solo para mayores de edad."
             : "Esta web habla de casino online y apuestas. Para entrar tenés que ser mayor de 18 años."}
         </p>
-        {denied ? (
-          <Link href="/juego-responsable" className={buttonClasses({ variant: "secondary" })} onClick={() => dialogRef.current?.close()}>
-            Leer sobre juego responsable
-          </Link>
-        ) : (
+        {denied ? null : (
           <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row">
             <button type="button" autoFocus onClick={confirm} className={buttonClasses({ className: "flex-1" })}>
               Sí, tengo 18 o más

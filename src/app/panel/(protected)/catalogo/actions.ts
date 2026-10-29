@@ -8,6 +8,7 @@ import { CASINOS_TAG } from "@/lib/casinos";
 import { parseCsv } from "@/lib/csv";
 import { fetchSlotReportSlots, SlotReportError } from "@/lib/external/slot-report";
 import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_ASSETS_BUCKET } from "@/lib/storage";
 import { hasFile, uploadPublicImage } from "@/lib/uploads";
 
 const checkbox = z
@@ -170,4 +171,32 @@ export async function saveCasino(_prev: ActionState, formData: FormData): Promis
   updateTag(CASINOS_TAG);
   refresh();
   return { ok: id ? "Casino actualizado." : "Casino creado." };
+}
+
+/**
+ * Borra un casino. Los hunts, buys, battles y sorteos que lo usaban quedan sin casino,
+ * y se borran las cuentas verificadas en él. Si tiene Wager Races, la base no lo deja.
+ */
+export async function deleteCasino(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("admin");
+  const parsed = z.object({ id: z.uuid() }).safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Datos inválidos." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("casinos").delete().eq("id", parsed.data.id).select("logo_path");
+  if (error) {
+    return {
+      error:
+        error.code === "23503"
+          ? "Este casino tiene Wager Races. Borrá esas Wager Races primero, o desactivalo para que no se vea en la web."
+          : "No se pudo borrar.",
+    };
+  }
+  if (!data?.length) return { error: "Solo el admin puede borrar casinos." };
+  const logo = data[0].logo_path;
+  if (logo) await supabase.storage.from(PUBLIC_ASSETS_BUCKET).remove([logo]);
+
+  updateTag(CASINOS_TAG);
+  refresh();
+  return { ok: "Casino borrado." };
 }

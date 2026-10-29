@@ -1,10 +1,10 @@
 import {
   BookOpen,
   Castle,
+  Clapperboard,
   Crosshair,
   Gift,
   House,
-  ShieldCheck,
   ShoppingCart,
   Swords,
   Trophy,
@@ -30,16 +30,11 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/wager-race", label: "Wager Race", icon: Trophy },
       { href: "/sorteos", label: "Sorteos", icon: Gift },
+      { href: "/replays", label: "Replays", icon: Clapperboard },
       { href: "/cuartel", label: "Cuartel", icon: Castle },
     ],
   },
-  {
-    title: "Info",
-    items: [
-      { href: "/como-participar", label: "Cómo participar", icon: BookOpen },
-      { href: "/juego-responsable", label: "Juego responsable", icon: ShieldCheck },
-    ],
-  },
+  { title: "Info", items: [{ href: "/como-participar", label: "Cómo participar", icon: BookOpen }] },
 ];
 
 export function isActivePath(pathname: string, href: string) {

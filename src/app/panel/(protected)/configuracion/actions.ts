@@ -82,17 +82,12 @@ export async function savePartner(_prev: ActionState, formData: FormData): Promi
   return (await saveSetting("partner", { ...parsed.data, perks })) ?? { ok: "Bloque de partner guardado." };
 }
 
-const generalSchema = z.object({
-  helpline: z.string().trim().min(1, "Completá la línea de ayuda.").max(200),
-  min_age_days: z.coerce.number().int().min(0).max(3650),
-});
+const generalSchema = z.object({ min_age_days: z.coerce.number().int().min(0).max(3650) });
 
 export async function saveGeneral(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = generalSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
-  const failed =
-    (await saveSetting("responsible_gaming_helpline", parsed.data.helpline)) ??
-    (await saveSetting("twitch_min_account_age_days", parsed.data.min_age_days));
+  const failed = await saveSetting("twitch_min_account_age_days", parsed.data.min_age_days);
   return failed ?? { ok: "Configuración guardada." };
 }
 

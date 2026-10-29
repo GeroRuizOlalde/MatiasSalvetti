@@ -4,7 +4,8 @@ import { useActionState, useId } from "react";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import type { Tables } from "@/types/database";
-import { saveCasino } from "../actions";
+import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
+import { deleteCasino, saveCasino } from "../actions";
 
 type Casino = Pick<
   Tables<"casinos">,
@@ -79,6 +80,25 @@ export function CasinoForm({ casino }: { casino?: Casino }) {
         <SubmitButton className="ml-auto">{casino ? "Guardar" : "Crear casino"}</SubmitButton>
       </div>
       <FormMessage state={state} className="sm:col-span-2 lg:col-span-4" />
+    </form>
+  );
+}
+
+export function DeleteCasinoForm({ casinoId, name }: { casinoId: string; name: string }) {
+  const [state, formAction] = useActionState<ActionState, FormData>(deleteCasino, INITIAL_ACTION_STATE);
+  const confirmDelete = useConfirmSubmit(
+    confirmFromText(
+      `¿Borrar ${name}? Los hunts, buys, battles y sorteos que lo usaban quedan sin casino, y se borran las cuentas verificadas en él. No se puede deshacer.`,
+    ),
+  );
+  return (
+    <form action={formAction} onSubmit={confirmDelete.onSubmit} className="flex flex-wrap items-center gap-3">
+      {confirmDelete.dialog}
+      <input type="hidden" name="id" value={casinoId} />
+      <SubmitButton variant="ghost" pendingLabel="Borrando…" className="text-live">
+        Borrar casino
+      </SubmitButton>
+      <FormMessage state={state} />
     </form>
   );
 }
