@@ -119,10 +119,18 @@ export function CallReviewForm({
   defaultBet?: number;
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(reviewCall, INITIAL_ACTION_STATE);
+  // Rechazar es definitivo: se confirma. Aceptar va directo.
+  const confirmReject = useConfirmSubmit(
+    confirmFromText(
+      "¿Rechazar el call? El viewer no va a poder pedir otro slot. Usalo, por ejemplo, si el bono no salió.",
+    ),
+    (b) => b?.getAttribute("value") === "reject",
+  );
   const id = useId();
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2">
+    <form action={formAction} className="flex flex-wrap items-center gap-2" onSubmit={confirmReject.onSubmit}>
+      {confirmReject.dialog}
       <input type="hidden" name="id" value={callId} />
       <input type="hidden" name="hunt_id" value={huntId} />
       <label htmlFor={`${id}-bet`} className="sr-only">

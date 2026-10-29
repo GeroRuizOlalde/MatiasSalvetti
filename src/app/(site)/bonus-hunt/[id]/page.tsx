@@ -164,7 +164,7 @@ function Results({ hunt }: { hunt: PublicHunt }) {
 const CALL_STATUS = {
   pending: "Pendiente de revisión",
   accepted: "¡Aceptado! Ya está en el hunt.",
-  rejected: "Rechazado. Podés pedir otro.",
+  rejected: "Rechazado: ya no podés pedir otro en este hunt.",
 } as const;
 
 /** Lee la sesión: va dentro de un <Suspense>. */
@@ -200,13 +200,12 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
                     </span>
                   </p>
                 ) : null}
-                {hunt.calls_open && (!call || call.status === "rejected") ? (
+                {hunt.calls_open && !call ? (
                   <CallForm
                     action={submitCall}
                     hidden={{ hunt_id: hunt.id }}
                     scopeLabel="hunt"
                     question="¿Qué slot querés que busque?"
-                    retry={call?.status === "rejected"}
                     taken={(taken ?? []).map((t) => t.slot_name)}
                   />
                 ) : null}

@@ -31,18 +31,23 @@ export function splitConfirmText(text: string) {
  * Devuelve un `onSubmit` para el <form> y el diálogo a renderizar: el envío se frena,
  * se pregunta, y si se acepta el form se vuelve a mandar con el mismo botón.
  */
-export function useConfirmSubmit(options: ConfirmOptions | null) {
+export function useConfirmSubmit(
+  options: ConfirmOptions | null,
+  /** Si está, solo se pregunta cuando el botón que envía lo cumple (ej. solo «Rechazar»). */
+  when?: (submitter: HTMLElement | null) => boolean,
+) {
   const [open, setOpen] = useState(false);
   const pending = useRef<{ form: HTMLFormElement; submitter: HTMLElement | null } | null>(null);
   const approved = useRef(false);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    if (!options || approved.current) {
+    const submitter = (e.nativeEvent as SubmitEvent).submitter;
+    if (!options || approved.current || (when && !when(submitter))) {
       approved.current = false;
       return;
     }
     e.preventDefault();
-    pending.current = { form: e.currentTarget, submitter: (e.nativeEvent as SubmitEvent).submitter };
+    pending.current = { form: e.currentTarget, submitter };
     setOpen(true);
   };
 

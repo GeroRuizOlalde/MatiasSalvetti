@@ -10,6 +10,7 @@ import { viewerError } from "@/lib/viewer-actions";
 const ERRORS: Record<string, string> = {
   calls_closed: "Los calls de esta battle están cerrados.",
   call_already_accepted: "Tu slot ya está en la battle.",
+  call_rejected: "Tu call ya fue rechazado: no podés pedir otro en esta battle.",
   call_already_sent: "Ya mandaste tu call para esta battle. No se puede cambiar.",
   slot_taken: "Esa máquina ya la pidió otro viewer. Elegí otra.",
   battle_full: "El cuadro ya está completo.",

@@ -156,7 +156,7 @@ function EntriesList({ battle }: { battle: PublicBattle }) {
 const CALL_STATUS = {
   pending: "Pendiente de revisión",
   accepted: "¡Aceptado! Tu slot está en la battle.",
-  rejected: "Rechazado. Podés pedir otro.",
+  rejected: "Rechazado: ya no podés pedir otro en esta battle.",
 } as const;
 
 /** Lee la sesión: va dentro de un <Suspense>. */
@@ -191,18 +191,15 @@ function CallBox({ battle }: { battle: PublicBattle }) {
                 </span>
               </p>
             ) : null}
-            {(!call || call.status === "rejected") && !full ? (
+            {!call && !full ? (
               <CallForm
                 action={submitBattleCall}
                 hidden={{ battle_id: battle.id }}
                 scopeLabel="battle"
-                retry={call?.status === "rejected"}
                 taken={(taken ?? []).map((t) => t.slot_name)}
               />
             ) : null}
-            {full && (!call || call.status === "rejected") ? (
-              <p className="text-sm text-muted">El cuadro ya está completo.</p>
-            ) : null}
+            {full && !call ? <p className="text-sm text-muted">El cuadro ya está completo.</p> : null}
           </section>
         );
       }}

@@ -11,14 +11,13 @@ type Props = {
   hidden: Record<string, string>;
   /** "hunt" o "sesión", para el texto de la regla. */
   scopeLabel: string;
-  retry: boolean;
   taken: string[];
   /** Pregunta del formulario (en el hunt se busca el slot; en buys y battles se compra). */
   question?: string;
 };
 
-/** Pedir un slot. Una vez mandado no se cambia; solo se puede pedir otro si el panel lo rechaza. */
-export function CallForm({ action, hidden, scopeLabel, retry, taken, question = "¿Qué slot querés que compre?" }: Props) {
+/** Pedir un slot. Una vez mandado no se cambia, y si el panel lo rechaza ya no se puede pedir otro. */
+export function CallForm({ action, hidden, scopeLabel, taken, question = "¿Qué slot querés que compre?" }: Props) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, INITIAL_ACTION_STATE);
   const id = useId();
 
@@ -28,7 +27,7 @@ export function CallForm({ action, hidden, scopeLabel, retry, taken, question = 
         <input key={name} type="hidden" name={name} value={value} />
       ))}
       <label htmlFor={`${id}-slot`} className="block text-xs font-semibold text-subtle">
-        {retry ? "Pedí otro slot" : question}
+        {question}
       </label>
       <div className="flex gap-2">
         <div className="min-w-0 flex-1">
@@ -39,7 +38,7 @@ export function CallForm({ action, hidden, scopeLabel, retry, taken, question = 
         </SubmitButton>
       </div>
       <p className="text-xs text-subtle">
-        Una máquina por {scopeLabel} y el call no se puede cambiar una vez mandado: elegí bien.
+        Una máquina por {scopeLabel}. El call no se puede cambiar y, si se rechaza, no podés pedir otro: elegí bien.
       </p>
       {taken.length ? (
         <p className="text-xs text-subtle">

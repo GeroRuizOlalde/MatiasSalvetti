@@ -151,16 +151,20 @@ describe("calls", () => {
     ).rejects.toThrow(/call_already_accepted/);
   });
 
-  it("un call rechazado se puede volver a pedir", async () => {
+  it("un call rechazado no se puede volver a pedir, pero la máquina queda libre", async () => {
     const hunt = await createHunt();
     await as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, 'Wanted')", [hunt]));
     const { rows } = await db.query<{ id: string }>("select id from public.hunt_calls where hunt_id = $1", [hunt]);
     await as(db, mod, () => db.query("select public.reject_hunt_call($1)", [rows[0].id]));
-    await as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, 'Wanted Dead')", [hunt]));
+    await expect(
+      as(db, viewerB, () => db.query("select public.submit_hunt_call($1, null, 'Wanted Dead')", [hunt])),
+    ).rejects.toThrow(/call_rejected/);
     const { rows: after } = await db.query<{ status: string }>("select status from public.hunt_calls where id = $1", [
       rows[0].id,
     ]);
-    expect(after[0].status).toBe("pending");
+    expect(after[0].status).toBe("rejected");
+    // Otro viewer sí puede pedir esa máquina.
+    await as(db, viewerA, () => db.query("select public.submit_hunt_call($1, null, 'Wanted')", [hunt]));
   });
 
   it("una máquina por hunt: no se puede pedir la que ya pidió otro o ya es bono", async () => {
