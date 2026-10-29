@@ -15,9 +15,9 @@ const permanentMarker = Permanent_Marker({
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
-  title: { default: "Matías Salvetti · Chupetti", template: "%s · Matías Salvetti" },
+  title: { default: "Chupetti", template: "%s · Chupetti" },
   description: "La web oficial de Chupetti: bonus hunts, bonus buys, bonus battles, Wager Race y sorteos en vivo.",
-  openGraph: { type: "website", locale: "es_AR", siteName: "Matías Salvetti" },
+  openGraph: { type: "website", locale: "es_AR", siteName: "Chupetti" },
   twitter: { card: "summary_large_image" },
 };
 

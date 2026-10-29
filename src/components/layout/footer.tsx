@@ -41,7 +41,7 @@ export async function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-xs text-subtle sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} Matías Salvetti ·{" "}
+            © {year} Chupetti ·{" "}
             <span>
               Datos de slots:{" "}
               <a href="https://slot.report" target="_blank" className="hover:text-text">

@@ -5,7 +5,7 @@ import { BRAND_ASSETS, hasBrandAsset } from "@/lib/brand";
 export function Logo({ className }: { className?: string }) {
   const { src, width, height } = BRAND_ASSETS.logo;
   return (
-    <Link href="/" aria-label="Matías Salvetti, ir al inicio" className={className}>
+    <Link href="/" aria-label="Chupetti, ir al inicio" className={className}>
       {hasBrandAsset("logo") ? (
         <Image src={src} alt="" width={width} height={height} priority className="h-12 w-auto" />
       ) : (

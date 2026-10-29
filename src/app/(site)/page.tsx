@@ -119,16 +119,10 @@ export default async function HomePage() {
         data={{
           "@context": "https://schema.org",
           "@graph": [
-            {
-              "@type": "WebSite",
-              name: "Matías Salvetti · Chupetti",
-              url: publicEnv.NEXT_PUBLIC_SITE_URL,
-              inLanguage: "es-AR",
-            },
+            { "@type": "WebSite", name: "Chupetti", url: publicEnv.NEXT_PUBLIC_SITE_URL, inLanguage: "es-AR" },
             {
               "@type": "Person",
-              name: "Matías Salvetti",
-              alternateName: "Chupetti",
+              name: "Chupetti",
               url: publicEnv.NEXT_PUBLIC_SITE_URL,
               sameAs: Object.values(settings.socials),
             },

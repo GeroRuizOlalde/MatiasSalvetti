@@ -133,7 +133,7 @@ test.describe("SEO", () => {
     await page.goto("/");
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /opengraph-image/);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
-    expect(JSON.parse(jsonLd ?? "{}")["@graph"][1].name).toBe("Matías Salvetti");
+    expect(JSON.parse(jsonLd ?? "{}")["@graph"][1].name).toBe("Chupetti");
   });
 
   test("las páginas mandan cabeceras de seguridad", async ({ request }) => {

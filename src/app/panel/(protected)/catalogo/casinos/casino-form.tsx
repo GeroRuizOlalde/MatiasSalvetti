@@ -21,7 +21,7 @@ export function CasinoForm({ casino }: { casino?: Casino }) {
       <Field id={`${id}-name`} label="Nombre">
         <input id={`${id}-name`} name="name" required maxLength={60} defaultValue={casino?.name} className={inputClass} />
       </Field>
-      <Field id={`${id}-slug`} label="Identificador" hint="minúsculas y guiones, ej. win-win">
+      <Field id={`${id}-slug`} label="Identificador" hint="minúsculas y guiones, ej. 1xslots">
         <input
           id={`${id}-slug`}
           name="slug"

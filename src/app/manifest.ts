@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Matías Salvetti · Chupetti",
+    name: "Chupetti",
     short_name: "Chupetti",
     description: "Bonus hunts, buys, battles, Wager Race y sorteos en vivo.",
     start_url: "/",

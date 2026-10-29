@@ -35,15 +35,15 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pt-14 pb-16 md:grid-cols-[1.1fr_1fr] md:pt-20 md:pb-24">
         <div>
-          <p className="flex animate-rise items-center gap-2 font-display text-2xl tracking-wide uppercase">
-            Chupetti <PartnerLogo />
-          </p>
           <h1
             id="hero-title"
-            className="mt-2 animate-rise font-display text-6xl leading-[0.95] tracking-wide uppercase [animation-delay:120ms] sm:text-7xl lg:text-8xl"
+            className="animate-rise font-display text-7xl leading-[0.95] tracking-wide uppercase sm:text-8xl lg:text-9xl"
           >
-            Matías <span className="text-glow block">Salvetti</span>
+            <span className="text-glow">Chupetti</span>
           </h1>
+          <p className="mt-3 flex animate-rise items-center font-display text-3xl tracking-wide uppercase [animation-delay:120ms]">
+            <PartnerLogo />
+          </p>
           <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">
             Slots, bonus hunts, batallas y CS2 en vivo. Todos los meses reparto premios con la Wager Race y los sorteos
             de la comunidad.
@@ -67,7 +67,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
 
           <ul
             className="mt-6 flex animate-rise flex-wrap gap-x-5 gap-y-2 text-sm [animation-delay:480ms]"
-            aria-label="Redes de Matías"
+            aria-label="Redes de Chupetti"
           >
             {TEXT_SOCIALS.filter((name) => name !== primary).map((name) => (
               <li key={name}>
@@ -120,7 +120,7 @@ function Character({
         {hasBrandAsset("personaje") ? (
           <Image
             src={personaje.src}
-            alt="Ilustración de Matías Salvetti con bata violeta de bordes neón y fichas de casino en la mano"
+            alt="Ilustración de Chupetti con bata violeta de bordes neón y fichas de casino en la mano"
             width={personaje.width}
             height={personaje.height}
             priority
