@@ -27,7 +27,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
   const { data: hunt } = await supabase
     .from("hunts")
     .select(
-      "id, title, casino_id, currency, start_cost, status, calls_open, guesses_open, final_balance, gtb_winner_id, updated_at",
+      "id, title, casino_id, currency, start_cost, opening_balance, status, calls_open, guesses_open, final_balance, gtb_winner_id, updated_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -67,7 +67,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
   };
 
   const list = bonuses ?? [];
-  const stats = huntStats(hunt.start_cost, list);
+  const stats = huntStats(hunt.start_cost, list, hunt.opening_balance);
   const locked = hunt.status === "finished";
   const lastBet = list.at(-1)?.bet;
   const tipeoStatus = (bonusId: string) => tipeos?.find((t) => t.bonus_id === bonusId)?.status;
@@ -96,6 +96,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
       <HuntStatsGrid
         stats={stats}
         startCost={hunt.start_cost}
+        openingBalance={hunt.opening_balance}
         currency={hunt.currency}
         finalBalance={hunt.final_balance}
       />

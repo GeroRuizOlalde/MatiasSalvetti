@@ -19,6 +19,7 @@ type HuntRow = Pick<
   | "title"
   | "currency"
   | "start_cost"
+  | "opening_balance"
   | "status"
   | "calls_open"
   | "guesses_open"
@@ -48,7 +49,7 @@ export type PublicHunt = HuntSummary & {
 };
 
 const HUNT_COLUMNS =
-  "id, title, currency, start_cost, status, calls_open, guesses_open, final_balance, finished_at, created_at, casino:casinos(name, slug, referral_url, code)";
+  "id, title, currency, start_cost, opening_balance, status, calls_open, guesses_open, final_balance, finished_at, created_at, casino:casinos(name, slug, referral_url, code)";
 
 /** Hunts públicos: los activos primero, después los terminados más recientes. */
 export async function getPublicHunts(limit = 24): Promise<HuntSummary[]> {

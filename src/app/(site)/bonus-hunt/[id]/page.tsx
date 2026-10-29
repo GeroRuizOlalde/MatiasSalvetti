@@ -42,7 +42,7 @@ async function HuntDetail({ params }: Pick<PageProps<"/bonus-hunt/[id]">, "param
   const hunt = await getPublicHunt(id);
   if (!hunt) notFound();
 
-  const stats = huntStats(hunt.start_cost, hunt.bonusList);
+  const stats = huntStats(hunt.start_cost, hunt.bonusList, hunt.opening_balance);
   const finished = hunt.status === "finished";
 
   return (
@@ -66,6 +66,7 @@ async function HuntDetail({ params }: Pick<PageProps<"/bonus-hunt/[id]">, "param
       <HuntStatsGrid
         stats={stats}
         startCost={hunt.start_cost}
+        openingBalance={hunt.opening_balance}
         currency={hunt.currency}
         finalBalance={hunt.final_balance}
       />

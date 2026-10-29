@@ -36,7 +36,7 @@ function buildStats(settings: PublicSettings, records: { bestMulti: number | nul
 type CardData = Pick<SessionCard, "href" | "status" | "facts" | "meta">;
 
 function huntCard(hunt: HuntSummary): CardData {
-  const stats = huntStats(hunt.start_cost, hunt.bonuses);
+  const stats = huntStats(hunt.start_cost, hunt.bonuses, hunt.opening_balance);
   const active = isHuntActive(hunt.status);
   return {
     href: `/bonus-hunt/${hunt.id}`,

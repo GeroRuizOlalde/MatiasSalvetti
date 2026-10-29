@@ -22,7 +22,7 @@ async function HuntOverlay() {
   const hunt = summary ? await getPublicHunt(summary.id) : null;
   if (!hunt) return <p className={cn(overlayPanel, "text-sm text-muted")}>No hay un Bonus Hunt en curso.</p>;
 
-  const stats = huntStats(hunt.start_cost, hunt.bonusList);
+  const stats = huntStats(hunt.start_cost, hunt.bonusList, hunt.opening_balance);
   const next = hunt.bonusList.findIndex((b) => b.payout === null);
   return (
     <div className={cn(overlayPanel, "w-[456px] space-y-3")}>
@@ -34,7 +34,11 @@ async function HuntOverlay() {
       </div>
       <dl className="grid grid-cols-3 gap-2 text-center">
         <Stat label="Inversión" value={formatMoney(hunt.start_cost, hunt.currency)} />
-        <Stat label="Ganado" value={formatMoney(stats.won, hunt.currency)} gold />
+        <Stat
+          label={hunt.opening_balance > 0 ? "Balance" : "Ganado"}
+          value={formatMoney(stats.balance, hunt.currency)}
+          gold
+        />
         <Stat
           label={stats.requiredMulti !== null ? "Multi necesario" : "Multi promedio"}
           value={

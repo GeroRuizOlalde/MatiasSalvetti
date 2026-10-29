@@ -47,6 +47,23 @@ describe("huntStats", () => {
     expect(stats.profit).toBe(4000);
   });
 
+  it("el saldo de apertura cuenta para el balance, la ganancia y el multi necesario", () => {
+    // Inversión 10.000; quedaron 2.000 en la cuenta al empezar a abrir.
+    const stats = huntStats(
+      10000,
+      [
+        { bet: 100, payout: 3000 },
+        { bet: 100, payout: null },
+      ],
+      2000,
+    );
+    expect(stats.won).toBe(3000);
+    expect(stats.balance).toBe(5000);
+    expect(stats.profit).toBe(-5000);
+    expect(stats.requiredMulti).toBe(50);
+    expect(stats.breakEvenMulti).toBe(40);
+  });
+
   it("redondea montos con decimales", () => {
     expect(
       huntStats(0.3, [

@@ -15,6 +15,7 @@ type Hunt = {
   casino_id: string | null;
   currency: Enums<"currency_code">;
   start_cost: number;
+  opening_balance: number;
   status: HuntStatus;
   calls_open: boolean;
   guesses_open: boolean;
@@ -80,6 +81,20 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
           </select>
         </Field>
       </div>
+      <Field
+        id={`${id}-opening`}
+        label="Saldo al empezar a abrir"
+        hint="Con cuánto arrancás a abrir los bonos. Se suma a lo que paguen para calcular la ganancia."
+        className="sm:col-span-2"
+      >
+        <AmountInput
+          id={`${id}-opening`}
+          name="opening_balance"
+          defaultValue={hunt?.opening_balance || undefined}
+          placeholder="0"
+          className={inputClass}
+        />
+      </Field>
 
       {hunt ? (
         <>

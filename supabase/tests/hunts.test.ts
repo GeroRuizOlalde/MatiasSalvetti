@@ -251,6 +251,20 @@ describe("adiviná el balance", () => {
     await expect(addBonus(hunt, 100, 1)).rejects.toThrow(/hunt_finished/);
   });
 
+  it("el balance final suma el saldo con el que se empezó a abrir", async () => {
+    const hunt = await createHunt();
+    await as(db, mod, () => db.query("update public.hunts set opening_balance = 2500 where id = $1", [hunt]));
+    await as(db, viewerA, () => db.query("select public.submit_hunt_guess($1, 3000)", [hunt]));
+    await as(db, viewerB, () => db.query("select public.submit_hunt_guess($1, 5600)", [hunt]));
+    await addBonus(hunt, 100, 3000);
+    await as(db, mod, () => db.query("update public.hunts set status = 'finished' where id = $1", [hunt]));
+    const { rows } = await db.query<{ final_balance: string; gtb_winner_id: string }>(
+      "select final_balance, gtb_winner_id from public.hunts where id = $1",
+      [hunt],
+    );
+    expect(rows[0]).toEqual({ final_balance: "5500.00", gtb_winner_id: viewerB.id });
+  });
+
   it("al reabrir se limpian los resultados", async () => {
     const hunt = await createHunt();
     await addBonus(hunt, 100, 300);
