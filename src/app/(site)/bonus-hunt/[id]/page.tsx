@@ -205,6 +205,7 @@ function Participation({ hunt }: { hunt: PublicHunt }) {
                     action={submitCall}
                     hidden={{ hunt_id: hunt.id }}
                     scopeLabel="hunt"
+                    question="¿Qué slot querés que busque?"
                     retry={call?.status === "rejected"}
                     taken={(taken ?? []).map((t) => t.slot_name)}
                   />

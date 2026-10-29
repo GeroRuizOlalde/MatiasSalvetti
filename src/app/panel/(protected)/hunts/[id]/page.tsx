@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isTipeoHit } from "@/lib/tipeos";
 import { DeleteHuntForm, HuntForm } from "../hunt-form";
 import { AddBonusForm, BonusRowForm, CallReviewForm } from "./bonus-forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Bonus Hunt" };
 
@@ -46,7 +47,7 @@ export default async function PanelHuntPage({ params }: PageProps<"/panel/hunts/
         .eq("hunt_id", id)
         .eq("status", "pending")
         .order("created_at"),
-      supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+      casinoOptions(supabase, hunt.casino_id),
       supabase.rpc("hunt_guess_count", { p_hunt: id }),
       supabase.from("tipeos").select("bonus_id, status").eq("hunt_id", id),
     ]);

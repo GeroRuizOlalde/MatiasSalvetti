@@ -5,7 +5,6 @@ import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
-import { LEGAL_TAG } from "@/lib/legal";
 import { SETTING_SCHEMAS, SETTINGS_TAG } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/types/database";
@@ -102,38 +101,4 @@ export async function regenerateOverlayToken(): Promise<ActionState> {
   if (failed) return failed;
   refresh();
   return { ok: "Token nuevo generado. Actualizá las URLs en OBS." };
-}
-
-const legalSchema = z.object({
-  kind: z.enum(["terms", "privacy", "responsible_gaming"]),
-  title: z.string().trim().min(1, "Poné un título.").max(120),
-  content_md: z.string().trim().min(20, "El contenido es demasiado corto.").max(100_000),
-});
-
-export async function publishLegalDocument(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const profile = await requirePanelProfile("admin");
-  const parsed = legalSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
-
-  const supabase = await createClient();
-  const { data: last } = await supabase
-    .from("legal_documents")
-    .select("version")
-    .eq("kind", parsed.data.kind)
-    .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const version = (last?.version ?? 0) + 1;
-
-  const { error } = await supabase.from("legal_documents").insert({
-    ...parsed.data,
-    version,
-    published_at: new Date().toISOString(),
-    created_by: profile.id,
-  });
-  if (error) return { error: "No se pudo publicar. Probá de nuevo." };
-
-  updateTag(LEGAL_TAG);
-  refresh();
-  return { ok: `Versión ${version} publicada.` };
 }

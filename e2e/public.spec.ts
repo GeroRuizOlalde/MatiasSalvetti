@@ -27,7 +27,7 @@ test.describe("páginas públicas", () => {
 
   const PAGES = [
     { path: "/bonus-hunt", heading: "Bonus Hunt" },
-    { path: "/bonus-buys", heading: "Bonus Buys" },
+    { path: "/bonus-buys", heading: "Bonus Buy" },
     { path: "/bonus-battle", heading: "Bonus Battle" },
     { path: "/wager-race", heading: "Wager Race" },
     { path: "/sorteos", heading: "Sorteos" },
@@ -83,7 +83,7 @@ test.describe("rutas protegidas", () => {
   test("el panel manda al login del panel", async ({ page }) => {
     await page.goto("/panel/hunts");
     await expect(page).toHaveURL(/\/panel\/login/);
-    await expect(page.getByRole("heading", { name: "Panel MS" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Panel" })).toBeVisible();
   });
 
   test("el Cuartel y el perfil piden entrar", async ({ page }) => {

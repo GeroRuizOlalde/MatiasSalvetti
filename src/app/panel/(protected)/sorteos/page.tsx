@@ -7,6 +7,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { GiveawayForm } from "./forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Sorteos" };
 
@@ -19,7 +20,7 @@ export default async function PanelSorteosPage() {
       .select("id, title, prize, status, ends_at, drawn_at")
       .order("ends_at", { ascending: false })
       .limit(100),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase),
   ]);
 
   return (

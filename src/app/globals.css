@@ -29,6 +29,7 @@
   --animate-live-pulse: live-pulse 1.6s ease-in-out infinite;
   --animate-rise: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-bob: bob 7s ease-in-out infinite;
+  --animate-ticker-up: ticker-up 30s linear infinite;
   --animate-orbit: spin 40s linear infinite;
   --animate-orbit-reverse: spin 40s linear infinite reverse;
 
@@ -43,6 +44,10 @@
   @keyframes drift {
     0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--drift-rotate, 0deg)); }
     50% { transform: translate3d(0, -18px, 0) rotate(calc(var(--drift-rotate, 0deg) + 8deg)); }
+  }
+  /* Lista que sube en loop (overlay del hunt): el contenido va duplicado y sube la mitad. */
+  @keyframes ticker-up {
+    to { transform: translateY(-50%); }
   }
   @keyframes rise {
     from { opacity: 0; transform: translateY(24px); }

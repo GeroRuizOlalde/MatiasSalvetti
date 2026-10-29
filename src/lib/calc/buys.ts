@@ -1,4 +1,4 @@
-// Números de una sesión de Bonus Buys. Cada compra cuesta `cost` y se juega a
+// Números de una sesión de Bonus Buy. Cada compra cuesta `cost` y se juega a
 // `bet`; el multi es payout / bet y el resultado de la sesión, pagado - costo.
 
 export type BuyAmounts = { bet: number; cost: number; payout: number | null };

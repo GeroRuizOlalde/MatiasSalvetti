@@ -30,7 +30,7 @@ export const EMPTY_SESSIONS: SessionCard[] = [
   },
   {
     key: "buys",
-    title: "Bonus Buys",
+    title: "Bonus Buy",
     href: "/bonus-buys",
     icon: ShoppingCart,
     description: "Sesiones de compra directa de bonos. Cuánto costó cada uno, cuánto pagó y el resultado acumulado.",

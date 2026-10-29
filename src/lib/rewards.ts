@@ -4,7 +4,9 @@ export type RewardKind = keyof PublicSettings["rewards"];
 
 /** Premios automáticos por participar (setting `rewards`, en el mismo orden que el panel). */
 export const REWARD_KINDS: { key: RewardKind; label: string; description: string }[] = [
-  { key: "hunt_call", label: "Call aceptado", description: "Cuando aceptan tu slot en un Bonus Hunt o en Bonus Buys." },
+  { key: "hunt_call", label: "Call aceptado", description: "Cuando aceptan tu slot en un Bonus Hunt, un Bonus Buy o una Bonus Battle." },
+  { key: "hunt_winner", label: "Ganador Bonus Hunt", description: "El call que pagó el mejor multi del hunt." },
+  { key: "buy_winner", label: "Ganador Bonus Buy", description: "El call que pagó el mejor multi de la sesión." },
   { key: "gtb_participation", label: "Adiviná el balance", description: "Por apostar en el GTB, al terminar el hunt." },
   { key: "gtb_win", label: "Ganar el GTB", description: "Extra para el que más se acercó al balance final." },
   {

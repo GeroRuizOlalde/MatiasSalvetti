@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatMoney, formatMoneyShort, formatMulti, maskAccountId, toArgentinaInput } from "./format";
+import {
+  capitalizeWords,
+  formatDateTime,
+  formatMoney,
+  formatMoneyShort,
+  formatMulti,
+  maskAccountId,
+  toArgentinaInput,
+} from "./format";
 
 const NBSP = " ";
 
@@ -59,5 +67,14 @@ describe("formatMoneyShort", () => {
     expect(formatMoneyShort(1_500_000, "USD")).toBe("1,5M USD");
     expect(formatMoneyShort(500_000)).toBe("500K ARS");
     expect(formatMoneyShort(750)).toBe("750 ARS");
+  });
+});
+
+describe("capitalizeWords", () => {
+  it("pone en mayúscula la primera letra de cada palabra", () => {
+    expect(capitalizeWords("  sweet   bonanza 1000 ")).toBe("Sweet Bonanza 1000");
+    expect(capitalizeWords("gates of olympus")).toBe("Gates Of Olympus");
+    expect(capitalizeWords("ñandú dorado")).toBe("Ñandú Dorado");
+    expect(capitalizeWords("Big Bass SPLASH")).toBe("Big Bass SPLASH");
   });
 });

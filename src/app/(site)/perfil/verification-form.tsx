@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState, useId, useRef } from "react";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
@@ -43,6 +44,19 @@ export function VerificationForm({
           className={inputClass}
         />
       </Field>
+      <figure className="rounded-xl border border-line bg-surface-2 p-3">
+        <Image
+          src="/brand/verificacion-ejemplo.webp"
+          alt="Ejemplo: el perfil del casino con el número de cuenta y el nivel marcados en un recuadro rojo"
+          width={456}
+          height={293}
+          className="h-auto w-full max-w-sm rounded-lg"
+        />
+        <figcaption className="mt-2 text-xs text-muted">
+          <strong className="text-text">Ejemplo de captura:</strong> entrá a tu perfil en el casino y sacale captura a
+          la parte donde se ve tu número de cuenta (lo marcado en rojo). Ese número es el que va en «ID de tu cuenta».
+        </figcaption>
+      </figure>
       <Field
         id={`${id}-shot`}
         label="Captura de pantalla"

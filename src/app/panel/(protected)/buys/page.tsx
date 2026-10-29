@@ -9,8 +9,9 @@ import { formatDate, formatInteger, formatMoney } from "@/lib/format";
 import { BUY_STATUSES, statusInfo } from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
 import { BuySessionForm } from "./forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
-export const metadata: Metadata = { title: "Bonus Buys" };
+export const metadata: Metadata = { title: "Bonus Buy" };
 
 export default async function PanelBuysPage() {
   await requirePanelProfile("mod");
@@ -21,12 +22,12 @@ export default async function PanelBuysPage() {
       .select("id, title, status, currency, created_at, buys(bet, cost, payout)")
       .order("created_at", { ascending: false })
       .limit(100),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase),
   ]);
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-4xl tracking-wide uppercase">Bonus Buys</h1>
+      <h1 className="font-display text-4xl tracking-wide uppercase">Bonus Buy</h1>
 
       <section aria-labelledby="new-session" className="rounded-2xl border border-line bg-surface p-5">
         <h2 id="new-session" className="mb-3 font-semibold">

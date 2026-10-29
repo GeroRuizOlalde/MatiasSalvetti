@@ -1,13 +1,9 @@
-import { FileText } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { headers } from "next/headers";
 import { publicEnv } from "@/lib/env";
-import { formatDate } from "@/lib/format";
-import { LEGAL_KINDS } from "@/lib/legal-kinds";
 import { OVERLAYS } from "@/lib/overlay";
 import { getPublicSettings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
@@ -18,17 +14,14 @@ export const metadata: Metadata = { title: "Configuración" };
 export default async function ConfiguracionPage() {
   await requirePanelProfile("admin");
   const supabase = await createClient();
-  const [settings, tokenRow, legalRows, casinosRows] = await Promise.all([
+  const [settings, tokenRow, casinosRows] = await Promise.all([
     getPublicSettings(),
     supabase.from("site_settings").select("value").eq("key", "overlay_token").maybeSingle(),
-    supabase.from("legal_documents").select("kind, version, published_at").order("version", { ascending: false }),
-    supabase.from("casinos").select("slug, name").order("sort_order").order("name"),
+    supabase.from("casinos").select("slug, name").eq("is_active", true).order("sort_order").order("name"),
   ]);
 
   const token = typeof tokenRow.data?.value === "string" ? tokenRow.data.value : null;
   const siteUrl = await currentOrigin();
-  const latest = new Map<string, { version: number; published_at: string | null }>();
-  for (const row of legalRows.data ?? []) if (!latest.has(row.kind)) latest.set(row.kind, row);
 
   return (
     <div className="space-y-6">
@@ -80,31 +73,6 @@ export default async function ConfiguracionPage() {
             ))}
           </ul>
         ) : null}
-      </Section>
-
-      <Section title="Textos legales" description="Cada cambio se publica como versión nueva y queda el historial.">
-        <ul className="divide-y divide-line">
-          {LEGAL_KINDS.map(({ kind, label }) => {
-            const doc = latest.get(kind);
-            return (
-              <li key={kind} className="flex flex-wrap items-center gap-3 py-3">
-                <FileText className="size-5 text-accent-text" aria-hidden />
-                <span className="font-semibold">{label}</span>
-                <span className="text-sm text-subtle">
-                  {doc
-                    ? `Versión ${doc.version}${doc.published_at ? ` · ${formatDate(doc.published_at)}` : " · sin publicar"}`
-                    : "Sin versiones"}
-                </span>
-                <Link
-                  href={`/panel/configuracion/legales/${kind}`}
-                  className="ml-auto text-sm font-semibold text-accent-text hover:text-accent-light"
-                >
-                  Editar
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
       </Section>
     </div>
   );

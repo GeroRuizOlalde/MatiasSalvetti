@@ -1,12 +1,11 @@
 import { Suspense } from "react";
+import { BonusTicker } from "@/components/overlay/bonus-ticker";
 import { OverlayGate, overlayPanel } from "@/components/overlay/overlay-gate";
 import { huntStats } from "@/lib/calc/hunt";
 import { cn } from "@/lib/cn";
 import { formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import { isHuntActive } from "@/lib/hunt-status";
 import { getPublicHunt, getPublicHunts } from "@/lib/hunts";
-
-const VISIBLE = 12;
 
 export default function HuntOverlayPage({ searchParams }: PageProps<"/overlay/hunt">) {
   return (
@@ -25,13 +24,6 @@ async function HuntOverlay() {
 
   const stats = huntStats(hunt.start_cost, hunt.bonusList);
   const next = hunt.bonusList.findIndex((b) => b.payout === null);
-  // Ventana de bonos alrededor del próximo a abrir.
-  const start = Math.max(
-    0,
-    Math.min((next === -1 ? hunt.bonusList.length : next) - 3, hunt.bonusList.length - VISIBLE),
-  );
-  const visible = hunt.bonusList.slice(start, start + VISIBLE);
-
   return (
     <div className={cn(overlayPanel, "w-[456px] space-y-3")}>
       <div className="flex items-baseline justify-between gap-3">
@@ -54,34 +46,12 @@ async function HuntOverlay() {
           }
         />
       </dl>
-      <ol className="space-y-1">
-        {visible.map((bonus, i) => {
-          const index = start + i;
-          const isNext = index === next;
-          return (
-            <li
-              key={bonus.id}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm",
-                isNext ? "bg-accent/30 ring-1 ring-accent" : "bg-white/5",
-                bonus.payout === null && !isNext && "text-muted",
-              )}
-            >
-              <span className="num w-6 text-xs text-subtle">{index + 1}</span>
-              <span className="min-w-0 flex-1 truncate font-semibold">{bonus.slot_name}</span>
-              <span className="num w-20 text-right text-xs text-muted">{formatMoney(bonus.bet, hunt.currency)}</span>
-              <span
-                className={cn(
-                  "num w-20 text-right font-bold",
-                  stats.best?.index === index ? "text-gold" : "text-accent-light",
-                )}
-              >
-                {bonus.multi !== null ? formatMulti(bonus.multi) : isNext ? "▶" : ""}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+      <BonusTicker
+        bonuses={hunt.bonusList}
+        currency={hunt.currency}
+        nextIndex={next}
+        bestIndex={stats.best?.index ?? null}
+      />
       {hunt.guesses_open ? (
         <p className="text-center text-xs text-muted">
           Adiviná el balance en la web · <span className="num text-gold">{formatInteger(hunt.guessCount)}</span>{" "}

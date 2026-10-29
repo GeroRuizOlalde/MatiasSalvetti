@@ -86,7 +86,7 @@ export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus:
         <span className="num w-20 text-right text-sm text-gold">{preview !== null ? formatMulti(preview) : "—"}</span>
         {locked ? null : (
           <SubmitButton variant="secondary" pendingLabel="…">
-            {bonus.payout === null ? "Abrir" : "Guardar"}
+            Guardar
           </SubmitButton>
         )}
       </form>
