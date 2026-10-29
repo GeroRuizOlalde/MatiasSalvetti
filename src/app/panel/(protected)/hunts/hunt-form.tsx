@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId } from "react";
+import { useActionState, useId, useState } from "react";
 import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { HUNT_STATUSES, type HuntStatus } from "@/lib/hunt-status";
@@ -23,6 +23,21 @@ type Hunt = {
 export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string; name: string }[] }) {
   const [state, formAction] = useActionState<ActionState, FormData>(saveHunt, INITIAL_ACTION_STATE);
   const id = useId();
+  const [status, setStatus] = useState<HuntStatus>(hunt?.status ?? "draft");
+  const [callsOpen, setCallsOpen] = useState(hunt?.calls_open ?? false);
+  const [guessesOpen, setGuessesOpen] = useState(hunt?.guesses_open ?? false);
+
+  // «Juntando bonos» abre calls y GTB; «Abriendo» o «Terminado» los cierran. Después se pueden tocar a mano.
+  const changeStatus = (next: HuntStatus) => {
+    setStatus(next);
+    if (next === "collecting") {
+      setCallsOpen(true);
+      setGuessesOpen(true);
+    } else if (next === "opening" || next === "finished") {
+      setCallsOpen(false);
+      setGuessesOpen(false);
+    }
+  };
 
   return (
     <form action={formAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -71,10 +86,16 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
           <Field
             id={`${id}-status`}
             label="Estado"
-            hint={HUNT_STATUSES.find((s) => s.value === hunt.status)?.hint}
+            hint={HUNT_STATUSES.find((s) => s.value === status)?.hint}
             className="sm:col-span-2"
           >
-            <select id={`${id}-status`} name="status" defaultValue={hunt.status} className={inputClass}>
+            <select
+              id={`${id}-status`}
+              name="status"
+              value={status}
+              onChange={(e) => changeStatus(e.target.value as HuntStatus)}
+              className={inputClass}
+            >
               {HUNT_STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
@@ -88,7 +109,8 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
               <input
                 type="checkbox"
                 name="calls_open"
-                defaultChecked={hunt.calls_open}
+                checked={callsOpen}
+                onChange={(e) => setCallsOpen(e.target.checked)}
                 className="size-4 accent-accent"
               />
               Calls abiertos
@@ -97,7 +119,8 @@ export function HuntForm({ hunt, casinos }: { hunt?: Hunt; casinos: { id: string
               <input
                 type="checkbox"
                 name="guesses_open"
-                defaultChecked={hunt.guesses_open}
+                checked={guessesOpen}
+                onChange={(e) => setGuessesOpen(e.target.checked)}
                 className="size-4 accent-accent"
               />
               Adiviná el balance abierto

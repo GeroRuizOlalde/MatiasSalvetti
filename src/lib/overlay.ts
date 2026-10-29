@@ -24,7 +24,7 @@ export const OVERLAYS = [
   },
   {
     path: "buys",
-    label: "Bonus Buys",
+    label: "Bonus Buy",
     size: "480 × 700",
     description: "Resultado de la sesión y las últimas compras.",
   },

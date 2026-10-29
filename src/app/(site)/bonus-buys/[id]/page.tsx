@@ -21,9 +21,9 @@ import { submitBuyCall } from "../actions";
 export async function generateMetadata({ params }: PageProps<"/bonus-buys/[id]">): Promise<Metadata> {
   const { id } = await params;
   const session = await getPublicBuySession(id);
-  if (!session) return { title: "Bonus Buys" };
+  if (!session) return { title: "Bonus Buy" };
   return {
-    title: `${session.title} · Bonus Buys`,
+    title: `${session.title} · Bonus Buy`,
     description: `${formatInteger(session.buys.length)} compras${session.casino ? ` en ${session.casino.name}` : ""}. Mirá cuánto pagó cada una y pedí la próxima.`,
   };
 }

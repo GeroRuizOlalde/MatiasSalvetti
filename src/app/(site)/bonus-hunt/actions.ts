@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { createClient } from "@/lib/supabase/server";
+import { capitalizeWords } from "@/lib/format";
 import { viewerError } from "@/lib/viewer-actions";
 
 const ERRORS: Record<string, string> = {
@@ -24,7 +25,8 @@ const callSchema = z.object({
     .union([z.uuid(), z.literal("")])
     .optional()
     .transform((v) => v || null),
-  slot_name: z.string().trim().min(1, "Elegí o escribí el slot.").max(120),
+  // Si lo escribe a mano, queda con las primeras letras en mayúscula (las del catálogo ya vienen bien).
+  slot_name: z.string().trim().min(1, "Elegí o escribí el slot.").max(120).transform(capitalizeWords),
 });
 
 export async function submitCall(_prev: ActionState, formData: FormData): Promise<ActionState> {

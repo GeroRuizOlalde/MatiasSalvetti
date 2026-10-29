@@ -7,7 +7,7 @@ import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 
 /**
  * «Dar tipeo» / «Descartar» para una recomendación, o «Quitar» para uno ya dado.
- * `kind` dice si es un bono de hunt o una compra de Bonus Buys.
+ * `kind` dice si es un bono de hunt o una compra de Bonus Buy.
  */
 export function TipeoButtons({ kind, id, given }: { kind: "bonus" | "buy"; id: string; given?: boolean }) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(decideTipeo, INITIAL_ACTION_STATE);

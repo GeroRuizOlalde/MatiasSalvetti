@@ -109,3 +109,12 @@ export function formatDayMonth(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
 }
+
+/** "sweet bonanza 1000" -> "Sweet Bonanza 1000": primera letra de cada palabra en mayúscula, el resto como vino. */
+export function capitalizeWords(text: string) {
+  return text
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toLocaleUpperCase("es-AR") + word.slice(1))
+    .join(" ");
+}

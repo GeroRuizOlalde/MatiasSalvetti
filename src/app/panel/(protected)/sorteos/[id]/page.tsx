@@ -10,6 +10,7 @@ import { formatDateTime, formatInteger, isPast, toArgentinaInput } from "@/lib/f
 import { createClient } from "@/lib/supabase/server";
 import { deleteGiveaway, drawGiveaway } from "../actions";
 import { GiveawayForm, WinnerStatusForm } from "../forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Sorteo" };
 
@@ -29,7 +30,7 @@ export default async function PanelGiveawayPage({ params }: PageProps<"/panel/so
   if (!giveaway) notFound();
 
   const [{ data: casinos }, { data: stats }, { data: winners }, { data: entries }] = await Promise.all([
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase, giveaway.casino_id),
     supabase.rpc("giveaway_stats", { p_giveaway: id }),
     supabase
       .from("giveaway_winners")

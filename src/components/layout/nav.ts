@@ -21,7 +21,7 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "En vivo",
     items: [
       { href: "/bonus-hunt", label: "Bonus Hunt", icon: Crosshair },
-      { href: "/bonus-buys", label: "Bonus Buys", icon: ShoppingCart },
+      { href: "/bonus-buys", label: "Bonus Buy", icon: ShoppingCart },
       { href: "/bonus-battle", label: "Bonus Battle", icon: Swords },
     ],
   },

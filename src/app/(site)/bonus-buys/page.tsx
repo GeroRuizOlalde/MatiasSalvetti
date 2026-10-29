@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getPublicBuySessions } from "@/lib/buys";
 
 export const metadata: Metadata = {
-  title: "Bonus Buys",
+  title: "Bonus Buy",
   description: "Todas las compras de bonus, sesión por sesión. Pedí cuál sigue.",
 };
 
@@ -17,7 +17,7 @@ export default async function BonusBuysPage() {
 
   return (
     <>
-      <PageHeader kicker="una atrás de otra" title="Bonus Buys">
+      <PageHeader kicker="una atrás de otra" title="Bonus Buy">
         Compras de bonus en vivo, con lo que costó y lo que pagó cada una. Mientras la sesión esté en vivo, pedí qué
         slot compramos.
       </PageHeader>

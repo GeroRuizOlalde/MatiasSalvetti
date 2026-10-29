@@ -34,7 +34,7 @@ const GROUPS: Group[] = [
     title: "En vivo",
     items: [
       { href: "/panel/hunts", label: "Bonus Hunt", icon: Crosshair },
-      { href: "/panel/buys", label: "Bonus Buys", icon: ShoppingCart },
+      { href: "/panel/buys", label: "Bonus Buy", icon: ShoppingCart },
       { href: "/panel/battles", label: "Bonus Battle", icon: Swords },
       { href: "/panel/tipeos", label: "Tipeos", icon: Sparkles },
     ],
@@ -113,7 +113,7 @@ export function PanelSidebar({
           href="/panel"
           className={cn("font-display text-2xl tracking-wide text-accent-light uppercase", hideWhenCollapsed)}
         >
-          Panel MS
+          Panel
         </Link>
         <Link
           href="/"

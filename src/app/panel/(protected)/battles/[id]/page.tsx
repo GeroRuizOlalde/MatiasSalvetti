@@ -12,6 +12,7 @@ import { BATTLE_STATUSES, statusInfo } from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
 import { deleteBattle, deleteEntry, resetBattle, shuffleEntries, startBattle } from "../actions";
 import { AddEntryForm, BattleCallReviewForm, BattleForm, MatchForm } from "../forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Bonus Battle" };
 
@@ -45,7 +46,7 @@ export default async function PanelBattlePage({ params }: PageProps<"/panel/batt
       .eq("battle_id", id)
       .eq("status", "pending")
       .order("created_at"),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase, battle.casino_id),
   ]);
 
   const list = entries ?? [];

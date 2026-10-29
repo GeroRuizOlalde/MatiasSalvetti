@@ -43,9 +43,13 @@ export const SETTING_SCHEMAS = {
     hunt_call: rewardSchema,
     gtb_participation: rewardSchema,
     gtb_win: rewardSchema,
-    buy_vote: rewardSchema,
-    battle_pick: rewardSchema,
+    // Ya no se usan (votaciones y «bancá a tu slot»): el panel no los guarda más, así que son opcionales.
+    buy_vote: rewardSchema.default({ points: 0, xp: 0 }),
+    battle_pick: rewardSchema.default({ points: 0, xp: 0 }),
     battle_champion: rewardSchema,
+    // Nuevos: si la base todavía no los tiene, valen los de fábrica.
+    hunt_winner: rewardSchema.default({ points: 200, xp: 100 }),
+    buy_winner: rewardSchema.default({ points: 200, xp: 100 }),
   }),
 };
 
@@ -85,6 +89,8 @@ export const DEFAULT_SETTINGS: PublicSettings = {
     buy_vote: { points: 5, xp: 10 },
     battle_pick: { points: 10, xp: 15 },
     battle_champion: { points: 150, xp: 80 },
+    hunt_winner: { points: 200, xp: 100 },
+    buy_winner: { points: 200, xp: 100 },
   },
 };
 

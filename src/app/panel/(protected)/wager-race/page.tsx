@@ -7,6 +7,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { RaceForm } from "./forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Wager Race" };
 
@@ -19,7 +20,7 @@ export default async function PanelWagerPage() {
       .select("id, title, status, starts_at, ends_at, casino:casinos(name)")
       .order("starts_at", { ascending: false })
       .limit(100),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase),
     supabase.from("casino_accounts").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
 

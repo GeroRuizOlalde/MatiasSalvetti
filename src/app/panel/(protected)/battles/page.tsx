@@ -8,6 +8,7 @@ import { formatDate, formatInteger } from "@/lib/format";
 import { BATTLE_STATUSES, statusInfo } from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
 import { BattleForm } from "./forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Bonus Battle" };
 
@@ -20,7 +21,7 @@ export default async function PanelBattlesPage() {
       .select("id, title, status, created_at, entries:battle_entries!battle_entries_battle_id_fkey(id)")
       .order("created_at", { ascending: false })
       .limit(100),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase),
   ]);
 
   return (

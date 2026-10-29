@@ -8,6 +8,7 @@ import { huntStats } from "@/lib/calc/hunt";
 import { formatDate, formatInteger, formatMoney } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { HuntForm } from "./hunt-form";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Bonus Hunt" };
 
@@ -20,7 +21,7 @@ export default async function PanelHuntsPage() {
       .select("id, title, status, currency, start_cost, final_balance, created_at, bonuses:hunt_bonuses(bet, payout)")
       .order("created_at", { ascending: false })
       .limit(100),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase),
     supabase.from("hunt_calls").select("hunt_id").eq("status", "pending"),
   ]);
 

@@ -13,10 +13,12 @@ type Props = {
   scopeLabel: string;
   retry: boolean;
   taken: string[];
+  /** Pregunta del formulario (en el hunt se busca el slot; en buys y battles se compra). */
+  question?: string;
 };
 
 /** Pedir un slot. Una vez mandado no se cambia; solo se puede pedir otro si el panel lo rechaza. */
-export function CallForm({ action, hidden, scopeLabel, retry, taken }: Props) {
+export function CallForm({ action, hidden, scopeLabel, retry, taken, question = "¿Qué slot querés que compre?" }: Props) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, INITIAL_ACTION_STATE);
   const id = useId();
 
@@ -26,7 +28,7 @@ export function CallForm({ action, hidden, scopeLabel, retry, taken }: Props) {
         <input key={name} type="hidden" name={name} value={value} />
       ))}
       <label htmlFor={`${id}-slot`} className="block text-xs font-semibold text-subtle">
-        {retry ? "Pedí otro slot" : "¿Qué slot querés que compre?"}
+        {retry ? "Pedí otro slot" : question}
       </label>
       <div className="flex gap-2">
         <div className="min-w-0 flex-1">

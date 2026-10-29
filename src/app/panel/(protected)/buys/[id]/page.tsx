@@ -16,8 +16,9 @@ import { createClient } from "@/lib/supabase/server";
 import { isTipeoHit } from "@/lib/tipeos";
 import { deleteBuySession } from "../actions";
 import { AddBuyForm, BuyCallReviewForm, BuyRowForm, BuySessionForm } from "../forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
-export const metadata: Metadata = { title: "Bonus Buys" };
+export const metadata: Metadata = { title: "Bonus Buy" };
 
 export default async function PanelBuySessionPage({ params }: PageProps<"/panel/buys/[id]">) {
   const profile = await requirePanelProfile("mod");
@@ -45,7 +46,7 @@ export default async function PanelBuySessionPage({ params }: PageProps<"/panel/
       .eq("session_id", id)
       .eq("status", "pending")
       .order("created_at"),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase, session.casino_id),
     supabase.from("tipeos").select("buy_id, status").eq("session_id", id),
   ]);
 

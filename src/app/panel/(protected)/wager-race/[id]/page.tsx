@@ -10,6 +10,7 @@ import { formatDateTime, formatInteger, formatMoney, toArgentinaInput } from "@/
 import { createClient } from "@/lib/supabase/server";
 import { deleteRace } from "../actions";
 import { EntryForm, ImportWagersForm, RaceForm } from "../forms";
+import { casinoOptions } from "@/lib/panel-casinos";
 
 export const metadata: Metadata = { title: "Wager Race" };
 
@@ -30,7 +31,7 @@ export default async function PanelRacePage({ params }: PageProps<"/panel/wager-
 
   const [{ data: board }, { data: casinos }, { count: verified }] = await Promise.all([
     supabase.rpc("wager_leaderboard", { p_race: id, p_limit: 500 }),
-    supabase.from("casinos").select("id, name").order("sort_order").order("name"),
+    casinoOptions(supabase, race.casino_id),
     supabase
       .from("casino_accounts")
       .select("id", { count: "exact", head: true })

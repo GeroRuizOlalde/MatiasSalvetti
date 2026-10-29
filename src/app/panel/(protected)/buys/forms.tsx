@@ -28,6 +28,15 @@ type Session = {
 export function BuySessionForm({ session, casinos }: { session?: Session; casinos: { id: string; name: string }[] }) {
   const [state, formAction] = useActionState<ActionState, FormData>(saveBuySession, INITIAL_ACTION_STATE);
   const id = useId();
+  const [status, setStatus] = useState(session?.status ?? "draft");
+  const [callsOpen, setCallsOpen] = useState(session?.calls_open ?? true);
+
+  // «En vivo» abre los calls y «Terminada» los cierra; después se pueden tocar a mano.
+  const changeStatus = (next: Enums<"buy_session_status">) => {
+    setStatus(next);
+    if (next === "live") setCallsOpen(true);
+    else if (next === "finished") setCallsOpen(false);
+  };
 
   return (
     <form action={formAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -44,10 +53,16 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
         <Field
           id={`${id}-status`}
           label="Estado"
-          hint={BUY_STATUSES.find((s) => s.value === session.status)?.hint}
+          hint={BUY_STATUSES.find((s) => s.value === status)?.hint}
           className="sm:col-span-2"
         >
-          <select id={`${id}-status`} name="status" defaultValue={session.status} className={inputClass}>
+          <select
+            id={`${id}-status`}
+            name="status"
+            value={status}
+            onChange={(e) => changeStatus(e.target.value as Enums<"buy_session_status">)}
+            className={inputClass}
+          >
             {BUY_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
@@ -63,7 +78,8 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
           <input
             type="checkbox"
             name="calls_open"
-            defaultChecked={session.calls_open}
+            checked={callsOpen}
+            onChange={(e) => setCallsOpen(e.target.checked)}
             className="size-4 accent-accent"
           />
           Calls abiertos (con la sesión «En vivo»)
@@ -171,7 +187,7 @@ export function BuyRowForm({
         </span>
         {locked ? null : (
           <SubmitButton variant="secondary" pendingLabel="…">
-            {buy.payout === null ? "Abrir" : "Guardar"}
+            Guardar
           </SubmitButton>
         )}
       </form>
