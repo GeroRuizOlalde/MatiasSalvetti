@@ -43,7 +43,7 @@ export default async function ComoParticiparPage() {
     },
     {
       icon: Landmark,
-      title: "Creá tu cuenta en un casino con el link de Matías",
+      title: "Creá tu cuenta en un casino con el link de Chupetti",
       body: (
         <>
           Para la Wager Race y algunos sorteos tenés que registrarte desde los links de abajo y usar el código. Si ya

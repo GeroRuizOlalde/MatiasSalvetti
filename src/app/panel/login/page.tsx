@@ -54,7 +54,7 @@ async function PanelLoginBox({ searchParams }: { searchParams: PageProps<"/panel
       {params.error === "sin-permiso" || profile ? (
         <p role="alert" className="rounded-lg border border-live/40 bg-live/10 px-4 py-3 text-sm">
           {profile
-            ? `Tu cuenta (${profile.twitch_login ?? profile.display_name}) no tiene acceso al panel. Pedile a Matías que te dé permisos.`
+            ? `Tu cuenta (${profile.twitch_login ?? profile.display_name}) no tiene acceso al panel. Pedile a Chupetti que te dé permisos.`
             : "Esa cuenta no tiene acceso al panel."}
         </p>
       ) : null}

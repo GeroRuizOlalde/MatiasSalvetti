@@ -45,7 +45,7 @@ export default async function VerificacionesPage({ searchParams }: PageProps<"/p
     <div className="space-y-6">
       <h1 className="font-display text-4xl tracking-wide uppercase">Verificaciones</h1>
       <p className="text-sm text-muted">
-        Revisá que la captura muestre el mismo ID y que la cuenta se haya creado con el link de Matías. Solo las cuentas
+        Revisá que la captura muestre el mismo ID y que la cuenta se haya creado con el link de Chupetti. Solo las cuentas
         aprobadas suman en la Wager Race.
       </p>
 

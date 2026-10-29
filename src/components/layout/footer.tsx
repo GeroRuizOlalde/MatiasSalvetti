@@ -22,7 +22,8 @@ export async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-line bg-bg-alt">
-      <div className="mx-auto max-w-7xl px-4 py-10">
+      {/* pb-28: el cohete de «volver arriba» no tapa los links del final. */}
+      <div className="mx-auto max-w-7xl px-4 pt-10 pb-28">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <section aria-labelledby="footer-rg" className="max-w-3xl space-y-2">
             <h2 id="footer-rg" className="flex items-center gap-2 font-semibold">
@@ -40,7 +41,7 @@ export async function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-xs text-subtle sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} Matías Salvetti ·{" "}
+            © {year} Chupetti ·{" "}
             <span>
               Datos de slots:{" "}
               <a href="https://slot.report" target="_blank" className="hover:text-text">

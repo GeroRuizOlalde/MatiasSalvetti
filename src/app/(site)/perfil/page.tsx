@@ -129,7 +129,7 @@ async function CasinoAccounts({ userId }: { userId: string }) {
         <div className="mt-5 border-t border-line pt-5">
           <h3 className="font-semibold">Verificar una cuenta</h3>
           <p className="mt-1 mb-3 text-sm text-muted">
-            Cargá el ID de tu cuenta y una captura. Tiene que ser una cuenta creada con el link de Matías. Con la cuenta
+            Cargá el ID de tu cuenta y una captura. Tiene que ser una cuenta creada con el link de Chupetti. Con la cuenta
             verificada entrás a la Wager Race y a los sorteos del casino.
           </p>
           <VerificationForm casinos={available.map(({ id, name }) => ({ id, name }))} />

@@ -108,8 +108,12 @@ describe("configuración y catálogo", () => {
   });
 
   it("anon lee casinos activos y no puede escribir", async () => {
-    const { rows } = await as(db, "anon", () => db.query("select slug from public.casinos order by sort_order"));
-    expect(rows).toHaveLength(3);
+    const { rows } = await as(db, "anon", () =>
+      db.query<{ slug: string }>("select slug from public.casinos order by sort_order"),
+    );
+    // Win Win está desactivado (20261109000001_sin_win_win.sql).
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.slug)).not.toContain("win-win");
     await expect(
       as(db, "anon", () =>
         db.query("insert into public.casinos (name, slug, referral_url) values ('X', 'x', 'https://x.test')"),
