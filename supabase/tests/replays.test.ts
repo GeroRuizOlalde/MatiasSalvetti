@@ -6,9 +6,17 @@ let mod: { id: string };
 let viewer: { id: string };
 let other: { id: string };
 
-const submit = (who: { id: string }, url: string, slot = "Mental", multi: number | null = null) =>
+const submit = (
+  who: { id: string },
+  url: string,
+  slot = "Mental",
+  amounts: { bet?: number; bonus?: number; payout?: number } = {},
+) =>
   as(db, who, () =>
-    db.query<{ id: string }>("select public.submit_replay($1, null, $2, $3) as id", [url, slot, multi]),
+    db.query<{ id: string }>(
+      "select public.submit_replay(p_url => $1, p_slot_name => $2, p_bet => $3, p_bonus_cost => $4, p_payout => $5) as id",
+      [url, slot, amounts.bet ?? null, amounts.bonus ?? null, amounts.payout ?? null],
+    ),
   ).then((r) => r.rows[0].id);
 
 beforeAll(async () => {
@@ -23,12 +31,26 @@ beforeAll(async () => {
 
 describe("replays", () => {
   it("se manda, queda pendiente y solo se publica cuando el panel lo aprueba", async () => {
-    const id = await submit(viewer, "https://www.ppreplaylink.net/IKfLBegbRp", "Gates of Olympus", 2500);
+    const id = await submit(viewer, "https://www.ppreplaylink.net/IKfLBegbRp", "Gates of Olympus", {
+      bet: 200,
+      bonus: 20000,
+      payout: 500000,
+    });
     const own = await as(db, viewer, () =>
-      db.query("select host, slot_name, multi, status from public.replays where id = $1", [id]),
+      db.query("select host, slot_name, bet, bonus_cost, payout, multi, status from public.replays where id = $1", [
+        id,
+      ]),
     );
     expect(own.rows).toEqual([
-      { host: "ppreplaylink.net", slot_name: "Gates of Olympus", multi: "2500.00", status: "pending" },
+      {
+        host: "ppreplaylink.net",
+        slot_name: "Gates of Olympus",
+        bet: "200.00",
+        bonus_cost: "20000.00",
+        payout: "500000.00",
+        multi: "2500.00",
+        status: "pending",
+      },
     ]);
 
     const hidden = await as(db, "anon", () => db.query("select id from public.replays where id = $1", [id]));
@@ -101,5 +123,59 @@ describe("replays", () => {
         db.query("insert into public.replay_providers (name, domain) values ('Mal', 'https://algo.com/x')"),
       ),
     ).rejects.toThrow(/check constraint/);
+  });
+
+  it("me gusta y comentarios en replays publicados", async () => {
+    const id = await submit(viewer, "https://nolimitcity.com/replay/social");
+    // Sin publicar no se puede.
+    await expect(as(db, other, () => db.query("select public.toggle_replay_like($1)", [id]))).rejects.toThrow(
+      /not_found/,
+    );
+    await as(db, mod, () => db.query("select public.review_replay($1, true)", [id]));
+
+    const like = await as(db, other, () =>
+      db.query<{ liked: boolean }>("select public.toggle_replay_like($1) as liked", [id]),
+    );
+    expect(like.rows[0].liked).toBe(true);
+    await as(db, viewer, () => db.query("select public.toggle_replay_like($1)", [id]));
+    const unlike = await as(db, other, () =>
+      db.query<{ liked: boolean }>("select public.toggle_replay_like($1) as liked", [id]),
+    );
+    expect(unlike.rows[0].liked).toBe(false);
+
+    const comment = await as(db, other, () =>
+      db.query<{ id: string }>("select public.add_replay_comment($1, '  ¡Qué locura!  ') as id", [id]),
+    );
+    await expect(as(db, other, () => db.query("select public.add_replay_comment($1, '   ')", [id]))).rejects.toThrow(
+      /invalid_comment/,
+    );
+    const counts = await as(db, "anon", () =>
+      db.query("select likes_count, comments_count from public.replays where id = $1", [id]),
+    );
+    expect(counts.rows).toEqual([{ likes_count: 1, comments_count: 1 }]);
+    const visible = await as(db, "anon", () =>
+      db.query("select body from public.replay_comments where replay_id = $1", [id]),
+    );
+    expect(visible.rows).toEqual([{ body: "¡Qué locura!" }]);
+
+    // Al dueño le llega el aviso del comentario.
+    const notice = await as(db, viewer, () =>
+      db.query("select title from public.notifications where kind = 'replay_comment'"),
+    );
+    expect(notice.rows).toHaveLength(1);
+
+    // Nadie escribe directo, y solo el autor (o el panel) borra su comentario.
+    await expect(
+      as(db, other, () =>
+        db.query("insert into public.replay_likes (replay_id, user_id) values ($1, $2)", [id, other.id]),
+      ),
+    ).rejects.toThrow(/permission denied/);
+    await as(db, viewer, () => db.query("delete from public.replay_comments where id = $1", [comment.rows[0].id]));
+    expect(
+      (await db.query("select id from public.replay_comments where id = $1", [comment.rows[0].id])).rows,
+    ).toHaveLength(1);
+    await as(db, other, () => db.query("delete from public.replay_comments where id = $1", [comment.rows[0].id]));
+    const after = await db.query("select comments_count from public.replays where id = $1", [id]);
+    expect(after.rows).toEqual([{ comments_count: 0 }]);
   });
 });

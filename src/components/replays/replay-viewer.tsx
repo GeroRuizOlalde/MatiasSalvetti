@@ -12,6 +12,7 @@ type Props = {
   label?: string;
   size?: "sm" | "md";
   variant?: "primary" | "secondary" | "ghost";
+  className?: string;
 };
 
 /**
@@ -25,6 +26,7 @@ export function ReplayViewer({
   label = "Ver replay",
   size = "sm",
   variant = "primary",
+  className,
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
@@ -39,7 +41,7 @@ export function ReplayViewer({
 
   if (!embeddable) {
     return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClasses({ variant, size })}>
+      <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClasses({ variant, size, className })}>
         <ExternalLink className="size-4" aria-hidden /> {label}
       </a>
     );
@@ -47,7 +49,7 @@ export function ReplayViewer({
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClasses({ variant, size })}>
+      <button type="button" onClick={() => setOpen(true)} className={buttonClasses({ variant, size, className })}>
         <Play className="size-4" aria-hidden /> {label}
       </button>
       <dialog

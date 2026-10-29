@@ -1141,6 +1141,12 @@ export type Database = {
           slot_name: string;
           multi: number | null;
           note: string | null;
+          currency: Database["public"]["Enums"]["currency_code"];
+          bet: number | null;
+          bonus_cost: number | null;
+          payout: number | null;
+          likes_count: number;
+          comments_count: number;
           status: "pending" | "approved" | "rejected";
           reject_reason: string | null;
           reviewed_by: string | null;
@@ -1156,6 +1162,12 @@ export type Database = {
           slot_name: string;
           multi?: number | null;
           note?: string | null;
+          currency?: Database["public"]["Enums"]["currency_code"];
+          bet?: number | null;
+          bonus_cost?: number | null;
+          payout?: number | null;
+          likes_count?: number;
+          comments_count?: number;
           status?: "pending" | "approved" | "rejected";
           reject_reason?: string | null;
           reviewed_by?: string | null;
@@ -1172,6 +1184,18 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      replay_likes: {
+        Row: { replay_id: string; user_id: string; created_at: string };
+        Insert: { replay_id: string; user_id: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["replay_likes"]["Insert"]>;
+        Relationships: [];
+      };
+      replay_comments: {
+        Row: { id: string; replay_id: string; user_id: string; body: string; created_at: string };
+        Insert: { id?: string; replay_id: string; user_id: string; body: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["replay_comments"]["Insert"]>;
+        Relationships: [];
       };
       tipeos: {
         Row: {
@@ -1268,11 +1292,16 @@ export type Database = {
           p_url: string;
           p_slot?: string | null;
           p_slot_name?: string | null;
-          p_multi?: number | null;
           p_note?: string | null;
+          p_currency?: Database["public"]["Enums"]["currency_code"];
+          p_bet?: number | null;
+          p_bonus_cost?: number | null;
+          p_payout?: number | null;
         };
         Returns: string;
       };
+      toggle_replay_like: { Args: { p_replay: string }; Returns: boolean };
+      add_replay_comment: { Args: { p_replay: string; p_body: string }; Returns: string };
       review_replay: { Args: { p_id: string; p_approve: boolean; p_reason?: string | null }; Returns: undefined };
       remove_manual_tipeo: { Args: { p_tipeo: string }; Returns: undefined };
       decide_tipeo: { Args: { p_bonus: string; p_give: boolean }; Returns: string };
