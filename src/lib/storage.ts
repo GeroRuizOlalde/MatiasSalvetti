@@ -8,3 +8,13 @@ export function publicAssetUrl(path: string | null | undefined) {
   const clean = path.split("/").map(encodeURIComponent).join("/");
   return `${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${PUBLIC_ASSETS_BUCKET}/${clean}`;
 }
+
+/** Logos que vienen con la web, por slug del casino. Uno subido desde el panel tiene prioridad. */
+const BUILT_IN_CASINO_LOGOS: Record<string, string> = {
+  "1xslots": "/brand/1xslots.png",
+  winebet: "/brand/casinos/winebet.png",
+};
+
+export function casinoLogoUrl(casino: { slug: string; logo_path: string | null }) {
+  return publicAssetUrl(casino.logo_path) ?? BUILT_IN_CASINO_LOGOS[casino.slug] ?? null;
+}

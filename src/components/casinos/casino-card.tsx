@@ -3,10 +3,10 @@ import Image from "next/image";
 import { buttonClasses } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import type { PublicCasino } from "@/lib/casinos";
-import { publicAssetUrl } from "@/lib/storage";
+import { casinoLogoUrl } from "@/lib/storage";
 
 export function CasinoCard({ casino }: { casino: PublicCasino }) {
-  const logo = publicAssetUrl(casino.logo_path);
+  const logo = casinoLogoUrl(casino);
 
   return (
     <article className="flex h-full flex-col rounded-2xl border border-line bg-surface p-5">

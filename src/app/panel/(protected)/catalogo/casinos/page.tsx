@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { requirePanelProfile } from "@/lib/auth/session";
-import { publicAssetUrl } from "@/lib/storage";
+import { casinoLogoUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { CatalogTabs } from "../catalog-tabs";
 import { CasinoForm } from "./casino-form";
@@ -29,7 +29,7 @@ export default async function CatalogoCasinosPage() {
       ) : (
         <ul className="space-y-4">
           {casinos?.map((casino) => {
-            const logo = publicAssetUrl(casino.logo_path);
+            const logo = casinoLogoUrl(casino);
             return (
               <li key={casino.id} className="rounded-2xl border border-line bg-surface p-5">
                 <div className="mb-4 flex items-center gap-3">
