@@ -4,16 +4,13 @@ import { Trash2 } from "lucide-react";
 import { useActionState } from "react";
 import { FormMessage } from "@/components/panel/form";
 import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
+import { ReplayEditButton } from "@/components/replays/replay-edit-button";
+import type { ReplayDraft } from "@/components/replays/replay-fields";
 import { StatusPill } from "@/components/ui/status-pill";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { deleteMyReplay } from "./actions";
 
-type Mine = {
-  id: string;
-  slot_name: string;
-  status: "pending" | "approved" | "rejected";
-  reject_reason: string | null;
-};
+type Mine = ReplayDraft & { status: "pending" | "approved" | "rejected"; reject_reason: string | null };
 
 const STATUS = {
   pending: { label: "En revisión", tone: "next" },
@@ -22,7 +19,7 @@ const STATUS = {
 } as const;
 
 /** Los replays que mandó el viewer y en qué quedó cada uno. */
-export function MyReplays({ replays }: { replays: Mine[] }) {
+export function MyReplays({ replays, providers }: { replays: Mine[]; providers: { name: string; domain: string }[] }) {
   if (!replays.length) return null;
   return (
     <div className="mt-5 border-t border-line pt-4">
@@ -32,9 +29,12 @@ export function MyReplays({ replays }: { replays: Mine[] }) {
           <li key={replay.id} className="flex flex-wrap items-center gap-2 text-sm">
             <span className="min-w-0 flex-1 truncate font-semibold">{replay.slot_name}</span>
             <StatusPill label={STATUS[replay.status].label} tone={STATUS[replay.status].tone} />
+            <ReplayEditButton replay={replay} providers={providers} className="px-1.5 [&>span]:sr-only" />
             {replay.status === "pending" ? <DeleteButton id={replay.id} /> : null}
             {replay.status === "rejected" && replay.reject_reason ? (
-              <p className="w-full text-xs text-subtle">Motivo: {replay.reject_reason}</p>
+              <p className="w-full text-xs text-subtle">
+                Motivo: {replay.reject_reason}. Si lo corregís, vuelve a revisión.
+              </p>
             ) : null}
           </li>
         ))}

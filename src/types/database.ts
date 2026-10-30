@@ -1147,6 +1147,7 @@ export type Database = {
           payout: number | null;
           likes_count: number;
           comments_count: number;
+          edited_at: string | null;
           status: "pending" | "approved" | "rejected";
           reject_reason: string | null;
           reviewed_by: string | null;
@@ -1168,6 +1169,7 @@ export type Database = {
           payout?: number | null;
           likes_count?: number;
           comments_count?: number;
+          edited_at?: string | null;
           status?: "pending" | "approved" | "rejected";
           reject_reason?: string | null;
           reviewed_by?: string | null;
@@ -1297,8 +1299,24 @@ export type Database = {
           p_bet?: number | null;
           p_bonus_cost?: number | null;
           p_payout?: number | null;
+          p_multi?: number | null;
         };
         Returns: string;
+      };
+      update_replay: {
+        Args: {
+          p_id: string;
+          p_url: string;
+          p_slot?: string | null;
+          p_slot_name?: string | null;
+          p_note?: string | null;
+          p_currency?: Database["public"]["Enums"]["currency_code"];
+          p_bet?: number | null;
+          p_bonus_cost?: number | null;
+          p_payout?: number | null;
+          p_multi?: number | null;
+        };
+        Returns: undefined;
       };
       toggle_replay_like: { Args: { p_replay: string }; Returns: boolean };
       add_replay_comment: { Args: { p_replay: string; p_body: string }; Returns: string };

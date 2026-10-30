@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 import { MyReplays } from "./my-replays";
 import { ReplayForm } from "./replay-form";
 
+type ProviderRef = { name: string; domain: string };
+
 export const metadata: Metadata = {
   title: "Replays",
   description: "Los mejores bonos de la comunidad: replays de slots compartidos por los viewers.",
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function ReplaysPage() {
   const [replays, providers] = await Promise.all([getPublicReplays(), getReplayProviders()]);
+  const providerRefs: ProviderRef[] = providers.map(({ name, domain }) => ({ name, domain }));
 
   return (
     <>
@@ -35,7 +38,9 @@ export default async function ReplaysPage() {
                 const supabase = await createClient();
                 const { data: mine } = await supabase
                   .from("replays")
-                  .select("id, slot_name, status, reject_reason")
+                  .select(
+                    "id, url, slot_id, slot_name, note, currency, bet, bonus_cost, payout, multi, status, reject_reason",
+                  )
                   .eq("user_id", profile.id)
                   .order("created_at", { ascending: false })
                   .limit(10);
@@ -43,9 +48,9 @@ export default async function ReplaysPage() {
                   <section className={participationBox}>
                     <ParticipationTitle>Compartí tu replay</ParticipationTitle>
                     <div className="mt-4">
-                      <ReplayForm providers={providers.map(({ name, domain }) => ({ name, domain }))} />
+                      <ReplayForm providers={providerRefs} />
                     </div>
-                    <MyReplays replays={mine ?? []} />
+                    <MyReplays replays={mine ?? []} providers={providerRefs} />
                   </section>
                 );
               }}
@@ -54,8 +59,8 @@ export default async function ReplaysPage() {
         </aside>
         <section aria-label="Replays" className="min-w-0 lg:order-1">
           {/* Primero se ve el feed tal cual; cuando se sabe quién mira, se marcan sus me gusta. */}
-          <Suspense fallback={<ReplayFeed replays={replays} viewer={null} />}>
-            <FeedForViewer replays={replays} />
+          <Suspense fallback={<ReplayFeed replays={replays} viewer={null} providers={providerRefs} />}>
+            <FeedForViewer replays={replays} providers={providerRefs} />
           </Suspense>
         </section>
       </div>
@@ -64,9 +69,9 @@ export default async function ReplaysPage() {
 }
 
 /** Lee la sesión: va dentro de un <Suspense>. */
-async function FeedForViewer({ replays }: { replays: PublicReplay[] }) {
+async function FeedForViewer({ replays, providers }: { replays: PublicReplay[]; providers: ProviderRef[] }) {
   const profile = await getCurrentProfile();
-  if (!profile) return <ReplayFeed replays={replays} viewer={null} />;
+  if (!profile) return <ReplayFeed replays={replays} viewer={null} providers={providers} />;
   const supabase = await createClient();
   const { data: likes } = await supabase.from("replay_likes").select("replay_id").eq("user_id", profile.id);
   return (
@@ -74,6 +79,7 @@ async function FeedForViewer({ replays }: { replays: PublicReplay[] }) {
       // Al cambiar de usuario, los me gusta se vuelven a leer.
       key={profile.id}
       replays={replays}
+      providers={providers}
       viewer={{ id: profile.id, isMod: isPanelRole(profile.role), likedIds: (likes ?? []).map((l) => l.replay_id) }}
     />
   );

@@ -1,12 +1,9 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
-import { SlotPicker } from "@/components/hunts/slot-picker";
-import { Field, FormMessage, inputClass, SubmitButton, textareaClass } from "@/components/panel/form";
-import { AmountInput } from "@/components/ui/amount-input";
+import { useActionState, useState } from "react";
+import { FormMessage } from "@/components/panel/form";
+import { ReplayFields } from "@/components/replays/replay-fields";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
-import { formatMulti } from "@/lib/format";
-import { matchProvider, replayHost } from "@/lib/replay-providers";
 import { submitReplay } from "./actions";
 
 /** Compartir un replay: link, slot, montos (opcionales) y un comentario corto. */
@@ -20,104 +17,14 @@ export function ReplayForm({ providers }: { providers: { name: string; domain: s
 
   return (
     <div className="space-y-3">
-      <Fields key={round} action={formAction} providers={providers} />
+      <ReplayFields
+        key={round}
+        action={formAction}
+        providers={providers}
+        submitLabel="Compartir replay"
+        pendingLabel="Enviando…"
+      />
       <FormMessage state={state} />
     </div>
-  );
-}
-
-function Fields({
-  action,
-  providers,
-}: {
-  action: (data: FormData) => void;
-  providers: { name: string; domain: string }[];
-}) {
-  const id = useId();
-  const [url, setUrl] = useState("");
-  const [bet, setBet] = useState("");
-  const [payout, setPayout] = useState("");
-  const multi = Number(bet) > 0 && payout !== "" ? Number(payout) / Number(bet) : null;
-  const host = replayHost(url.trim());
-  const provider = host ? matchProvider(host, providers) : null;
-
-  return (
-    <form action={action} className="grid gap-3">
-      <Field
-        id={`${id}-url`}
-        label="Link del replay"
-        hint={
-          host
-            ? provider
-              ? `Replay de ${provider.name}.`
-              : "No conocemos este proveedor: el panel lo va a revisar."
-            : "Copiá el link para compartir el replay desde el juego."
-        }
-      >
-        <input
-          id={`${id}-url`}
-          name="url"
-          type="url"
-          required
-          maxLength={500}
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://…"
-          className={inputClass}
-        />
-      </Field>
-      <Field id={`${id}-slot`} label="Slot">
-        <SlotPicker id={`${id}-slot`} required />
-      </Field>
-      <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Field id={`${id}-currency`} label="Moneda">
-          <select id={`${id}-currency`} name="currency" defaultValue="ARS" className={inputClass}>
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-          </select>
-        </Field>
-        <Field id={`${id}-bet`} label="Apuesta">
-          <AmountInput
-            id={`${id}-bet`}
-            name="bet"
-            onValueChange={setBet}
-            placeholder="Ej.: 200"
-            className={inputClass}
-          />
-        </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Field id={`${id}-bonus`} label="Valor del bono">
-          <AmountInput id={`${id}-bonus`} name="bonus_cost" placeholder="Si lo compraste" className={inputClass} />
-        </Field>
-        <Field id={`${id}-payout`} label="Pagó">
-          <AmountInput
-            id={`${id}-payout`}
-            name="payout"
-            onValueChange={setPayout}
-            placeholder="Ej.: 50.000"
-            className={inputClass}
-          />
-        </Field>
-      </div>
-      {multi !== null ? (
-        <p className="text-sm text-muted">
-          Multi: <span className="num font-bold text-gold">{formatMulti(multi)}</span>
-        </p>
-      ) : null}
-      <Field id={`${id}-note`} label="Comentario (opcional)">
-        <textarea
-          id={`${id}-note`}
-          name="note"
-          maxLength={200}
-          rows={2}
-          placeholder="Ej.: Entró con 3 scatters y pagó todo en el último giro."
-          className={textareaClass}
-        />
-      </Field>
-      <div>
-        <SubmitButton pendingLabel="Enviando…">Compartir replay</SubmitButton>
-      </div>
-    </form>
   );
 }

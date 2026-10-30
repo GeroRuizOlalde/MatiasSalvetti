@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { formatDate, formatInteger, formatMoney, formatMulti } from "@/lib/format";
 import type { PublicReplay } from "@/lib/replays";
 import { ReplayComments } from "./replay-comments";
+import { ReplayEditButton } from "./replay-edit-button";
 import { ReplayViewer } from "./replay-viewer";
 
 /** Quién está mirando el feed: para marcar sus me gusta y dejarle comentar. */
@@ -23,7 +24,17 @@ const SORTS = [
 type Sort = (typeof SORTS)[number]["value"];
 
 /** Los replays como publicaciones: montos, me gusta, comentarios y compartir. */
-export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewer: ReplayViewerUser | null }) {
+type Providers = { name: string; domain: string }[];
+
+export function ReplayFeed({
+  replays,
+  viewer,
+  providers,
+}: {
+  replays: PublicReplay[];
+  viewer: ReplayViewerUser | null;
+  providers: Providers;
+}) {
   const [provider, setProvider] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("new");
 
@@ -35,7 +46,7 @@ export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewe
     );
   }
 
-  const providers = [...new Set(replays.map((r) => r.provider?.name ?? "Otros"))].sort();
+  const providerNames = [...new Set(replays.map((r) => r.provider?.name ?? "Otros"))].sort();
   const shown = replays
     .filter((r) => !provider || (r.provider?.name ?? "Otros") === provider)
     .sort((a, b) => {
@@ -53,7 +64,7 @@ export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewe
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {providers.length > 1 ? (
+        {providerNames.length > 1 ? (
           <div role="group" aria-label="Proveedor" className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -63,7 +74,7 @@ export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewe
             >
               Todos
             </button>
-            {providers.map((name) => (
+            {providerNames.map((name) => (
               <button
                 key={name}
                 type="button"
@@ -95,7 +106,7 @@ export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewe
       <ul className="space-y-4">
         {shown.map((replay) => (
           <li key={replay.id}>
-            <ReplayPost replay={replay} viewer={viewer} />
+            <ReplayPost replay={replay} viewer={viewer} providers={providers} />
           </li>
         ))}
       </ul>
@@ -103,7 +114,15 @@ export function ReplayFeed({ replays, viewer }: { replays: PublicReplay[]; viewe
   );
 }
 
-function ReplayPost({ replay, viewer }: { replay: PublicReplay; viewer: ReplayViewerUser | null }) {
+function ReplayPost({
+  replay,
+  viewer,
+  providers,
+}: {
+  replay: PublicReplay;
+  viewer: ReplayViewerUser | null;
+  providers: Providers;
+}) {
   const [liked, setLiked] = useState(() => viewer?.likedIds.includes(replay.id) ?? false);
   const [likes, setLikes] = useState(replay.likes_count);
   const [comments, setComments] = useState(replay.comments_count);
@@ -163,8 +182,16 @@ function ReplayPost({ replay, viewer }: { replay: PublicReplay; viewer: ReplayVi
           <p className="text-xs text-subtle">
             {replay.provider ? `${replay.provider.name} · ` : ""}
             {formatDate(replay.created_at)}
+            {replay.edited_at ? " · editado" : ""}
           </p>
         </div>
+        {viewer && (viewer.id === replay.user?.id || viewer.isMod) ? (
+          <ReplayEditButton
+            replay={replay}
+            providers={providers}
+            byPanel={viewer.isMod && viewer.id !== replay.user?.id}
+          />
+        ) : null}
       </header>
 
       <div className="space-y-3 px-4 pt-3 pb-4">
