@@ -41,7 +41,7 @@ async function WagerOverlay() {
       )}
       <ol className="space-y-1">
         {top.map((row) => (
-          <li key={row.user_id} className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5 text-sm">
+          <li key={row.user_id} className="flex items-center gap-2 rounded-lg bg-white/10 px-2 py-1.5 text-sm">
             {row.rank <= 3 ? (
               <Medal className={cn("size-4 shrink-0", MEDAL[row.rank - 1])} aria-hidden />
             ) : (

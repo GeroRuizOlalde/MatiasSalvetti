@@ -8,7 +8,10 @@ export default function OverlayLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <style>{"html,body{background:transparent!important}"}</style>
-      <div className="p-3 text-text">{children}</div>
+      {/* Grises más claros que en la web: en el stream el overlay se ve chico y sobre video. */}
+      <div className="p-3 text-text [--color-muted:#ece4f7] [--color-subtle:#cfc2e6] [text-shadow:0_1px_2px_rgb(0_0_0/0.5)]">
+        {children}
+      </div>
     </>
   );
 }
