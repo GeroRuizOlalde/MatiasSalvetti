@@ -2,7 +2,12 @@ import type { ReactNode } from "react";
 import { isValidOverlayKey } from "@/lib/overlay";
 import { AutoRefresh } from "./auto-refresh";
 
-export const overlayPanel = "rounded-2xl border border-white/10 bg-[#0b0712]/85 p-4 shadow-2xl backdrop-blur";
+/**
+ * Cuadro de los overlays: sólido y con borde brillante para que se lea sobre cualquier
+ * fondo del stream (los semitransparentes se pierden sobre escenas claras o rosas).
+ */
+export const overlayPanel =
+  "relative overflow-hidden rounded-2xl border-2 border-accent bg-[#120a20] p-4 pt-5 shadow-[0_0_28px_-6px_rgb(157_59_255/0.9)] before:absolute before:inset-x-0 before:top-0 before:h-1.5 before:bg-gradient-to-r before:from-accent before:via-[#ff5fd2] before:to-gold";
 
 /** Valida el ?key= y agrega el refresco automático. */
 export async function OverlayGate({

@@ -47,7 +47,7 @@ export function BonusTicker({
                 <div
                   className={cn(
                     "flex h-8 items-center gap-2 rounded-lg px-2 text-sm",
-                    isNext ? "bg-accent/30 ring-1 ring-accent ring-inset" : "bg-white/5",
+                    isNext ? "bg-accent/30 ring-1 ring-accent ring-inset" : "bg-white/10",
                     bonus.payout === null && !isNext && "text-muted",
                   )}
                 >
