@@ -11,11 +11,13 @@ const ERRORS: Record<string, string> = {
   invalid_url: "Pegá el link completo del replay (empieza con https://).",
   invalid_slot: "Elegí o escribí el slot.",
   invalid_amount: "Revisá los montos.",
+  invalid_multi: "Revisá el multi.",
   invalid_note: "El comentario es muy largo.",
   invalid_comment: "Escribí un comentario (hasta 300 letras).",
   replay_duplicate: "Ese replay ya lo compartió alguien.",
   too_many_pending: "Tenés 5 replays esperando revisión. Esperá a que el panel los revise.",
   not_found: "Ese replay ya no está publicado.",
+  forbidden: "Solo podés editar tus replays.",
 };
 
 /** Monto opcional (vacío = null). `positive`: tiene que ser mayor a 0. */
@@ -45,13 +47,14 @@ const schema = z.object({
   bet: amount("La apuesta tiene que ser mayor a 0."),
   bonus_cost: amount("El valor del bono tiene que ser mayor a 0."),
   payout: amount("Lo que pagó tiene que ser un número mayor o igual a 0.", false),
+  multi: amount("El multi tiene que ser mayor a 0."),
   note: z.string().trim().max(200, "El comentario es muy largo.").optional(),
 });
 
 export async function submitReplay(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
-  const { url, slot_id, slot_name, currency, bet, bonus_cost, payout, note } = parsed.data;
+  const { url, slot_id, slot_name, currency, bet, bonus_cost, payout, multi, note } = parsed.data;
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_replay", {
@@ -63,10 +66,42 @@ export async function submitReplay(_prev: ActionState, formData: FormData): Prom
     p_bet: bet,
     p_bonus_cost: bonus_cost,
     p_payout: payout,
+    p_multi: multi,
   });
   if (error) return { error: viewerError(error.message, ERRORS) };
   refresh();
   return { ok: "¡Listo! Tu replay se publica cuando lo revise el panel." };
+}
+
+export async function updateReplay(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = schema.extend({ id: z.uuid() }).safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+  const { id, url, slot_id, slot_name, currency, bet, bonus_cost, payout, multi, note } = parsed.data;
+
+  const supabase = await createClient();
+  const { data: before } = await supabase.from("replays").select("status").eq("id", id).maybeSingle();
+  const { error } = await supabase.rpc("update_replay", {
+    p_id: id,
+    p_url: url,
+    p_slot: slot_id,
+    p_slot_name: slot_name,
+    p_note: note || null,
+    p_currency: currency,
+    p_bet: bet,
+    p_bonus_cost: bonus_cost,
+    p_payout: payout,
+    p_multi: multi,
+  });
+  if (error) return { error: viewerError(error.message, ERRORS) };
+  const { data: after } = await supabase.from("replays").select("status").eq("id", id).maybeSingle();
+  updateTag(REPLAYS_TAG);
+  refresh();
+  return {
+    ok:
+      before?.status !== "pending" && after?.status === "pending"
+        ? "Guardado. Vuelve a revisión: se publica cuando lo apruebe el panel."
+        : "Cambios guardados.",
+  };
 }
 
 export async function deleteMyReplay(_prev: ActionState, formData: FormData): Promise<ActionState> {

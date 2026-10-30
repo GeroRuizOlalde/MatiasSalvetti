@@ -21,6 +21,8 @@ export type PublicReplay = Pick<
   | "payout"
   | "likes_count"
   | "comments_count"
+  | "edited_at"
+  | "slot_id"
 > & { provider: ReplayProvider | null; user: PublicProfileName | null };
 
 /** Proveedores cargados en el panel. */
@@ -47,7 +49,7 @@ export async function getPublicReplays(limit = 120): Promise<PublicReplay[]> {
     supabase
       .from("replays")
       .select(
-        "id, url, host, user_id, slot_name, multi, note, created_at, currency, bet, bonus_cost, payout, likes_count, comments_count",
+        "id, url, host, user_id, slot_name, multi, note, created_at, currency, bet, bonus_cost, payout, likes_count, comments_count, edited_at, slot_id",
       )
       .eq("status", "approved")
       .order("created_at", { ascending: false })

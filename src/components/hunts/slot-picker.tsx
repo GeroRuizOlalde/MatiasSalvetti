@@ -17,14 +17,19 @@ export function SlotPicker({
   id,
   required,
   placeholder = "Buscá el slot",
+  defaultValue,
 }: {
   id: string;
   required?: boolean;
   placeholder?: string;
+  /** Slot ya elegido (al editar). */
+  defaultValue?: { id: string | null; name: string };
 }) {
   const listId = useId();
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Option | null>(null);
+  const [query, setQuery] = useState(defaultValue?.name ?? "");
+  const [selected, setSelected] = useState<Option | null>(
+    defaultValue?.id ? { id: defaultValue.id, name: defaultValue.name, provider: null } : null,
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);

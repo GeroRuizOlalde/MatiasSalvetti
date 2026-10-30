@@ -178,4 +178,67 @@ describe("replays", () => {
     const after = await db.query("select comments_count from public.replays where id = $1", [id]);
     expect(after.rows).toEqual([{ comments_count: 0 }]);
   });
+
+  it("el autor edita su replay: los datos no vuelven a revisión, el link sí", async () => {
+    const edit = (who: { id: string }, id: string, url: string, extra: Record<string, unknown> = {}) =>
+      as(db, who, () =>
+        db.query(
+          "select public.update_replay(p_id => $1, p_url => $2, p_slot_name => $3, p_note => $4, p_bet => $5, p_payout => $6)",
+          [id, url, extra.slot ?? "Mental", extra.note ?? null, extra.bet ?? null, extra.payout ?? null],
+        ),
+      );
+    const id = await submit(viewer, "https://nolimitcity.com/replay/editable");
+    await as(db, mod, () => db.query("select public.review_replay($1, true)", [id]));
+
+    await edit(viewer, id, "https://nolimitcity.com/replay/editable", { note: "Corregido", bet: 100, payout: 25000 });
+    const same = await db.query(
+      "select status, note, multi, edited_at is not null as edited from public.replays where id = $1",
+      [id],
+    );
+    expect(same.rows).toEqual([{ status: "approved", note: "Corregido", multi: "250.00", edited: true }]);
+
+    await edit(viewer, id, "https://nolimitcity.com/replay/otro-link");
+    const review = await db.query("select status, url from public.replays where id = $1", [id]);
+    expect(review.rows).toEqual([{ status: "pending", url: "https://nolimitcity.com/replay/otro-link" }]);
+
+    // Nadie más lo puede editar; el panel sí, y no lo manda a revisión.
+    await expect(edit(other, id, "https://nolimitcity.com/replay/robado")).rejects.toThrow(/forbidden/);
+    await as(db, mod, () => db.query("select public.review_replay($1, true)", [id]));
+    await edit(mod, id, "https://nolimitcity.com/replay/del-panel", { slot: "San Quentin" });
+    const byMod = await db.query("select status, slot_name from public.replays where id = $1", [id]);
+    expect(byMod.rows).toEqual([{ status: "approved", slot_name: "San Quentin" }]);
+  });
+
+  it("editar uno rechazado lo vuelve a mandar a revisión", async () => {
+    const id = await submit(other, "https://nolimitcity.com/replay/rechazado-editado");
+    await as(db, mod, () => db.query("select public.review_replay($1, false, 'Falta el slot correcto')", [id]));
+    await as(db, other, () =>
+      db.query("select public.update_replay(p_id => $1, p_url => $2, p_slot_name => 'Tombstone')", [
+        id,
+        "https://nolimitcity.com/replay/rechazado-editado",
+      ]),
+    );
+    const { rows } = await db.query("select status, reject_reason from public.replays where id = $1", [id]);
+    expect(rows).toEqual([{ status: "pending", reject_reason: null }]);
+  });
+
+  it("sin apuesta y pago se puede poner el multi a mano; con los dos se calcula solo", async () => {
+    const { rows } = await as(db, other, () =>
+      db.query<{ id: string }>(
+        "select public.submit_replay(p_url => $1, p_slot_name => 'Mental', p_multi => 12500) as id",
+        ["https://nolimitcity.com/replay/multi-a-mano"],
+      ),
+    );
+    const manual = await db.query("select multi from public.replays where id = $1", [rows[0].id]);
+    expect(manual.rows).toEqual([{ multi: "12500.00" }]);
+
+    await as(db, mod, () =>
+      db.query(
+        "select public.update_replay(p_id => $1, p_url => $2, p_slot_name => 'Mental', p_bet => 10, p_payout => 500, p_multi => 9999)",
+        [rows[0].id, "https://nolimitcity.com/replay/multi-a-mano"],
+      ),
+    );
+    const auto = await db.query("select multi from public.replays where id = $1", [rows[0].id]);
+    expect(auto.rows).toEqual([{ multi: "50.00" }]);
+  });
 });

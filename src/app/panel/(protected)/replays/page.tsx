@@ -1,6 +1,7 @@
 import { AlertTriangle, Clapperboard } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ReplayEditButton } from "@/components/replays/replay-edit-button";
 import { ReplayViewer } from "@/components/replays/replay-viewer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePanelProfile } from "@/lib/auth/session";
@@ -30,7 +31,7 @@ export default async function PanelReplaysPage({ searchParams }: PageProps<"/pan
     supabase
       .from("replays")
       .select(
-        "id, url, host, slot_name, multi, currency, bet, bonus_cost, payout, likes_count, comments_count, note, status, reject_reason, created_at, user:profiles!replays_user_id_fkey(display_name, twitch_login)",
+        "id, url, host, slot_id, slot_name, multi, currency, bet, bonus_cost, payout, likes_count, comments_count, note, status, reject_reason, created_at, user:profiles!replays_user_id_fkey(display_name, twitch_login)",
       )
       .eq("status", tab)
       .order("created_at", { ascending: tab === "pending" })
@@ -128,6 +129,7 @@ export default async function PanelReplaysPage({ searchParams }: PageProps<"/pan
                         <p className="mt-1 text-xs text-subtle">Motivo del rechazo: {replay.reject_reason}</p>
                       ) : null}
                     </div>
+                    <ReplayEditButton replay={replay} providers={providerList} byPanel />
                     <ReplayViewer
                       url={replay.url}
                       title={`${replay.slot_name} · ${name}`}
