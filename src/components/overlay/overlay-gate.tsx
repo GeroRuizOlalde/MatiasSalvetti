@@ -3,11 +3,10 @@ import { isValidOverlayKey } from "@/lib/overlay";
 import { AutoRefresh } from "./auto-refresh";
 
 /**
- * Cuadro de los overlays: sólido y con borde brillante para que se lea sobre cualquier
- * fondo del stream (los semitransparentes se pierden sobre escenas claras o rosas).
+ * Fondo de los overlays: sólido para que se lea sobre cualquier escena, sin borde ni
+ * brillo (el marco lo pone OBS).
  */
-export const overlayPanel =
-  "relative overflow-hidden rounded-2xl border-2 border-accent bg-[#120a20] p-4 pt-5 shadow-[0_0_28px_-6px_rgb(157_59_255/0.9)] before:absolute before:inset-x-0 before:top-0 before:h-1.5 before:bg-gradient-to-r before:from-accent before:via-[#ff5fd2] before:to-gold";
+export const overlayPanel = "rounded-2xl bg-[#120a20] p-4";
 
 /** Valida el ?key= y agrega el refresco automático. */
 export async function OverlayGate({

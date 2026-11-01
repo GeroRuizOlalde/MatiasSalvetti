@@ -31,6 +31,13 @@ export const OVERLAYS = [
   { path: "battle", label: "Bonus Battle", size: "1280 × 360", description: "El cruce en juego y el cuadro." },
   { path: "wager", label: "Wager Race", size: "420 × 520", description: "Cuenta regresiva y top 5." },
   {
+    path: "deposito",
+    label: "Depósito",
+    size: "400 × 60",
+    description:
+      "Solo el monto de la inversión del Bonus Hunt en curso, para poner al lado del «DEPÓSITO» de la escena.",
+  },
+  {
     path: "sorteo",
     label: "Sorteo",
     size: "560 × 260",
