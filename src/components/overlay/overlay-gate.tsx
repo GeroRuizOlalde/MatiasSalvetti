@@ -3,10 +3,10 @@ import { isValidOverlayKey } from "@/lib/overlay";
 import { AutoRefresh } from "./auto-refresh";
 
 /**
- * Fondo de los overlays: sólido para que se lea sobre cualquier escena, sin borde ni
+ * Fondo de los overlays: sólido y cuadrado para que se lea sobre cualquier escena, sin borde ni
  * brillo (el marco lo pone OBS).
  */
-export const overlayPanel = "rounded-2xl bg-[#120a20] p-4";
+export const overlayPanel = "bg-[#120a20] p-4";
 
 /** Valida el ?key= y agrega el refresco automático. */
 export async function OverlayGate({

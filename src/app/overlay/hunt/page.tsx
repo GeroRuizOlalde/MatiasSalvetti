@@ -68,7 +68,7 @@ async function HuntOverlay() {
 
 function Stat({ label, value, gold }: { label: string; value: string; gold?: boolean }) {
   return (
-    <div className="rounded-lg bg-white/10 px-2 py-1.5">
+    <div className="bg-white/10 px-2 py-1.5">
       <dt className="text-[11px] font-semibold tracking-wide text-subtle uppercase">{label}</dt>
       <dd className={cn("num text-base font-bold", gold ? "text-gold" : "text-text")}>{value}</dd>
     </div>
