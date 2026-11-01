@@ -97,7 +97,7 @@ test.describe("rutas protegidas", () => {
 
 test.describe("overlays de OBS", () => {
   test("sin token no muestran datos", async ({ page }) => {
-    for (const kind of ["hunt", "buys", "battle", "wager", "sorteo", "deposito"]) {
+    for (const kind of ["hunt", "buys", "battle", "wager", "sorteo", "deposito", "chat"]) {
       await page.goto(`/overlay/${kind}`);
       await expect(page.getByText("Overlay sin permiso"), kind).toBeVisible();
     }
