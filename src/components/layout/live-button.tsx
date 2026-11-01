@@ -1,18 +1,25 @@
-import { CalendarClock } from "lucide-react";
+import { Gift, Trophy } from "lucide-react";
+import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
-import { BRAND_LABELS } from "@/components/ui/brand-icon";
-import { formatDateTime, formatInteger } from "@/lib/format";
+import { BRAND_LABELS, BrandIcon } from "@/components/ui/brand-icon";
+import { CountdownText } from "@/components/wager/countdown-text";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
+import { formatInteger } from "@/lib/format";
 import { getLiveStatus } from "@/lib/live-status";
+import { getOfflineHighlight } from "@/lib/offline-highlight";
 import { getPublicSettings } from "@/lib/settings";
 
-/** "EN VIVO" con link al canal activo (Twitch primero) o el próximo stream si está offline. */
-export async function LiveButton({ compact = false }: { compact?: boolean }) {
+/** "EN VIVO" con link al canal activo (Twitch primero); offline, un sorteo, la Wager Race o seguirlo. */
+export async function LiveButton({ compact = false, lang }: { compact?: boolean; lang: Locale }) {
   const [status, settings] = await Promise.all([getLiveStatus(), getPublicSettings()]);
+  const { t, href } = getI18n(lang);
 
   if (status.live && status.platform) {
-    const label = `En vivo ahora en ${BRAND_LABELS[status.platform]}${
-      status.viewers !== null ? `, ${formatInteger(status.viewers)} viendo` : ""
-    }`;
+    const label = t.live.liveNow(
+      BRAND_LABELS[status.platform],
+      status.viewers !== null ? formatInteger(status.viewers) : null,
+    );
     return (
       <a
         href={settings.socials[status.platform]}
@@ -23,27 +30,42 @@ export async function LiveButton({ compact = false }: { compact?: boolean }) {
         className={buttonClasses({ variant: "live", size: "sm", className: compact ? "w-full" : undefined })}
       >
         <span aria-hidden className="size-2 animate-live-pulse rounded-full bg-white" />
-        EN VIVO
-        {compact ? <span className="font-normal">en {BRAND_LABELS[status.platform]}</span> : null}
+        {t.live.live}
+        {compact ? <span className="font-normal">{t.live.on(BRAND_LABELS[status.platform])}</span> : null}
       </a>
     );
   }
 
-  const nextAt = settings.next_stream.at;
-  const when = settings.next_stream.label || (nextAt ? formatDateTime(nextAt) : "[día y hora]");
+  // Offline: lo más importante del momento (sorteo abierto, Wager Race o seguirlo en Twitch).
+  const highlight = await getOfflineHighlight();
+  const className = buttonClasses({ variant: "secondary", size: "sm", className: compact ? "w-full" : undefined });
+
+  if (highlight.kind === "follow") {
+    const platform = settings.primary_platform;
+    return (
+      <a href={settings.socials[platform]} target="_blank" rel="noopener noreferrer" className={className}>
+        <BrandIcon name={platform} className="size-4 text-accent-text" />
+        {t.live.follow(BRAND_LABELS[platform])}
+      </a>
+    );
+  }
+
+  const giveaway = highlight.kind === "giveaway";
+  const Icon = giveaway ? Gift : Trophy;
   return (
-    <a
-      href={settings.socials[settings.primary_platform]}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={`Próximo stream: ${when}`}
-      className={buttonClasses({ variant: "secondary", size: "sm", className: compact ? "w-full" : undefined })}
+    <Link
+      href={href(giveaway ? "/sorteos" : "/wager-race")}
+      title={giveaway ? t.live.giveawayTitle(highlight.title) : t.live.wagerTitle(highlight.title)}
+      className={className}
     >
-      <CalendarClock className="size-4 text-accent-text" aria-hidden />
+      <Icon className="size-4 text-gold" aria-hidden />
       <span>
-        Próximo stream {/* En el header la fecha entra recién en pantallas anchas; en el menú del celular, siempre. */}
-        <span className={compact ? "num text-accent-light" : "num hidden text-accent-light 2xl:inline"}>{when}</span>
+        {giveaway ? t.live.giveaway : t.live.wager}{" "}
+        {/* En el header la cuenta regresiva entra en pantallas anchas; en el menú del celular, siempre. */}
+        <span className={compact ? "num text-accent-light" : "num hidden text-accent-light xl:inline"}>
+          · {giveaway ? t.live.closesIn : t.live.endsIn} <CountdownText target={highlight.endsAt} />
+        </span>
       </span>
-    </a>
+    </Link>
   );
 }

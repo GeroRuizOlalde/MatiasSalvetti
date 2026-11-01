@@ -3,25 +3,36 @@ import Image from "next/image";
 import { BrandIcon } from "@/components/ui/brand-icon";
 import { buttonClasses } from "@/components/ui/button";
 import type { YoutubeVideo } from "@/lib/external/youtube";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { formatDate } from "@/lib/format";
 import { SectionHeading } from "./section-heading";
 
-export function ClipsSection({ videos, channelUrl }: { videos: YoutubeVideo[]; channelUrl: string }) {
+export function ClipsSection({
+  videos,
+  channelUrl,
+  lang,
+}: {
+  videos: YoutubeVideo[];
+  channelUrl: string;
+  lang: Locale;
+}) {
+  const { t } = getI18n(lang);
   return (
     <section aria-labelledby="clips-title" className="mx-auto max-w-7xl px-4 py-16">
-      <SectionHeading id="clips-title" kicker="lo mejor del stream" title="Últimos clips" />
+      <SectionHeading id="clips-title" kicker={t.home.clips.kicker} title={t.home.clips.title} />
 
       {videos.length === 0 ? (
         <div className="reveal flex flex-col items-center gap-4 rounded-2xl border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
           <BrandIcon name="youtube" className="size-10 text-accent-text" />
-          <p className="max-w-md text-sm text-muted">Mirá todos los clips en el canal de YouTube.</p>
+          <p className="max-w-md text-sm text-muted">{t.home.clips.empty}</p>
           <a
             href={channelUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={buttonClasses({ variant: "secondary" })}
           >
-            Ir al canal
+            {t.home.clips.channel}
           </a>
         </div>
       ) : (
@@ -48,7 +59,7 @@ export function ClipsSection({ videos, channelUrl }: { videos: YoutubeVideo[]; c
                 </div>
                 <div className="p-4">
                   <h3 className="line-clamp-2 font-semibold">{video.title}</h3>
-                  <p className="mt-1 text-xs text-subtle">{formatDate(video.publishedAt)}</p>
+                  <p className="mt-1 text-xs text-subtle">{formatDate(video.publishedAt, lang)}</p>
                 </div>
               </a>
             </li>

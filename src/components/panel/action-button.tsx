@@ -15,6 +15,7 @@ export function ActionButton({
   children,
   pendingLabel = "Guardando…",
   confirmText,
+  confirmLabel,
   variant = "secondary",
   className,
 }: {
@@ -23,11 +24,15 @@ export function ActionButton({
   children: ReactNode;
   pendingLabel?: string;
   confirmText?: string;
+  /** Texto del botón de la confirmación (si no, sale del verbo de la pregunta). */
+  confirmLabel?: string;
   variant?: "primary" | "secondary" | "ghost" | "live";
   className?: string;
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, INITIAL_ACTION_STATE);
-  const confirm = useConfirmSubmit(confirmText ? confirmFromText(confirmText) : null);
+  const confirm = useConfirmSubmit(
+    confirmText ? { ...confirmFromText(confirmText), ...(confirmLabel ? { confirmLabel } : {}) } : null,
+  );
   return (
     <form
       action={formAction}

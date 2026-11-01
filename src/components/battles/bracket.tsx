@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { Crown } from "lucide-react";
 import { groupRounds, sideMulti, type BracketMatch } from "@/lib/calc/bracket";
 import { cn } from "@/lib/cn";
@@ -11,13 +13,16 @@ export function Bracket({
   entries,
   currency,
   currentId,
+  lang = "es",
 }: {
   matches: BracketMatch[];
   entries: BattleEntry[];
   currency: Enums<"currency_code">;
   /** Cruce que se está jugando. */
   currentId: string | null;
+  lang?: Locale;
 }) {
+  const { t } = getI18n(lang);
   const rounds = groupRounds(matches);
   const entryOf = (id: string | null) => entries.find((e) => e.id === id) ?? null;
 
@@ -26,7 +31,9 @@ export function Bracket({
       <ol className="flex min-w-max gap-4">
         {rounds.map((round) => (
           <li key={round.round} className="flex w-64 flex-col">
-            <h3 className="mb-3 text-xs font-semibold tracking-wide text-subtle uppercase">{round.name}</h3>
+            <h3 className="mb-3 text-xs font-semibold tracking-wide text-subtle uppercase">
+              {t.battle.roundName(round.fromEnd, round.round)}
+            </h3>
             <ul className="flex flex-1 flex-col justify-around gap-3">
               {round.matches.map((match) => (
                 <li
@@ -53,10 +60,10 @@ export function Bracket({
                           lost && "text-subtle",
                         )}
                       >
-                        {won ? <Crown className="size-3.5 shrink-0 text-gold" aria-label="Ganó" /> : null}
+                        {won ? <Crown className="size-3.5 shrink-0 text-gold" aria-label={t.common.wonMatch} /> : null}
                         <span className={cn("min-w-0 flex-1", won && "font-semibold text-text")}>
                           <span className="block truncate">
-                            {entry?.slot_name ?? <span className="text-subtle">Por definir</span>}
+                            {entry?.slot_name ?? <span className="text-subtle">{t.common.tbd}</span>}
                           </span>
                           {entry?.calledBy ? (
                             <span className="block truncate text-[11px] font-normal text-subtle">
@@ -67,7 +74,7 @@ export function Bracket({
                         {payout !== null ? (
                           <span
                             className="num text-xs text-muted"
-                            title={bet !== null ? `Apuesta ${formatMoney(bet, currency)}` : undefined}
+                            title={bet !== null ? t.common.betOf(formatMoney(bet, currency)) : undefined}
                           >
                             {formatMoney(payout, currency)}
                           </span>

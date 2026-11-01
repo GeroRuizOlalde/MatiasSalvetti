@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { ExternalLink, Play, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { buttonClasses } from "@/components/ui/button";
@@ -19,16 +20,9 @@ type Props = {
  * Botón «Ver replay». Si el proveedor se deja embeber, abre el replay en un
  * reproductor dentro de la página; si no, en otra pestaña.
  */
-export function ReplayViewer({
-  url,
-  title,
-  embeddable,
-  label = "Ver replay",
-  size = "sm",
-  variant = "primary",
-  className,
-}: Props) {
+export function ReplayViewer({ url, title, embeddable, label, size = "sm", variant = "primary", className }: Props) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -42,7 +36,7 @@ export function ReplayViewer({
   if (!embeddable) {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClasses({ variant, size, className })}>
-        <ExternalLink className="size-4" aria-hidden /> {label}
+        <ExternalLink className="size-4" aria-hidden /> {label ?? t.replays.watch}
       </a>
     );
   }
@@ -50,7 +44,7 @@ export function ReplayViewer({
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={buttonClasses({ variant, size, className })}>
-        <Play className="size-4" aria-hidden /> {label}
+        <Play className="size-4" aria-hidden /> {label ?? t.replays.watch}
       </button>
       <dialog
         ref={ref}
@@ -73,12 +67,12 @@ export function ReplayViewer({
             className={buttonClasses({ variant: "ghost", size: "sm" })}
           >
             <ExternalLink className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Abrir en otra pestaña</span>
+            <span className="hidden sm:inline">{t.replays.openInTab}</span>
           </a>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Cerrar"
+            aria-label={t.replays.close}
             className="rounded-md p-2 text-subtle hover:bg-surface-2 hover:text-text"
           >
             <X className="size-5" aria-hidden />

@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { Megaphone } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -9,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const participationBox = "rounded-2xl border border-accent/40 bg-accent/5 p-5";
 
-export function ParticipationTitle({ children = "Participá" }: { children?: ReactNode }) {
+export function ParticipationTitle({ children }: { children: ReactNode }) {
   return (
     <h2 className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
       <Megaphone className="size-5 text-accent-text" aria-hidden /> {children}
@@ -27,16 +29,19 @@ export async function ParticipationGate({
   loginHint,
   title,
   children,
+  lang,
 }: {
   /** Ruta a la que vuelve después del login o la bienvenida. */
   next: string;
   loginHint: string;
   title?: ReactNode;
+  lang: Locale;
   children: (profile: CurrentProfile) => ReactNode | Promise<ReactNode>;
 }) {
+  const { t, href } = getI18n(lang);
   const box = (body: ReactNode) => (
     <section className={participationBox}>
-      <ParticipationTitle>{title}</ParticipationTitle>
+      <ParticipationTitle>{title ?? t.participation.title}</ParticipationTitle>
       {body}
     </section>
   );
@@ -46,7 +51,7 @@ export async function ParticipationGate({
     return box(
       <>
         <p className="mt-2 mb-4 text-sm text-muted">{loginHint}</p>
-        <LoginButton next={next} />
+        <LoginButton next={href(next)} lang={lang} />
       </>,
     );
   }
@@ -55,12 +60,12 @@ export async function ParticipationGate({
   if (needsOnboarding(profile, terms?.version ?? null)) {
     return box(
       <p className="mt-2 text-sm text-muted">
-        Antes de participar tenés que{" "}
+        {t.participation.beforeYouJoin}{" "}
         <Link
-          href={`/bienvenida?next=${encodeURIComponent(next)}`}
+          href={href(`/bienvenida?next=${encodeURIComponent(href(next))}`)}
           className="font-semibold text-accent-text underline"
         >
-          confirmar tu edad y aceptar las bases
+          {t.participation.confirmAge}
         </Link>
         .
       </p>,
@@ -72,9 +77,7 @@ export async function ParticipationGate({
   if (!canParticipate) {
     return box(
       <p className={cn("mt-2 text-sm text-muted")}>
-        {profile.banned_at
-          ? "Tu cuenta no puede participar."
-          : "Tu cuenta de Twitch todavía no cumple la antigüedad mínima para participar."}
+        {profile.banned_at ? t.participation.banned : t.participation.tooNew}
       </p>,
     );
   }

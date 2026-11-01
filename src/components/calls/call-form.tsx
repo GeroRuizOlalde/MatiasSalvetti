@@ -3,6 +3,7 @@
 import { useActionState, useId } from "react";
 import { SlotPicker } from "@/components/hunts/slot-picker";
 import { FormMessage, SubmitButton } from "@/components/panel/form";
+import { useI18n } from "@/i18n/client";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 
 type Props = {
@@ -17,9 +18,10 @@ type Props = {
 };
 
 /** Pedir un slot. Una vez mandado no se cambia, y si el panel lo rechaza ya no se puede pedir otro. */
-export function CallForm({ action, hidden, scopeLabel, taken, question = "¿Qué slot querés que compre?" }: Props) {
+export function CallForm({ action, hidden, scopeLabel, taken, question }: Props) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, INITIAL_ACTION_STATE);
   const id = useId();
+  const { t } = useI18n();
 
   return (
     <form action={formAction} className="space-y-2">
@@ -27,22 +29,20 @@ export function CallForm({ action, hidden, scopeLabel, taken, question = "¿Qué
         <input key={name} type="hidden" name={name} value={value} />
       ))}
       <label htmlFor={`${id}-slot`} className="block text-xs font-semibold text-subtle">
-        {question}
+        {question ?? t.calls.buyQuestion}
       </label>
       <div className="flex gap-2">
         <div className="min-w-0 flex-1">
           <SlotPicker id={`${id}-slot`} required />
         </div>
-        <SubmitButton pendingLabel="Enviando…" className="h-10">
-          Pedir
+        <SubmitButton pendingLabel={t.common.sending} className="h-10">
+          {t.calls.request}
         </SubmitButton>
       </div>
-      <p className="text-xs text-subtle">
-        Una máquina por {scopeLabel}. El call no se puede cambiar y, si se rechaza, no podés pedir otro: elegí bien.
-      </p>
+      <p className="text-xs text-subtle">{t.calls.rule(scopeLabel)}</p>
       {taken.length ? (
         <p className="text-xs text-subtle">
-          Ya pedidas: <span className="text-muted">{taken.join(", ")}</span>
+          {t.calls.taken} <span className="text-muted">{taken.join(", ")}</span>
         </p>
       ) : null}
       <FormMessage state={state} />

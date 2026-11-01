@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import type { BuysStats } from "@/lib/calc/buys";
 import { cn } from "@/lib/cn";
 import { formatInteger, formatMoney, formatMulti } from "@/lib/format";
@@ -7,22 +9,25 @@ export function BuysStatsGrid({
   stats,
   currency,
   className,
+  lang = "es",
 }: {
   stats: BuysStats;
   currency: Enums<"currency_code">;
   className?: string;
+  lang?: Locale;
 }) {
+  const c = getI18n(lang).t.common;
   const items: { label: string; value: string; tone?: "gold" | "good" | "bad" }[] = [
-    { label: "Compras", value: `${formatInteger(stats.opened)}/${formatInteger(stats.buys)}` },
-    { label: "Gastado", value: formatMoney(stats.totalCost, currency) },
-    { label: "Pagado", value: formatMoney(stats.totalPayout, currency), tone: "gold" },
+    { label: c.buys, value: `${formatInteger(stats.opened)}/${formatInteger(stats.buys)}` },
+    { label: c.spent, value: formatMoney(stats.totalCost, currency) },
+    { label: c.paid, value: formatMoney(stats.totalPayout, currency), tone: "gold" },
     {
-      label: "Resultado",
+      label: c.result,
       value: stats.opened ? `${stats.profit >= 0 ? "+" : ""}${formatMoney(stats.profit, currency)}` : "—",
       tone: stats.opened ? (stats.profit >= 0 ? "good" : "bad") : undefined,
     },
-    { label: "Multi promedio", value: stats.averageMulti !== null ? formatMulti(stats.averageMulti) : "—" },
-    { label: "Mejor multi", value: stats.best ? formatMulti(stats.best.multi) : "—" },
+    { label: c.averageMulti, value: stats.averageMulti !== null ? formatMulti(stats.averageMulti) : "—" },
+    { label: c.bestMulti, value: stats.best ? formatMulti(stats.best.multi) : "—" },
   ];
 
   return (

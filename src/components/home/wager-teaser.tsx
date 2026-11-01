@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
 import { CountdownText } from "@/components/wager/countdown-text";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
 import { formatMoney, formatMoneyShort } from "@/lib/format";
 import type { LeaderboardRow, PublicRace } from "@/lib/wager";
 
 /** Carrera destacada con cuenta regresiva y podio; sin carrera, el anuncio genérico. */
-export function WagerTeaser({ race, top }: { race: PublicRace | null; top: LeaderboardRow[] }) {
+export function WagerTeaser({ race, top, lang }: { race: PublicRace | null; top: LeaderboardRow[]; lang: Locale }) {
+  const { t, href } = getI18n(lang);
+  const w = t.home.wager;
   const active = race && race.phase !== "ended";
   const total = race?.prizes.reduce((a, b) => a + b, 0) ?? 0;
 
@@ -17,27 +21,25 @@ export function WagerTeaser({ race, top }: { race: PublicRace | null; top: Leade
           <p className="num text-xs tracking-[0.2em] text-subtle uppercase">
             {active ? (
               <>
-                {race.phase === "running" ? "Evento activo · termina en " : "Próximo evento · arranca en "}
+                {race.phase === "running" ? w.running : w.upcoming}
                 <CountdownText target={race.phase === "running" ? race.ends_at : race.starts_at} />
               </>
             ) : (
-              "Competí con la comunidad"
+              w.compete
             )}
           </p>
           <h2 id="wager-title" className="mt-2 font-display text-5xl tracking-wide uppercase">
             Wager Race
           </h2>
           <p className="mt-3 max-w-md text-sm text-muted">
-            {active && total > 0
-              ? `${formatMoney(total, race.currency)} repartidos entre el top ${race.prizes.length}. Jugá con mi link, verificá tu cuenta y sumá en el ranking.`
-              : "La próxima carrera se anuncia pronto. Jugá con mi link, verificá tu cuenta y sumá en el ranking."}
+            {active && total > 0 ? w.prizes(formatMoney(total, race.currency), race.prizes.length) : w.soon}
           </p>
-          <Link href="/wager-race" className={buttonClasses({ size: "sm", className: "mt-5" })}>
-            {active ? "Ver ranking completo" : "Ver detalles"}
+          <Link href={href("/wager-race")} className={buttonClasses({ size: "sm", className: "mt-5" })}>
+            {active ? w.fullRanking : w.details}
           </Link>
         </div>
         {active && top.length ? (
-          <ol className="space-y-3" aria-label="Podio">
+          <ol className="space-y-3" aria-label={w.podium}>
             {top.map((row) => (
               <li
                 key={row.user_id}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { useId, useState } from "react";
 import { SlotPicker } from "@/components/hunts/slot-picker";
 import { Field, inputClass, SubmitButton, textareaClass } from "@/components/panel/form";
@@ -28,7 +29,7 @@ export function ReplayFields({
   providers,
   initial,
   submitLabel,
-  pendingLabel = "Guardando…",
+  pendingLabel,
   hint,
 }: {
   action: (data: FormData) => void;
@@ -40,6 +41,8 @@ export function ReplayFields({
   hint?: string;
 }) {
   const id = useId();
+  const { t } = useI18n();
+  const f = t.replays.fields;
   const [url, setUrl] = useState(initial?.url ?? "");
   const [bet, setBet] = useState(initial?.bet != null ? String(initial.bet) : "");
   const [payout, setPayout] = useState(initial?.payout != null ? String(initial.payout) : "");
@@ -53,15 +56,8 @@ export function ReplayFields({
       {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
       <Field
         id={`${id}-url`}
-        label="Link del replay"
-        hint={
-          hint ??
-          (host
-            ? provider
-              ? `Replay de ${provider.name}.`
-              : "No conocemos este proveedor: el panel lo va a revisar."
-            : "Copiá el link para compartir el replay desde el juego.")
-        }
+        label={f.link}
+        hint={hint ?? (host ? (provider ? f.from(provider.name) : f.unknown) : f.linkHint)}
       >
         <input
           id={`${id}-url`}
@@ -75,7 +71,7 @@ export function ReplayFields({
           className={inputClass}
         />
       </Field>
-      <Field id={`${id}-slot`} label="Slot">
+      <Field id={`${id}-slot`} label={f.slot}>
         <SlotPicker
           id={`${id}-slot`}
           required
@@ -83,7 +79,7 @@ export function ReplayFields({
         />
       </Field>
       <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Field id={`${id}-currency`} label="Moneda">
+        <Field id={`${id}-currency`} label={f.currency}>
           <select
             id={`${id}-currency`}
             name="currency"
@@ -94,71 +90,67 @@ export function ReplayFields({
             <option value="USD">USD</option>
           </select>
         </Field>
-        <Field id={`${id}-bet`} label="Apuesta">
+        <Field id={`${id}-bet`} label={f.bet}>
           <AmountInput
             id={`${id}-bet`}
             name="bet"
             defaultValue={initial?.bet}
             onValueChange={setBet}
-            placeholder="Ej.: 200"
+            placeholder={f.betPlaceholder}
             className={inputClass}
           />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Field id={`${id}-bonus`} label="Valor del bono">
+        <Field id={`${id}-bonus`} label={f.bonus}>
           <AmountInput
             id={`${id}-bonus`}
             name="bonus_cost"
             defaultValue={initial?.bonus_cost}
-            placeholder="Si lo compraste"
+            placeholder={f.bonusPlaceholder}
             className={inputClass}
           />
         </Field>
-        <Field id={`${id}-payout`} label="Pagó">
+        <Field id={`${id}-payout`} label={f.payout}>
           <AmountInput
             id={`${id}-payout`}
             name="payout"
             defaultValue={initial?.payout}
             onValueChange={setPayout}
-            placeholder="Ej.: 50.000"
+            placeholder={f.payoutPlaceholder}
             className={inputClass}
           />
         </Field>
       </div>
       {autoMulti !== null ? (
         <p className="text-sm text-muted">
-          Multi: <span className="num font-bold text-gold">{formatMulti(autoMulti)}</span>
-          <span className="text-xs text-subtle"> (pago ÷ apuesta)</span>
+          {f.multi}: <span className="num font-bold text-gold">{formatMulti(autoMulti)}</span>
+          <span className="text-xs text-subtle"> {f.multiFormula}</span>
         </p>
       ) : (
-        <Field
-          id={`${id}-multi`}
-          label="Multi (x)"
-          hint="Si no sabés la apuesta o el pago, poné directo cuántas x pagó."
-        >
+        <Field id={`${id}-multi`} label={f.multiManual} hint={f.multiHint}>
           <AmountInput
             id={`${id}-multi`}
             name="multi"
             defaultValue={initial?.multi}
-            placeholder="Ej.: 2.500"
+            placeholder={f.multiPlaceholder}
             className={inputClass}
           />
         </Field>
       )}
-      <Field id={`${id}-note`} label="Comentario (opcional)">
+      <Field id={`${id}-note`} label={f.note}>
         <textarea
           id={`${id}-note`}
           name="note"
           maxLength={200}
           rows={2}
           defaultValue={initial?.note ?? ""}
-          placeholder="Ej.: Entró con 3 scatters y pagó todo en el último giro."
+          placeholder={f.notePlaceholder}
           className={textareaClass}
         />
       </Field>
       <div>
-        <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>
+        <SubmitButton pendingLabel={pendingLabel ?? t.common.saving}>{submitLabel}</SubmitButton>
       </div>
     </form>
   );

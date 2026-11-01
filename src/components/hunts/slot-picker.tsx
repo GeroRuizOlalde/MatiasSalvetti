@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { inputClass } from "@/components/panel/form";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,7 +17,7 @@ type Option = { id: string; name: string; provider: string | null };
 export function SlotPicker({
   id,
   required,
-  placeholder = "Buscá el slot",
+  placeholder,
   defaultValue,
 }: {
   id: string;
@@ -26,6 +27,7 @@ export function SlotPicker({
   defaultValue?: { id: string | null; name: string };
 }) {
   const listId = useId();
+  const { t } = useI18n();
   const [query, setQuery] = useState(defaultValue?.name ?? "");
   const [selected, setSelected] = useState<Option | null>(
     defaultValue?.id ? { id: defaultValue.id, name: defaultValue.name, provider: null } : null,
@@ -72,7 +74,7 @@ export function SlotPicker({
         required={required}
         maxLength={120}
         value={query}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t.slotPicker.placeholder}
         className={inputClass}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -124,7 +126,7 @@ export function SlotPicker({
           aria-live="polite"
           className="absolute z-20 mt-1 w-full rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-xs text-muted shadow-xl"
         >
-          No está en el catálogo. Podés usar «{query.trim()}» igual.
+          {t.slotPicker.notInCatalog(query.trim())}
         </p>
       ) : null}
     </div>

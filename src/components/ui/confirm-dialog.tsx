@@ -3,6 +3,7 @@
 import { AlertTriangle, HelpCircle } from "lucide-react";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { buttonClasses } from "@/components/ui/button";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/lib/cn";
 
 export type ConfirmOptions = {
@@ -16,7 +17,8 @@ export type ConfirmOptions = {
 /** "¿Borrar …?" -> { confirmLabel: "Borrar", danger: true }. Sirve para no repetirlo en cada botón. */
 export function confirmFromText(text: string): ConfirmOptions {
   const verb = text.match(/^¿\s*([a-záéíóúñü]+)/i)?.[1] ?? "";
-  const label = verb ? verb[0].toUpperCase() + verb.slice(1).toLowerCase() : "Confirmar";
+  // Sin verbo (o en inglés) el botón dice «Confirmar» / «Confirm» según el idioma.
+  const label = verb ? verb[0].toUpperCase() + verb.slice(1).toLowerCase() : undefined;
   return { text, confirmLabel: label, danger: /^(borrar|quitar|eliminar|rechazar|cancelar)$/i.test(verb) };
 }
 
@@ -78,6 +80,7 @@ function ConfirmDialog({
   onConfirm: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const { t } = useI18n();
   const titleId = useId();
   const detailId = useId();
   const { title, detail } = splitConfirmText(options.text);
@@ -126,7 +129,7 @@ function ConfirmDialog({
       </div>
       <div className="flex justify-end gap-2 border-t border-line px-6 py-4">
         <button type="button" onClick={onCancel} className={buttonClasses({ variant: "ghost", size: "sm" })}>
-          Cancelar
+          {t.common.cancel}
         </button>
         <button
           type="button"
@@ -134,7 +137,7 @@ function ConfirmDialog({
           onClick={onConfirm}
           className={buttonClasses({ variant: options.danger ? "live" : "primary", size: "sm" })}
         >
-          {options.confirmLabel ?? "Confirmar"}
+          {options.confirmLabel ?? t.common.confirm}
         </button>
       </div>
     </dialog>

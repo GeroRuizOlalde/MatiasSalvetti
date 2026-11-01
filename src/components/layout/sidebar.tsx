@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { routePath } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/lib/cn";
 import { isActivePath, NAV_GROUPS } from "./nav";
 
@@ -25,6 +27,9 @@ export function SiteSidebar({ children }: { children?: ReactNode }) {
 
 /** Sin `pathname` no marca ninguno: sirve de fallback mientras se resuelve la URL. */
 export function SidebarNav({ pathname, children }: { pathname: string | null; children?: ReactNode }) {
+  const { t, href } = useI18n();
+  // La ruta sin el /en, para marcar el item activo en los dos idiomas.
+  const current = pathname === null ? null : routePath(pathname);
   // Cerrar el cajón al navegar o con Escape.
   useEffect(() => closeDrawer(), [pathname]);
   useEffect(() => {
@@ -48,33 +53,33 @@ export function SidebarNav({ pathname, children }: { pathname: string | null; ch
         )}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4 lg:hidden">
-          <span className="font-display text-2xl tracking-wide text-accent-light uppercase">Menú</span>
+          <span className="font-display text-2xl tracking-wide text-accent-light uppercase">{t.layout.menu}</span>
           <button
             type="button"
             onClick={closeDrawer}
-            aria-label="Cerrar menú"
+            aria-label={t.layout.closeMenu}
             className="flex size-10 items-center justify-center rounded-lg text-text hover:bg-surface-2"
           >
             <X className="size-6" aria-hidden />
           </button>
         </div>
-        <nav aria-label="Principal" className="flex-1 space-y-3 overflow-x-hidden overflow-y-auto p-3">
+        <nav aria-label={t.layout.mainNav} className="flex-1 space-y-3 overflow-x-hidden overflow-y-auto p-3">
           {children ? <div className="lg:hidden">{children}</div> : null}
           {NAV_GROUPS.map((group, i) => (
             <div key={group.title ?? i} className="rounded-xl bg-surface/70 p-1.5">
               {group.title ? (
                 <p className="px-3 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-subtle uppercase lg:collapsed:hidden">
-                  {group.title}
+                  {t.nav[group.title]}
                 </p>
               ) : null}
               <ul className="space-y-0.5">
-                {group.items.map(({ href, label, icon: Icon }) => {
-                  const active = pathname !== null && isActivePath(pathname, href);
+                {group.items.map(({ href: path, label, icon: Icon }) => {
+                  const active = current !== null && isActivePath(current, path);
                   return (
-                    <li key={href}>
+                    <li key={path}>
                       <Link
-                        href={href}
-                        title={label}
+                        href={href(path)}
+                        title={t.nav[label]}
                         aria-current={active ? "page" : undefined}
                         onClick={closeDrawer}
                         className={cn(
@@ -83,7 +88,7 @@ export function SidebarNav({ pathname, children }: { pathname: string | null; ch
                         )}
                       >
                         <Icon className="size-[18px] shrink-0" aria-hidden />
-                        <span className="whitespace-nowrap lg:collapsed:sr-only">{label}</span>
+                        <span className="whitespace-nowrap lg:collapsed:sr-only">{t.nav[label]}</span>
                       </Link>
                     </li>
                   );

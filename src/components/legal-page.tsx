@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { FileText } from "lucide-react";
 import Markdown from "react-markdown";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -7,16 +9,25 @@ import { getLegalDocument } from "@/lib/legal";
 import { getPublicSettings } from "@/lib/settings";
 import type { Enums } from "@/types/database";
 
-export async function LegalPage({ kind, fallbackTitle }: { kind: Enums<"legal_kind">; fallbackTitle: string }) {
+export async function LegalPage({
+  kind,
+  fallbackTitle,
+  lang,
+}: {
+  kind: Enums<"legal_kind">;
+  fallbackTitle: string;
+  lang: Locale;
+}) {
   const [doc, settings] = await Promise.all([getLegalDocument(kind), getPublicSettings()]);
+  const t = getI18n(lang).t.legal;
 
   if (!doc) {
     return (
       <>
         <PageHeader title={fallbackTitle} />
         <div className="mx-auto max-w-3xl px-4 pb-16">
-          <EmptyState icon={FileText} title="Sin contenido">
-            Este documento todavía no está cargado.
+          <EmptyState icon={FileText} title={t.noContentTitle}>
+            {t.noContent}
           </EmptyState>
         </div>
       </>
@@ -29,9 +40,11 @@ export async function LegalPage({ kind, fallbackTitle }: { kind: Enums<"legal_ki
     <>
       <PageHeader title={doc.title}>
         <p className="text-sm text-subtle">
-          Versión <span className="num">{doc.version}</span>
-          {doc.published_at ? <> · vigente desde el {formatDate(doc.published_at)}</> : null}
+          {t.version} <span className="num">{doc.version}</span>
+          {doc.published_at ? <> · {t.since(formatDate(doc.published_at, lang))}</> : null}
         </p>
+        {/* Los documentos legales se cargan en el panel en español. */}
+        {t.onlySpanish ? <p className="mt-2 text-sm text-gold">{t.onlySpanish}</p> : null}
       </PageHeader>
       <article className="mx-auto max-w-3xl px-4 pb-16 text-muted [&_a]:text-accent-text [&_a]:underline [&_blockquote]:my-6 [&_blockquote]:rounded-xl [&_blockquote]:border [&_blockquote]:border-gold/40 [&_blockquote]:bg-gold/5 [&_blockquote]:px-4 [&_blockquote]:py-3 [&_blockquote]:text-gold [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:tracking-wide [&_h2]:text-text [&_h2]:uppercase [&_li]:my-1 [&_p]:my-4 [&_p]:leading-relaxed [&_strong]:text-text [&_ul]:list-disc [&_ul]:pl-6">
         <Markdown>{content}</Markdown>

@@ -1,11 +1,16 @@
-import { Play, Trophy } from "lucide-react";
+import { Gift, Play, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND_LABELS, type BrandName } from "@/components/ui/brand-icon";
+import { BRAND_LABELS, BrandIcon, type BrandName } from "@/components/ui/brand-icon";
 import { buttonClasses } from "@/components/ui/button";
 import { BRAND_ASSETS, hasBrandAsset } from "@/lib/brand";
-import { formatDateTime, formatInteger } from "@/lib/format";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
+import { CountdownText } from "@/components/wager/countdown-text";
+import { localePath } from "@/i18n/config";
+import { formatInteger } from "@/lib/format";
 import type { LiveStatus } from "@/lib/live-status";
+import type { OfflineHighlight } from "@/lib/offline-highlight";
 import type { PublicSettings } from "@/lib/settings";
 import { PartnerLogo } from "@/components/layout/partner-logo";
 import { FloatingDecor } from "./floating-decor";
@@ -21,10 +26,23 @@ export type HeroExtras = {
   wagerPrize: string | null;
   /** Hunt en curso, para la tarjeta de "en vivo". */
   activeHunt: { title: string; status: string } | null;
+  /** Qué mostrar en la tarjeta si está offline. */
+  offline: OfflineHighlight;
 };
 
-export function Hero({ settings, live, extras }: { settings: PublicSettings; live: LiveStatus; extras: HeroExtras }) {
+export function Hero({
+  settings,
+  live,
+  extras,
+  lang,
+}: {
+  settings: PublicSettings;
+  live: LiveStatus;
+  extras: HeroExtras;
+  lang: Locale;
+}) {
   const primary = settings.primary_platform;
+  const { t, href } = getI18n(lang);
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden">
       <div
@@ -44,10 +62,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
           <p className="mt-3 flex animate-rise items-center font-display text-3xl tracking-wide uppercase [animation-delay:120ms]">
             <PartnerLogo />
           </p>
-          <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">
-            Slots, bonus hunts, batallas y CS2 en vivo. Todos los meses reparto premios con la Wager Race y los sorteos
-            de la comunidad.
-          </p>
+          <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">{t.home.hero.tagline}</p>
 
           <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:360ms]">
             <a
@@ -57,9 +72,9 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
               className={buttonClasses({ size: "lg" })}
             >
               <Play className="size-5" aria-hidden />
-              Ver el stream en {PLATFORM_LABEL[primary]}
+              {t.home.hero.watchOn(PLATFORM_LABEL[primary])}
             </a>
-            <Link href="/wager-race" className={buttonClasses({ variant: "secondary", size: "lg" })}>
+            <Link href={href("/wager-race")} className={buttonClasses({ variant: "secondary", size: "lg" })}>
               <Trophy className="size-5 text-gold" aria-hidden />
               Wager Race{extras.wagerPrize ? ` · ${extras.wagerPrize}` : ""}
             </Link>
@@ -67,7 +82,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
 
           <ul
             className="mt-6 flex animate-rise flex-wrap gap-x-5 gap-y-2 text-sm [animation-delay:480ms]"
-            aria-label="Redes de Chupetti"
+            aria-label={t.home.hero.socials}
           >
             {TEXT_SOCIALS.filter((name) => name !== primary).map((name) => (
               <li key={name}>
@@ -84,7 +99,13 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
           </ul>
         </div>
 
-        <Character live={live} settings={settings} activeHunt={extras.activeHunt} />
+        <Character
+          live={live}
+          settings={settings}
+          activeHunt={extras.activeHunt}
+          offline={extras.offline}
+          lang={lang}
+        />
       </div>
     </section>
   );
@@ -94,11 +115,16 @@ function Character({
   live,
   settings,
   activeHunt,
+  offline,
+  lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  offline: OfflineHighlight;
+  lang: Locale;
 }) {
+  const { t } = getI18n(lang);
   const personaje = BRAND_ASSETS.personaje;
 
   return (
@@ -120,7 +146,7 @@ function Character({
         {hasBrandAsset("personaje") ? (
           <Image
             src={personaje.src}
-            alt="Ilustración de Chupetti con bata violeta de bordes neón y fichas de casino en la mano"
+            alt={t.home.hero.characterAlt}
             width={personaje.width}
             height={personaje.height}
             priority
@@ -134,7 +160,7 @@ function Character({
         )}
       </div>
 
-      <LiveCard live={live} settings={settings} activeHunt={activeHunt} />
+      <LiveCard live={live} settings={settings} activeHunt={activeHunt} offline={offline} lang={lang} />
     </div>
   );
 }
@@ -143,11 +169,16 @@ function LiveCard({
   live,
   settings,
   activeHunt,
+  offline,
+  lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  offline: OfflineHighlight;
+  lang: Locale;
 }) {
+  const { t } = getI18n(lang);
   const href = settings.socials[live.platform ?? settings.primary_platform];
 
   if (live.live && live.platform) {
@@ -160,7 +191,7 @@ function LiveCard({
       >
         <span className="flex items-center gap-2 text-xs font-bold tracking-wide text-live uppercase">
           <span aria-hidden className="size-2 animate-live-pulse rounded-full bg-live" />
-          En vivo en {BRAND_LABELS[live.platform]}
+          {t.home.hero.liveOn(BRAND_LABELS[live.platform])}
         </span>
         {activeHunt ? (
           <span className="mt-1 line-clamp-2 block text-sm font-semibold">
@@ -170,20 +201,44 @@ function LiveCard({
           <span className="mt-1 line-clamp-2 block text-sm font-semibold">{live.title}</span>
         ) : null}
         {live.viewers !== null ? (
-          <span className="num mt-1 block text-xs text-muted">{formatInteger(live.viewers)} viendo</span>
+          <span className="num mt-1 block text-xs text-muted">{t.home.hero.watching(formatInteger(live.viewers))}</span>
         ) : null}
       </a>
     );
   }
 
-  const nextAt = settings.next_stream.at;
-  const when = settings.next_stream.label || (nextAt ? formatDateTime(nextAt) : "[día y hora]");
+  const card =
+    "absolute bottom-6 -left-2 block max-w-[17rem] animate-float rounded-2xl border border-line-strong bg-bg/90 px-4 py-3 backdrop-blur transition-colors hover:border-accent/60 [animation-delay:-3s] sm:-left-8";
+  const offlineLabel = (
+    <span className="block text-xs font-bold tracking-wide text-subtle uppercase">{t.home.hero.offline}</span>
+  );
+
+  if (offline.kind === "follow") {
+    const platform = settings.primary_platform;
+    return (
+      <a href={settings.socials[platform]} target="_blank" rel="noopener noreferrer" className={card}>
+        {offlineLabel}
+        <span className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">
+          <BrandIcon name={platform} className="size-4 text-accent-text" />
+          {t.live.follow(BRAND_LABELS[platform])}
+        </span>
+        <span className="mt-0.5 block text-xs text-muted">{t.live.followText}</span>
+      </a>
+    );
+  }
+
+  const giveaway = offline.kind === "giveaway";
+  const Icon = giveaway ? Gift : Trophy;
   return (
-    <div className="absolute bottom-6 -left-2 animate-float rounded-2xl border border-line-strong bg-bg/90 px-4 py-3 backdrop-blur [animation-delay:-3s] sm:-left-8">
-      <span className="block text-xs font-bold tracking-wide text-subtle uppercase">Offline</span>
-      <span className="mt-0.5 block text-sm">
-        Próximo stream <span className="num text-accent-light">{when}</span>
+    <Link href={localePath(lang, giveaway ? "/sorteos" : "/wager-race")} className={card}>
+      {offlineLabel}
+      <span className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">
+        <Icon className="size-4 shrink-0 text-gold" aria-hidden />
+        <span className="line-clamp-1">{giveaway ? t.live.giveawayTitle(offline.title) : offline.title}</span>
       </span>
-    </div>
+      <span className="num mt-0.5 block text-xs text-accent-light">
+        {giveaway ? t.live.closesIn : t.live.endsIn} <CountdownText target={offline.endsAt} />
+      </span>
+    </Link>
   );
 }

@@ -1,12 +1,14 @@
 "use client";
 
 import { Menu } from "lucide-react";
+import { useI18n } from "@/i18n/client";
 import { SIDEBAR_KEY } from "./sidebar";
 
 const buttonClass = "flex size-10 items-center justify-center rounded-lg text-text hover:bg-surface-2";
 
 /** En celular abre el cajón; en compu achica o agranda la barra lateral. */
 export function SidebarToggle() {
+  const { t } = useI18n();
   const openDrawer = () => {
     document.documentElement.dataset.drawer = "open";
   };
@@ -27,7 +29,7 @@ export function SidebarToggle() {
       <button
         type="button"
         onClick={openDrawer}
-        aria-label="Abrir menú"
+        aria-label={t.layout.openMenu}
         aria-controls="menu-lateral"
         className={`${buttonClass} lg:hidden`}
       >
@@ -36,7 +38,7 @@ export function SidebarToggle() {
       <button
         type="button"
         onClick={toggleCollapsed}
-        aria-label="Achicar o agrandar el menú"
+        aria-label={t.layout.toggleMenu}
         aria-controls="menu-lateral"
         className={`${buttonClass} hidden lg:flex`}
       >

@@ -1,5 +1,7 @@
 import { ArrowRight, Crosshair, ShoppingCart, Swords, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
 import { SectionHeading } from "./section-heading";
 
@@ -17,37 +19,38 @@ export type SessionCard = {
 };
 
 // Estado vacío de cada tarjeta. La home las completa con la sesión en curso o la última de cada una.
-export const EMPTY_SESSIONS: SessionCard[] = [
-  {
-    key: "hunt",
-    title: "Bonus Hunt",
-    href: "/bonus-hunt",
-    icon: Crosshair,
-    description:
-      "Junto bonos durante el stream y los abro todos juntos. Seguí cada slot, el break-even y adiviná el balance final.",
-    status: null,
-    facts: [],
-  },
-  {
-    key: "buys",
-    title: "Bonus Buy",
-    href: "/bonus-buys",
-    icon: ShoppingCart,
-    description: "Sesiones de compra directa de bonos. Cuánto costó cada uno, cuánto pagó y el resultado acumulado.",
-    status: null,
-    facts: [],
-  },
-  {
-    key: "battle",
-    title: "Bonus Battle",
-    href: "/bonus-battle",
-    icon: Swords,
-    description:
-      "Slots elegidos por el chat, uno contra otro. El que paga mejor multiplicador pasa de ronda. Elegí tu slot.",
-    status: null,
-    facts: [],
-  },
-];
+export function emptySessions(lang: Locale): SessionCard[] {
+  const { t, href } = getI18n(lang);
+  return [
+    {
+      key: "hunt",
+      title: "Bonus Hunt",
+      href: href("/bonus-hunt"),
+      icon: Crosshair,
+      description: t.home.sessions.huntDescription,
+      status: null,
+      facts: [],
+    },
+    {
+      key: "buys",
+      title: "Bonus Buy",
+      href: href("/bonus-buys"),
+      icon: ShoppingCart,
+      description: t.home.sessions.buysDescription,
+      status: null,
+      facts: [],
+    },
+    {
+      key: "battle",
+      title: "Bonus Battle",
+      href: href("/bonus-battle"),
+      icon: Swords,
+      description: t.home.sessions.battleDescription,
+      status: null,
+      facts: [],
+    },
+  ];
+}
 
 const TONE: Record<"live" | "past" | "next", string> = {
   live: "bg-live/15 text-live",
@@ -55,10 +58,11 @@ const TONE: Record<"live" | "past" | "next", string> = {
   next: "bg-accent/20 text-accent-light",
 };
 
-export function Sessions({ cards }: { cards: SessionCard[] }) {
+export function Sessions({ cards, lang }: { cards: SessionCard[]; lang: Locale }) {
+  const { t } = getI18n(lang);
   return (
     <section aria-labelledby="sessions-title" className="mx-auto max-w-7xl px-4 py-16">
-      <SectionHeading id="sessions-title" kicker="lo que pasa en el stream" title="Seguí cada sesión" />
+      <SectionHeading id="sessions-title" kicker={t.home.sessions.kicker} title={t.home.sessions.title} />
       <ul className="grid gap-4 md:grid-cols-3">
         {cards.map(({ key, title, href, description, status, meta, facts }) => (
           <li key={key} className="reveal">
@@ -73,7 +77,7 @@ export function Sessions({ cards }: { cards: SessionCard[] }) {
                     status ? TONE[status.tone] : TONE.past,
                   )}
                 >
-                  {status?.label ?? "Sin sesiones todavía"}
+                  {status?.label ?? t.home.sessions.empty}
                 </span>
                 {meta ? <span className="num text-xs text-subtle">{meta}</span> : null}
               </div>
@@ -90,7 +94,7 @@ export function Sessions({ cards }: { cards: SessionCard[] }) {
                 </dl>
               ) : (
                 <span className="mt-auto flex items-center gap-1 pt-6 text-sm font-semibold text-accent-text group-hover:text-accent-light">
-                  Ver {title} <ArrowRight className="size-4" aria-hidden />
+                  {t.home.sessions.see(title)} <ArrowRight className="size-4" aria-hidden />
                 </span>
               )}
             </Link>

@@ -122,12 +122,7 @@ export default async function PanelHomePage() {
         <p className="mt-1 mb-4 text-sm text-muted">
           Respaldo manual por si falla la detección automática de Twitch y Kick.
         </p>
-        <StreamStatusForm
-          live={settings.stream_manual.live}
-          platform={settings.stream_manual.platform}
-          nextAt={settings.next_stream.at}
-          nextLabel={settings.next_stream.label}
-        />
+        <StreamStatusForm live={settings.stream_manual.live} platform={settings.stream_manual.platform} />
       </section>
     </div>
   );

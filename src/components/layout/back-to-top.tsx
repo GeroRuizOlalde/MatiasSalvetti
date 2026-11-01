@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/lib/cn";
 
 /** El cohete aparece al bajar y, al tocarlo, despega y te lleva arriba de todo. */
 export function BackToTop() {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [launching, setLaunching] = useState(false);
 
@@ -30,8 +32,8 @@ export function BackToTop() {
     <button
       type="button"
       onClick={launch}
-      aria-label="Volver arriba"
-      title="Volver arriba"
+      aria-label={t.layout.backToTop}
+      title={t.layout.backToTop}
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}
       className={cn(

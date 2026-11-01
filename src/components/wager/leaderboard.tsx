@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { Medal } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
@@ -11,11 +13,14 @@ export function Leaderboard({
   rows,
   currency,
   highlightUserId,
+  lang = "es",
 }: {
   rows: LeaderboardRow[];
   currency: Enums<"currency_code">;
   highlightUserId?: string | null;
+  lang?: Locale;
 }) {
+  const { t } = getI18n(lang);
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
       <table className="w-full text-sm">
@@ -25,13 +30,13 @@ export function Leaderboard({
               #
             </th>
             <th scope="col" className="px-2 py-3 font-semibold">
-              Jugador
+              {t.wager.player}
             </th>
             <th scope="col" className="px-2 py-3 text-right font-semibold">
-              Wager
+              {t.wager.wager}
             </th>
             <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Premio
+              {t.wager.prize}
             </th>
           </tr>
         </thead>
@@ -40,7 +45,7 @@ export function Leaderboard({
             <tr key={row.user_id} className={cn(row.user_id === highlightUserId && "bg-accent/10")}>
               <td className="num px-4 py-3">
                 {row.rank <= 3 ? (
-                  <Medal className={cn("size-5", MEDAL[row.rank - 1])} aria-label={`Puesto ${row.rank}`} />
+                  <Medal className={cn("size-5", MEDAL[row.rank - 1])} aria-label={t.wager.rank(row.rank)} />
                 ) : (
                   <span className="text-subtle">{row.rank}</span>
                 )}
@@ -52,7 +57,7 @@ export function Leaderboard({
                     <span className="block truncate font-semibold">
                       {row.display_name}
                       {row.user_id === highlightUserId ? (
-                        <span className="ml-2 text-xs text-accent-text">vos</span>
+                        <span className="ml-2 text-xs text-accent-text">{t.common.you}</span>
                       ) : null}
                     </span>
                     <span className="num block text-xs text-subtle">{row.masked_account}</span>
