@@ -31,6 +31,13 @@ export const OVERLAYS = [
   { path: "battle", label: "Bonus Battle", size: "1280 × 360", description: "El cruce en juego y el cuadro." },
   { path: "wager", label: "Wager Race", size: "420 × 520", description: "Cuenta regresiva y top 5." },
   {
+    path: "chat",
+    label: "Chat",
+    size: "380 × 700",
+    description:
+      "El chat de Twitch en vivo, sin fondo. Opciones: &ocultar=nightbot (bots a esconder), &segundos=60 (que los mensajes se vayan), &max=20.",
+  },
+  {
     path: "deposito",
     label: "Depósito",
     size: "400 × 60",
