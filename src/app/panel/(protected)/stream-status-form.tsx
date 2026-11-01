@@ -4,25 +4,13 @@ import { useActionState, useId } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { updateStreamStatus, type StreamStatusState } from "./actions";
 
-type Props = {
-  live: boolean;
-  platform: "twitch" | "kick";
-  nextAt: string | null;
-  nextLabel: string | null;
-};
+type Props = { live: boolean; platform: "twitch" | "kick" };
 
 const inputClass = "h-10 w-full rounded-lg border border-line bg-surface-2 px-3 text-sm text-text";
 
-/** ISO → valor de <input type="datetime-local"> en hora de Argentina (UTC-3). */
-function toLocalInput(iso: string | null) {
-  if (!iso) return "";
-  const d = new Date(new Date(iso).getTime() - 3 * 60 * 60 * 1000);
-  return d.toISOString().slice(0, 16);
-}
-
-export function StreamStatusForm({ live, platform, nextAt, nextLabel }: Props) {
+export function StreamStatusForm({ live, platform }: Props) {
   const [state, formAction, pending] = useActionState<StreamStatusState, FormData>(updateStreamStatus, {});
-  const ids = { live: useId(), platform: useId(), at: useId(), label: useId() };
+  const ids = { live: useId(), platform: useId() };
 
   return (
     <form action={formAction} className="space-y-4">
@@ -31,7 +19,7 @@ export function StreamStatusForm({ live, platform, nextAt, nextLabel }: Props) {
         <span className="text-sm font-semibold">Forzar &quot;En vivo&quot;</span>
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="max-w-xs">
         <div>
           <label htmlFor={ids.platform} className="mb-1 block text-xs text-subtle">
             Plataforma
@@ -40,25 +28,6 @@ export function StreamStatusForm({ live, platform, nextAt, nextLabel }: Props) {
             <option value="twitch">Twitch</option>
             <option value="kick">Kick</option>
           </select>
-        </div>
-        <div>
-          <label htmlFor={ids.at} className="mb-1 block text-xs text-subtle">
-            Próximo stream (hora AR)
-          </label>
-          <input id={ids.at} type="datetime-local" name="next_at" defaultValue={toLocalInput(nextAt)} className={inputClass} />
-        </div>
-        <div>
-          <label htmlFor={ids.label} className="mb-1 block text-xs text-subtle">
-            Texto alternativo (opcional)
-          </label>
-          <input
-            id={ids.label}
-            name="next_label"
-            maxLength={60}
-            defaultValue={nextLabel ?? ""}
-            placeholder="Ej.: Hoy 22 h"
-            className={inputClass}
-          />
         </div>
       </div>
 

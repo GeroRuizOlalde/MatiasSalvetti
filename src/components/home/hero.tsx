@@ -1,13 +1,16 @@
-import { Play, Trophy } from "lucide-react";
+import { Gift, Play, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND_LABELS, type BrandName } from "@/components/ui/brand-icon";
+import { BRAND_LABELS, BrandIcon, type BrandName } from "@/components/ui/brand-icon";
 import { buttonClasses } from "@/components/ui/button";
 import { BRAND_ASSETS, hasBrandAsset } from "@/lib/brand";
 import type { Locale } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
-import { formatDateTime, formatInteger } from "@/lib/format";
+import { CountdownText } from "@/components/wager/countdown-text";
+import { localePath } from "@/i18n/config";
+import { formatInteger } from "@/lib/format";
 import type { LiveStatus } from "@/lib/live-status";
+import type { OfflineHighlight } from "@/lib/offline-highlight";
 import type { PublicSettings } from "@/lib/settings";
 import { PartnerLogo } from "@/components/layout/partner-logo";
 import { FloatingDecor } from "./floating-decor";
@@ -23,6 +26,8 @@ export type HeroExtras = {
   wagerPrize: string | null;
   /** Hunt en curso, para la tarjeta de "en vivo". */
   activeHunt: { title: string; status: string } | null;
+  /** Qué mostrar en la tarjeta si está offline. */
+  offline: OfflineHighlight;
 };
 
 export function Hero({
@@ -94,7 +99,13 @@ export function Hero({
           </ul>
         </div>
 
-        <Character live={live} settings={settings} activeHunt={extras.activeHunt} lang={lang} />
+        <Character
+          live={live}
+          settings={settings}
+          activeHunt={extras.activeHunt}
+          offline={extras.offline}
+          lang={lang}
+        />
       </div>
     </section>
   );
@@ -104,11 +115,13 @@ function Character({
   live,
   settings,
   activeHunt,
+  offline,
   lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  offline: OfflineHighlight;
   lang: Locale;
 }) {
   const { t } = getI18n(lang);
@@ -147,7 +160,7 @@ function Character({
         )}
       </div>
 
-      <LiveCard live={live} settings={settings} activeHunt={activeHunt} lang={lang} />
+      <LiveCard live={live} settings={settings} activeHunt={activeHunt} offline={offline} lang={lang} />
     </div>
   );
 }
@@ -156,11 +169,13 @@ function LiveCard({
   live,
   settings,
   activeHunt,
+  offline,
   lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  offline: OfflineHighlight;
   lang: Locale;
 }) {
   const { t } = getI18n(lang);
@@ -192,14 +207,38 @@ function LiveCard({
     );
   }
 
-  const nextAt = settings.next_stream.at;
-  const when = settings.next_stream.label || (nextAt ? formatDateTime(nextAt, lang) : t.live.dayAndTime);
+  const card =
+    "absolute bottom-6 -left-2 block max-w-[17rem] animate-float rounded-2xl border border-line-strong bg-bg/90 px-4 py-3 backdrop-blur transition-colors hover:border-accent/60 [animation-delay:-3s] sm:-left-8";
+  const offlineLabel = (
+    <span className="block text-xs font-bold tracking-wide text-subtle uppercase">{t.home.hero.offline}</span>
+  );
+
+  if (offline.kind === "follow") {
+    const platform = settings.primary_platform;
+    return (
+      <a href={settings.socials[platform]} target="_blank" rel="noopener noreferrer" className={card}>
+        {offlineLabel}
+        <span className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">
+          <BrandIcon name={platform} className="size-4 text-accent-text" />
+          {t.live.follow(BRAND_LABELS[platform])}
+        </span>
+        <span className="mt-0.5 block text-xs text-muted">{t.live.followText}</span>
+      </a>
+    );
+  }
+
+  const giveaway = offline.kind === "giveaway";
+  const Icon = giveaway ? Gift : Trophy;
   return (
-    <div className="absolute bottom-6 -left-2 animate-float rounded-2xl border border-line-strong bg-bg/90 px-4 py-3 backdrop-blur [animation-delay:-3s] sm:-left-8">
-      <span className="block text-xs font-bold tracking-wide text-subtle uppercase">{t.home.hero.offline}</span>
-      <span className="mt-0.5 block text-sm">
-        {t.live.nextStream} <span className="num text-accent-light">{when}</span>
+    <Link href={localePath(lang, giveaway ? "/sorteos" : "/wager-race")} className={card}>
+      {offlineLabel}
+      <span className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">
+        <Icon className="size-4 shrink-0 text-gold" aria-hidden />
+        <span className="line-clamp-1">{giveaway ? t.live.giveawayTitle(offline.title) : offline.title}</span>
       </span>
-    </div>
+      <span className="num mt-0.5 block text-xs text-accent-light">
+        {giveaway ? t.live.closesIn : t.live.endsIn} <CountdownText target={offline.endsAt} />
+      </span>
+    </Link>
   );
 }

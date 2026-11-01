@@ -16,6 +16,7 @@ import { formatDayMonth, formatInteger, formatMoneyShort, formatMulti } from "@/
 import { isHuntActive } from "@/lib/hunt-status";
 import { getHuntRecords, getPublicHunts, type HuntSummary } from "@/lib/hunts";
 import { getLiveStatus } from "@/lib/live-status";
+import { getOfflineHighlight } from "@/lib/offline-highlight";
 import { getPublicSettings, type PublicSettings } from "@/lib/settings";
 import { getLeaderboard, getWagerOverview } from "@/lib/wager";
 import { getLatestVideos } from "@/lib/external/youtube";
@@ -116,7 +117,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang: param } = await params;
   const lang: Locale = isLocale(param) ? param : "es";
   const { t } = getI18n(lang);
-  const [settings, live, casinos, hunts, records, buySessions, battles, wager, videos] = await Promise.all([
+  const [settings, live, casinos, hunts, records, buySessions, battles, wager, videos, offline] = await Promise.all([
     getPublicSettings(),
     getLiveStatus(),
     getActiveCasinos(),
@@ -126,6 +127,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     getPublicBattles(),
     getWagerOverview(),
     getLatestVideos(3),
+    getOfflineHighlight(),
   ]);
   const race = wager.featured && wager.featured.phase !== "ended" ? wager.featured : null;
   const top = race ? await getLeaderboard(race.id, 3) : [];
@@ -161,6 +163,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         extras={{
           wagerPrize: race && raceTotal > 0 ? formatMoneyShort(raceTotal, race.currency) : null,
           activeHunt: activeHunt ? { title: activeHunt.title, status: t.status.hunt[activeHunt.status] } : null,
+          offline,
         }}
       />
       <StatsStrip
