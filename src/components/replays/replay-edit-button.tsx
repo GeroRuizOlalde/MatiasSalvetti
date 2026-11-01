@@ -1,8 +1,9 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { Pencil, X } from "lucide-react";
 import { useActionState, useEffect, useId, useRef, useState } from "react";
-import { updateReplay } from "@/app/(site)/replays/actions";
+import { updateReplay } from "@/app/[lang]/(site)/replays/actions";
 import { FormMessage } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
@@ -22,6 +23,7 @@ export function ReplayEditButton({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const [round, setRound] = useState(0);
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -41,14 +43,14 @@ export function ReplayEditButton({
           setRound((r) => r + 1);
           setOpen(true);
         }}
-        aria-label="Editar replay"
+        aria-label={t.replays.editReplay}
         className={cn(
           "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-text",
           className,
         )}
       >
         <Pencil className="size-4" aria-hidden />
-        <span>Editar</span>
+        <span>{t.replays.edit}</span>
       </button>
       <dialog
         ref={ref}
@@ -62,12 +64,12 @@ export function ReplayEditButton({
       >
         <div className="flex items-center gap-3 border-b border-line px-5 py-3">
           <h2 id={titleId} className="flex-1 font-display text-2xl tracking-wide uppercase">
-            Editar replay
+            {t.replays.editTitle}
           </h2>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Cerrar"
+            aria-label={t.replays.close}
             className="rounded-md p-2 text-subtle hover:bg-surface-2 hover:text-text"
           >
             <X className="size-5" aria-hidden />
@@ -99,6 +101,7 @@ function EditBody({
   byPanel: boolean;
   onSaved: () => void;
 }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState<ActionState, FormData>(async (prev, data) => {
     const result = await updateReplay(prev, data);
     if (result.ok) onSaved();
@@ -111,8 +114,8 @@ function EditBody({
         action={formAction}
         providers={providers}
         initial={replay}
-        submitLabel="Guardar cambios"
-        hint={byPanel ? undefined : "Si cambiás el link, el replay vuelve a revisión."}
+        submitLabel={t.replays.saveChanges}
+        hint={byPanel ? undefined : t.replays.linkChangeHint}
       />
       <FormMessage state={state} />
     </div>

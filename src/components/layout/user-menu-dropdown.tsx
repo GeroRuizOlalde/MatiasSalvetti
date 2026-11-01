@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "@/app/auth/actions";
 import { Avatar } from "@/components/ui/avatar";
+import { useI18n } from "@/i18n/client";
 
 type Props = { displayName: string; avatarUrl: string | null; canUsePanel: boolean; level: number; points: number };
 
@@ -15,6 +16,7 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const menuId = useId();
+  const { t, href } = useI18n();
 
   useEffect(() => {
     if (!open) return;
@@ -40,7 +42,7 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
         type="button"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={`Menú de ${displayName}`}
+        aria-label={t.userMenu.menuOf(displayName)}
         onClick={() => setOpen((v) => !v)}
         className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface p-1 hover:border-line-strong sm:pr-3"
       >
@@ -54,26 +56,27 @@ export function UserMenuDropdown({ displayName, avatarUrl, canUsePanel, level, p
           className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-line bg-surface p-2 shadow-2xl shadow-black/50"
         >
           <p className="num mb-1 border-b border-line px-3 pt-1 pb-2 text-xs text-subtle">
-            Nivel <span className="font-semibold text-accent-text">{level}</span> ·{" "}
-            <span className="font-semibold text-gold">{new Intl.NumberFormat("es-AR").format(points)}</span> puntos
+            {t.userMenu.level} <span className="font-semibold text-accent-text">{level}</span> ·{" "}
+            <span className="font-semibold text-gold">{new Intl.NumberFormat("es-AR").format(points)}</span>{" "}
+            {t.userMenu.points}
           </p>
-          <Link href="/perfil" className={itemClass} onClick={close}>
-            <User className="size-4" aria-hidden /> Mi perfil
+          <Link href={href("/perfil")} className={itemClass} onClick={close}>
+            <User className="size-4" aria-hidden /> {t.userMenu.profile}
           </Link>
-          <Link href="/perfil#cuentas" className={itemClass} onClick={close}>
-            <BadgeCheck className="size-4" aria-hidden /> Verificar cuenta
+          <Link href={href("/perfil#cuentas")} className={itemClass} onClick={close}>
+            <BadgeCheck className="size-4" aria-hidden /> {t.userMenu.verify}
           </Link>
-          <Link href="/cuartel" className={itemClass} onClick={close}>
-            <Castle className="size-4" aria-hidden /> Cuartel
+          <Link href={href("/cuartel")} className={itemClass} onClick={close}>
+            <Castle className="size-4" aria-hidden /> {t.userMenu.hq}
           </Link>
           {canUsePanel ? (
             <Link href="/panel" className={itemClass} onClick={close}>
-              <LayoutDashboard className="size-4" aria-hidden /> Panel
+              <LayoutDashboard className="size-4" aria-hidden /> {t.userMenu.panel}
             </Link>
           ) : null}
           <form action={signOut} className="mt-1 border-t border-line pt-1">
             <button type="submit" className={itemClass}>
-              <LogOut className="size-4" aria-hidden /> Salir
+              <LogOut className="size-4" aria-hidden /> {t.userMenu.signOut}
             </button>
           </form>
         </div>

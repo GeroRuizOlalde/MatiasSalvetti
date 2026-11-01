@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { markNotificationsRead } from "@/app/notifications/actions";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
 import type { NotificationItem, NotificationScope } from "@/lib/notifications";
@@ -20,6 +21,7 @@ type Props = {
 
 /** Campanita con las últimas notificaciones. Se actualiza sola cuando llega una nueva. */
 export function NotificationBell({ scope, items, readAt, align = "right" }: Props) {
+  const { t, lang, href } = useI18n();
   const [open, setOpen] = useState(false);
   // Al abrir se marcan leídas hasta la más nueva que se vio (con la hora del servidor, no la del navegador).
   const [seenUntil, setSeenUntil] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export function NotificationBell({ scope, items, readAt, align = "right" }: Prop
         onClick={toggle}
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={count ? `Notificaciones, ${count} sin leer` : "Notificaciones"}
+        aria-label={count ? t.notifications.unread(count) : t.notifications.title}
         className="relative flex size-10 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-text"
       >
         <Bell className="size-5" aria-hidden />
@@ -102,7 +104,7 @@ export function NotificationBell({ scope, items, readAt, align = "right" }: Prop
           )}
         >
           <p className="border-b border-line px-4 py-3 text-sm font-semibold">
-            {scope === "panel" ? "Avisos del panel" : "Notificaciones"}
+            {scope === "panel" ? "Avisos del panel" : t.notifications.title}
           </p>
           {items.length ? (
             <ul className="max-h-[60vh] divide-y divide-line overflow-y-auto">
@@ -117,7 +119,7 @@ export function NotificationBell({ scope, items, readAt, align = "right" }: Prop
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-semibold">{item.title}</span>
                       {item.body ? <span className="block text-sm text-muted">{item.body}</span> : null}
-                      <span className="mt-0.5 block text-xs text-subtle">{formatDateTime(item.created_at)}</span>
+                      <span className="mt-0.5 block text-xs text-subtle">{formatDateTime(item.created_at, lang)}</span>
                     </span>
                   </>
                 );
@@ -125,7 +127,8 @@ export function NotificationBell({ scope, items, readAt, align = "right" }: Prop
                   <li key={item.id}>
                     {item.link ? (
                       <Link
-                        href={item.link}
+                        // Los links de la web se abren en el idioma actual; los del panel, tal cual.
+                        href={scope === "site" ? href(item.link) : item.link}
                         onClick={() => setOpen(false)}
                         className="flex gap-3 px-4 py-3 hover:bg-surface-2"
                       >
@@ -139,7 +142,7 @@ export function NotificationBell({ scope, items, readAt, align = "right" }: Prop
               })}
             </ul>
           ) : (
-            <p className="px-4 py-8 text-center text-sm text-subtle">No tenés notificaciones todavía.</p>
+            <p className="px-4 py-8 text-center text-sm text-subtle">{t.notifications.empty}</p>
           )}
         </div>
       ) : null}

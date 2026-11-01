@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import type { HuntStats } from "@/lib/calc/hunt";
 import { cn } from "@/lib/cn";
 import { formatInteger, formatMoney, formatMulti } from "@/lib/format";
@@ -11,38 +13,48 @@ type Props = {
   currency: Enums<"currency_code">;
   finalBalance: number | null;
   className?: string;
+  lang?: Locale;
 };
 
-export function HuntStatsGrid({ stats, startCost, openingBalance, currency, finalBalance, className }: Props) {
+export function HuntStatsGrid({
+  stats,
+  startCost,
+  openingBalance,
+  currency,
+  finalBalance,
+  className,
+  lang = "es",
+}: Props) {
+  const c = getI18n(lang).t.common;
   const finished = finalBalance !== null;
   const profit = finished ? finalBalance - startCost : null;
 
   const items: { label: string; value: string; note?: string; tone?: "gold" | "good" | "bad" }[] = [
     {
-      label: "Inversión",
+      label: c.investment,
       value: formatMoney(startCost, currency),
-      note: openingBalance > 0 ? `Saldo al abrir: ${formatMoney(openingBalance, currency)}` : undefined,
+      note: openingBalance > 0 ? c.openingBalance(formatMoney(openingBalance, currency)) : undefined,
     },
-    { label: "Bonos", value: `${formatInteger(stats.opened)}/${formatInteger(stats.bonuses)}` },
+    { label: c.bonuses, value: `${formatInteger(stats.opened)}/${formatInteger(stats.bonuses)}` },
     {
       // Con saldo de apertura, lo que importa es el balance (saldo + lo pagado), no solo lo pagado.
-      label: finished ? "Balance final" : openingBalance > 0 ? "Balance actual" : "Ganado",
+      label: finished ? c.finalBalance : openingBalance > 0 ? c.currentBalance : c.won,
       value: formatMoney(finalBalance ?? stats.balance, currency),
       tone: "gold",
     },
     finished
       ? {
-          label: "Resultado",
+          label: c.result,
           value: `${profit! >= 0 ? "+" : ""}${formatMoney(profit!, currency)}`,
           tone: profit! >= 0 ? "good" : "bad",
         }
       : {
-          label: "Multi necesario",
+          label: c.requiredMulti,
           // Sin bonos por abrir no hay multi necesario.
           value: stats.requiredMulti !== null ? formatMulti(stats.requiredMulti) : "—",
         },
-    { label: "Multi promedio", value: stats.averageMulti !== null ? formatMulti(stats.averageMulti) : "—" },
-    { label: "Mejor multi", value: stats.best ? formatMulti(stats.best.multi) : "—" },
+    { label: c.averageMulti, value: stats.averageMulti !== null ? formatMulti(stats.averageMulti) : "—" },
+    { label: c.bestMulti, value: stats.best ? formatMulti(stats.best.multi) : "—" },
   ];
 
   return (

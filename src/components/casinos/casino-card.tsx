@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { buttonClasses } from "@/components/ui/button";
@@ -5,7 +7,8 @@ import { CopyButton } from "@/components/ui/copy-button";
 import type { PublicCasino } from "@/lib/casinos";
 import { casinoLogoUrl } from "@/lib/storage";
 
-export function CasinoCard({ casino }: { casino: PublicCasino }) {
+export function CasinoCard({ casino, lang }: { casino: PublicCasino; lang: Locale }) {
+  const t = getI18n(lang).t.casino;
   const logo = casinoLogoUrl(casino);
 
   return (
@@ -15,7 +18,7 @@ export function CasinoCard({ casino }: { casino: PublicCasino }) {
           // Caja fija: cada logo tiene otra proporción y así todos quedan del mismo tamaño.
           <Image
             src={logo}
-            alt={`Logo de ${casino.name}`}
+            alt={t.logo(casino.name)}
             width={192}
             height={48}
             className="h-12 w-48 object-contain object-left"
@@ -28,10 +31,10 @@ export function CasinoCard({ casino }: { casino: PublicCasino }) {
 
       <div className="mt-4 flex items-center justify-between gap-2 rounded-lg border border-dashed border-line-strong bg-surface-2 py-1 pr-1 pl-3">
         <div>
-          <p className="text-[11px] tracking-wide text-subtle uppercase">Código</p>
+          <p className="text-[11px] tracking-wide text-subtle uppercase">{t.code}</p>
           <p className="num font-bold text-gold">{casino.code ?? "[CÓDIGO]"}</p>
         </div>
-        {casino.code ? <CopyButton value={casino.code} label={`Copiar el código de ${casino.name}`} /> : null}
+        {casino.code ? <CopyButton value={casino.code} label={t.copy(casino.name)} /> : null}
       </div>
 
       <a
@@ -40,8 +43,8 @@ export function CasinoCard({ casino }: { casino: PublicCasino }) {
         rel="sponsored noopener noreferrer"
         className={buttonClasses({ className: "mt-5 w-full" })}
       >
-        Registrarme <ExternalLink className="size-4" aria-hidden />
-        <span className="sr-only">en {casino.name} (se abre en otra pestaña)</span>
+        {t.signUp} <ExternalLink className="size-4" aria-hidden />
+        <span className="sr-only">{t.opensIn(casino.name)}</span>
       </a>
     </article>
   );

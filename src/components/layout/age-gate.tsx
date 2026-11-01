@@ -3,6 +3,7 @@
 import { ShieldAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { buttonClasses } from "@/components/ui/button";
+import { useI18n } from "@/i18n/client";
 
 const STORAGE_KEY = "ms-age-confirmed";
 
@@ -23,6 +24,7 @@ function saveConfirmed() {
 }
 
 export function AgeGate() {
+  const { t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [denied, setDenied] = useState(false);
 
@@ -46,24 +48,22 @@ export function AgeGate() {
       <div className="flex flex-col items-center gap-4 p-6 text-center sm:p-8">
         <ShieldAlert className="size-10 text-gold" aria-hidden />
         <h2 id="age-gate-title" className="font-display text-3xl tracking-wide uppercase">
-          {denied ? "Volvé cuando tengas 18" : "¿Sos mayor de 18?"}
+          {denied ? t.ageGate.deniedTitle : t.ageGate.question}
         </h2>
         <p id="age-gate-desc" className="text-sm text-muted">
-          {denied
-            ? "Esta web habla de casino online y es solo para mayores de edad."
-            : "Esta web habla de casino online y apuestas. Para entrar tenés que ser mayor de 18 años."}
+          {denied ? t.ageGate.deniedText : t.ageGate.text}
         </p>
         {denied ? null : (
           <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row">
             <button type="button" autoFocus onClick={confirm} className={buttonClasses({ className: "flex-1" })}>
-              Sí, tengo 18 o más
+              {t.ageGate.yes}
             </button>
             <button
               type="button"
               onClick={() => setDenied(true)}
               className={buttonClasses({ variant: "secondary", className: "flex-1" })}
             >
-              No
+              {t.ageGate.no}
             </button>
           </div>
         )}

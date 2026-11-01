@@ -1,9 +1,10 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { addReplayComment, deleteReplayComment, loadReplayComments } from "@/app/(site)/replays/actions";
+import { addReplayComment, deleteReplayComment, loadReplayComments } from "@/app/[lang]/(site)/replays/actions";
 import { inputClass } from "@/components/panel/form";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
@@ -29,6 +30,8 @@ export function ReplayComments({
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { t, lang, href } = useI18n();
+  const r = t.replays;
 
   useEffect(() => {
     let alive = true;
@@ -70,9 +73,9 @@ export function ReplayComments({
   };
 
   return (
-    <section id={id} aria-label="Comentarios" className="space-y-3 border-t border-line px-4 py-4">
+    <section id={id} aria-label={r.commentsTitle} className="space-y-3 border-t border-line px-4 py-4">
       {comments === null ? (
-        <p className="text-sm text-subtle">Cargando comentarios…</p>
+        <p className="text-sm text-subtle">{r.loadingComments}</p>
       ) : comments.length ? (
         <ul className="space-y-3">
           {comments.map((comment) => {
@@ -84,7 +87,7 @@ export function ReplayComments({
                 <div className="min-w-0 flex-1 rounded-xl bg-surface-2 px-3 py-2">
                   <p className="text-xs">
                     <span className="font-semibold">{name}</span>{" "}
-                    <span className="text-subtle">· {formatDateTime(comment.created_at)}</span>
+                    <span className="text-subtle">· {formatDateTime(comment.created_at, lang)}</span>
                   </p>
                   <p className="text-sm break-words whitespace-pre-line">{comment.body}</p>
                 </div>
@@ -93,7 +96,7 @@ export function ReplayComments({
                     type="button"
                     onClick={() => remove(comment.id)}
                     disabled={pending}
-                    aria-label="Borrar comentario"
+                    aria-label={r.deleteComment}
                     className="self-start rounded-md p-1.5 text-subtle hover:bg-surface-2 hover:text-live disabled:opacity-50"
                   >
                     <Trash2 className="size-4" aria-hidden />
@@ -104,26 +107,26 @@ export function ReplayComments({
           })}
         </ul>
       ) : (
-        <p className="text-sm text-subtle">Todavía no hay comentarios. ¡Sé el primero!</p>
+        <p className="text-sm text-subtle">{r.noComments}</p>
       )}
 
       {viewer ? (
         <form onSubmit={send} className="flex gap-2">
           <label htmlFor={`${id}-input`} className="sr-only">
-            Escribí un comentario
+            {r.writeComment}
           </label>
           <input
             id={`${id}-input`}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={MAX}
-            placeholder="Escribí un comentario…"
+            placeholder={r.commentPlaceholder}
             className={cn(inputClass, "flex-1")}
           />
           <button
             type="submit"
             disabled={pending || !text.trim()}
-            aria-label="Comentar"
+            aria-label={r.comment}
             className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-white hover:bg-[#8a2cec] disabled:opacity-50"
           >
             <Send className="size-4" aria-hidden />
@@ -131,10 +134,13 @@ export function ReplayComments({
         </form>
       ) : (
         <p className="text-sm text-muted">
-          <Link href="/entrar?next=/replays" className="font-semibold text-accent-text hover:underline">
-            Entrá con Twitch
+          <Link
+            href={`${href("/entrar")}?next=${href("/replays")}`}
+            className="font-semibold text-accent-text hover:underline"
+          >
+            {r.loginToComment}
           </Link>{" "}
-          para comentar.
+          {r.toComment}
         </p>
       )}
       {error ? (

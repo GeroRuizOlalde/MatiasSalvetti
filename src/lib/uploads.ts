@@ -51,14 +51,15 @@ export async function uploadVerificationScreenshot(
   userId: string,
   casinoSlug: string,
   file: File,
+  messages: { type: string; size: string; upload: string },
 ): Promise<{ path: string } | { error: string }> {
   const ext = SCREENSHOT_TYPES[file.type];
-  if (!ext) return { error: "La captura tiene que ser PNG, JPG o WebP." };
-  if (file.size > 5 * 1024 * 1024) return { error: "La captura no puede pesar más de 5 MB." };
+  if (!ext) return { error: messages.type };
+  if (file.size > 5 * 1024 * 1024) return { error: messages.size };
   const path = `${userId}/${casinoSlug}-${Date.now()}.${ext}`;
   const { error } = await supabase.storage
     .from(VERIFICATIONS_BUCKET)
     .upload(path, file, { contentType: file.type, upsert: false });
-  if (error) return { error: "No se pudo subir la captura." };
+  if (error) return { error: messages.upload };
   return { path };
 }

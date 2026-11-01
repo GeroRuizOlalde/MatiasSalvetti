@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BRAND_LABELS, type BrandName } from "@/components/ui/brand-icon";
 import { buttonClasses } from "@/components/ui/button";
 import { BRAND_ASSETS, hasBrandAsset } from "@/lib/brand";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { formatDateTime, formatInteger } from "@/lib/format";
 import type { LiveStatus } from "@/lib/live-status";
 import type { PublicSettings } from "@/lib/settings";
@@ -23,8 +25,19 @@ export type HeroExtras = {
   activeHunt: { title: string; status: string } | null;
 };
 
-export function Hero({ settings, live, extras }: { settings: PublicSettings; live: LiveStatus; extras: HeroExtras }) {
+export function Hero({
+  settings,
+  live,
+  extras,
+  lang,
+}: {
+  settings: PublicSettings;
+  live: LiveStatus;
+  extras: HeroExtras;
+  lang: Locale;
+}) {
   const primary = settings.primary_platform;
+  const { t, href } = getI18n(lang);
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden">
       <div
@@ -44,10 +57,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
           <p className="mt-3 flex animate-rise items-center font-display text-3xl tracking-wide uppercase [animation-delay:120ms]">
             <PartnerLogo />
           </p>
-          <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">
-            Slots, bonus hunts, batallas y CS2 en vivo. Todos los meses reparto premios con la Wager Race y los sorteos
-            de la comunidad.
-          </p>
+          <p className="mt-6 max-w-lg animate-rise text-lg text-muted [animation-delay:240ms]">{t.home.hero.tagline}</p>
 
           <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:360ms]">
             <a
@@ -57,9 +67,9 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
               className={buttonClasses({ size: "lg" })}
             >
               <Play className="size-5" aria-hidden />
-              Ver el stream en {PLATFORM_LABEL[primary]}
+              {t.home.hero.watchOn(PLATFORM_LABEL[primary])}
             </a>
-            <Link href="/wager-race" className={buttonClasses({ variant: "secondary", size: "lg" })}>
+            <Link href={href("/wager-race")} className={buttonClasses({ variant: "secondary", size: "lg" })}>
               <Trophy className="size-5 text-gold" aria-hidden />
               Wager Race{extras.wagerPrize ? ` · ${extras.wagerPrize}` : ""}
             </Link>
@@ -67,7 +77,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
 
           <ul
             className="mt-6 flex animate-rise flex-wrap gap-x-5 gap-y-2 text-sm [animation-delay:480ms]"
-            aria-label="Redes de Chupetti"
+            aria-label={t.home.hero.socials}
           >
             {TEXT_SOCIALS.filter((name) => name !== primary).map((name) => (
               <li key={name}>
@@ -84,7 +94,7 @@ export function Hero({ settings, live, extras }: { settings: PublicSettings; liv
           </ul>
         </div>
 
-        <Character live={live} settings={settings} activeHunt={extras.activeHunt} />
+        <Character live={live} settings={settings} activeHunt={extras.activeHunt} lang={lang} />
       </div>
     </section>
   );
@@ -94,11 +104,14 @@ function Character({
   live,
   settings,
   activeHunt,
+  lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  lang: Locale;
 }) {
+  const { t } = getI18n(lang);
   const personaje = BRAND_ASSETS.personaje;
 
   return (
@@ -120,7 +133,7 @@ function Character({
         {hasBrandAsset("personaje") ? (
           <Image
             src={personaje.src}
-            alt="Ilustración de Chupetti con bata violeta de bordes neón y fichas de casino en la mano"
+            alt={t.home.hero.characterAlt}
             width={personaje.width}
             height={personaje.height}
             priority
@@ -134,7 +147,7 @@ function Character({
         )}
       </div>
 
-      <LiveCard live={live} settings={settings} activeHunt={activeHunt} />
+      <LiveCard live={live} settings={settings} activeHunt={activeHunt} lang={lang} />
     </div>
   );
 }
@@ -143,11 +156,14 @@ function LiveCard({
   live,
   settings,
   activeHunt,
+  lang,
 }: {
   live: LiveStatus;
   settings: PublicSettings;
   activeHunt: HeroExtras["activeHunt"];
+  lang: Locale;
 }) {
+  const { t } = getI18n(lang);
   const href = settings.socials[live.platform ?? settings.primary_platform];
 
   if (live.live && live.platform) {
@@ -160,7 +176,7 @@ function LiveCard({
       >
         <span className="flex items-center gap-2 text-xs font-bold tracking-wide text-live uppercase">
           <span aria-hidden className="size-2 animate-live-pulse rounded-full bg-live" />
-          En vivo en {BRAND_LABELS[live.platform]}
+          {t.home.hero.liveOn(BRAND_LABELS[live.platform])}
         </span>
         {activeHunt ? (
           <span className="mt-1 line-clamp-2 block text-sm font-semibold">
@@ -170,19 +186,19 @@ function LiveCard({
           <span className="mt-1 line-clamp-2 block text-sm font-semibold">{live.title}</span>
         ) : null}
         {live.viewers !== null ? (
-          <span className="num mt-1 block text-xs text-muted">{formatInteger(live.viewers)} viendo</span>
+          <span className="num mt-1 block text-xs text-muted">{t.home.hero.watching(formatInteger(live.viewers))}</span>
         ) : null}
       </a>
     );
   }
 
   const nextAt = settings.next_stream.at;
-  const when = settings.next_stream.label || (nextAt ? formatDateTime(nextAt) : "[día y hora]");
+  const when = settings.next_stream.label || (nextAt ? formatDateTime(nextAt, lang) : t.live.dayAndTime);
   return (
     <div className="absolute bottom-6 -left-2 animate-float rounded-2xl border border-line-strong bg-bg/90 px-4 py-3 backdrop-blur [animation-delay:-3s] sm:-left-8">
-      <span className="block text-xs font-bold tracking-wide text-subtle uppercase">Offline</span>
+      <span className="block text-xs font-bold tracking-wide text-subtle uppercase">{t.home.hero.offline}</span>
       <span className="mt-0.5 block text-sm">
-        Próximo stream <span className="num text-accent-light">{when}</span>
+        {t.live.nextStream} <span className="num text-accent-light">{when}</span>
       </span>
     </div>
   );

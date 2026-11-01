@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { BRAND_ASSETS, hasBrandAsset } from "@/lib/brand";
 
-export function Logo({ className }: { className?: string }) {
+export function Logo({ className, lang = "es" }: { className?: string; lang?: Locale }) {
   const { src, width, height } = BRAND_ASSETS.logo;
+  const { t, href } = getI18n(lang);
   return (
-    <Link href="/" aria-label="Chupetti, ir al inicio" className={className}>
+    <Link href={href("/")} aria-label={t.layout.logoLabel} className={className}>
       {hasBrandAsset("logo") ? (
         <Image src={src} alt="" width={width} height={height} priority className="h-12 w-auto" />
       ) : (

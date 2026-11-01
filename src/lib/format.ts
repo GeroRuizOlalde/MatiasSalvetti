@@ -1,3 +1,4 @@
+import { INTL_LOCALE, type Locale } from "@/i18n/config";
 import type { Enums } from "@/types/database";
 
 export const TIME_ZONE = "America/Argentina/Buenos_Aires";
@@ -39,11 +40,12 @@ export function formatInteger(value: number) {
   return number(value, 0);
 }
 
-/** Fecha y hora en horario de Buenos Aires, ej. `lun 27/10 · 21:30`. */
-export function formatDateTime(date: Date | string) {
+/** Fecha y hora en horario de Buenos Aires, ej. `lun 27/10 · 21:30` (`Mon 10/27 · 21:30` en inglés). */
+export function formatDateTime(date: Date | string, lang: Locale = "es") {
   const d = typeof date === "string" ? new Date(date) : date;
-  const day = new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, weekday: "short" }).format(d).replace(".", "");
-  const dm = new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
+  const locale = INTL_LOCALE[lang];
+  const day = new Intl.DateTimeFormat(locale, { timeZone: TIME_ZONE, weekday: "short" }).format(d).replace(".", "");
+  const dm = new Intl.DateTimeFormat(locale, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
   const hm = new Intl.DateTimeFormat(LOCALE, {
     timeZone: TIME_ZONE,
     hour: "2-digit",
@@ -53,9 +55,9 @@ export function formatDateTime(date: Date | string) {
   return `${day} ${dm} · ${hm}`;
 }
 
-export function formatDate(date: Date | string) {
+export function formatDate(date: Date | string, lang: Locale = "es") {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat(LOCALE, {
+  return new Intl.DateTimeFormat(INTL_LOCALE[lang], {
     timeZone: TIME_ZONE,
     day: "numeric",
     month: "long",
@@ -104,10 +106,11 @@ export function formatMoneyShort(amount: number, currency: Enums<"currency_code"
   return `${text}${suffix} ${currency}`;
 }
 
-/** `28/10` en hora de Buenos Aires. */
-export function formatDayMonth(date: Date | string) {
+/** `28/10` en hora de Buenos Aires (`10/28` en inglés). */
+export function formatDayMonth(date: Date | string, lang: Locale = "es") {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
+  const locale = INTL_LOCALE[lang];
+  return new Intl.DateTimeFormat(locale, { timeZone: TIME_ZONE, day: "2-digit", month: "2-digit" }).format(d);
 }
 
 /** "sweet bonanza 1000" -> "Sweet Bonanza 1000": primera letra de cada palabra en mayúscula, el resto como vino. */

@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { Crown } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
@@ -9,11 +11,14 @@ export function BonusTable({
   bonuses,
   currency,
   bestIndex,
+  lang = "es",
 }: {
   bonuses: PublicHuntBonus[];
   currency: Enums<"currency_code">;
   bestIndex: number | null;
+  lang?: Locale;
 }) {
+  const { t } = getI18n(lang);
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
       <table className="w-full text-sm">
@@ -23,19 +28,19 @@ export function BonusTable({
               #
             </th>
             <th scope="col" className="px-2 py-3 font-semibold">
-              Slot
+              {t.common.slot}
             </th>
             <th scope="col" className="hidden px-2 py-3 font-semibold md:table-cell">
-              Call
+              {t.common.call}
             </th>
             <th scope="col" className="px-2 py-3 text-right font-semibold">
-              Apuesta
+              {t.common.bet}
             </th>
             <th scope="col" className="px-2 py-3 text-right font-semibold">
-              Pago
+              {t.common.payout}
             </th>
             <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Multi
+              {t.common.multi}
             </th>
           </tr>
         </thead>
@@ -48,7 +53,7 @@ export function BonusTable({
                 <td className="num px-4 py-3 text-subtle">{i + 1}</td>
                 <td className="max-w-48 px-2 py-3">
                   <p className="flex items-center gap-1.5 truncate font-semibold text-text">
-                    {best ? <Crown className="size-4 shrink-0 text-gold" aria-label="Mejor multi" /> : null}
+                    {best ? <Crown className="size-4 shrink-0 text-gold" aria-label={t.common.bestMulti} /> : null}
                     <span className="truncate">{bonus.slot_name}</span>
                   </p>
                   <p className="truncate text-xs text-subtle">

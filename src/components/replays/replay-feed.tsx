@@ -1,8 +1,10 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
+import { localePath } from "@/i18n/config";
 import { Clapperboard, Heart, Link2, MessageCircle } from "lucide-react";
 import { useState, useTransition } from "react";
-import { toggleReplayLike } from "@/app/(site)/replays/actions";
+import { toggleReplayLike } from "@/app/[lang]/(site)/replays/actions";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/cn";
@@ -15,13 +17,9 @@ import { ReplayViewer } from "./replay-viewer";
 /** Quién está mirando el feed: para marcar sus me gusta y dejarle comentar. */
 export type ReplayViewerUser = { id: string; isMod: boolean; likedIds: string[] };
 
-const SORTS = [
-  { value: "new", label: "Más nuevos" },
-  { value: "likes", label: "Más gustados" },
-  { value: "multi", label: "Mayor multi" },
-] as const;
+const SORTS = ["new", "likes", "multi"] as const;
 
-type Sort = (typeof SORTS)[number]["value"];
+type Sort = (typeof SORTS)[number];
 
 /** Los replays como publicaciones: montos, me gusta, comentarios y compartir. */
 type Providers = { name: string; domain: string }[];
@@ -37,18 +35,20 @@ export function ReplayFeed({
 }) {
   const [provider, setProvider] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("new");
+  const { t } = useI18n();
 
   if (!replays.length) {
     return (
-      <EmptyState icon={Clapperboard} title="Todavía no hay replays">
-        Compartí el primero: pegá el link del replay de tu mejor bono.
+      <EmptyState icon={Clapperboard} title={t.replays.emptyTitle}>
+        {t.replays.empty}
       </EmptyState>
     );
   }
 
-  const providerNames = [...new Set(replays.map((r) => r.provider?.name ?? "Otros"))].sort();
+  const others = t.replays.others;
+  const providerNames = [...new Set(replays.map((r) => r.provider?.name ?? others))].sort();
   const shown = replays
-    .filter((r) => !provider || (r.provider?.name ?? "Otros") === provider)
+    .filter((r) => !provider || (r.provider?.name ?? others) === provider)
     .sort((a, b) => {
       if (sort === "likes") return b.likes_count - a.likes_count || b.created_at.localeCompare(a.created_at);
       if (sort === "multi") return (b.multi ?? 0) - (a.multi ?? 0) || b.created_at.localeCompare(a.created_at);
@@ -65,14 +65,14 @@ export function ReplayFeed({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {providerNames.length > 1 ? (
-          <div role="group" aria-label="Proveedor" className="flex flex-wrap gap-2">
+          <div role="group" aria-label={t.replays.provider} className="flex flex-wrap gap-2">
             <button
               type="button"
               aria-pressed={!provider}
               onClick={() => setProvider(null)}
               className={chip(!provider)}
             >
-              Todos
+              {t.replays.all}
             </button>
             {providerNames.map((name) => (
               <button
@@ -88,15 +88,15 @@ export function ReplayFeed({
           </div>
         ) : null}
         <label className="ml-auto flex items-center gap-2 text-sm text-subtle">
-          Ordenar
+          {t.replays.sort}
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
             className="h-9 rounded-lg border border-line bg-surface-2 px-2 text-sm text-text"
           >
             {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+              <option key={s} value={s}>
+                {t.replays.sorts[s]}
               </option>
             ))}
           </select>
@@ -129,20 +129,20 @@ function ReplayPost({
   const [showComments, setShowComments] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { t, lang } = useI18n();
+  const r = t.replays;
 
   const name = replay.user?.name ?? "Viewer";
   const stats = [
-    replay.bet !== null ? { label: "Apuesta", value: formatMoney(replay.bet, replay.currency) } : null,
-    replay.bonus_cost !== null
-      ? { label: "Valor del bono", value: formatMoney(replay.bonus_cost, replay.currency) }
-      : null,
-    replay.payout !== null ? { label: "Pagó", value: formatMoney(replay.payout, replay.currency), gold: true } : null,
-    replay.multi !== null ? { label: "Multi", value: formatMulti(replay.multi), gold: true } : null,
+    replay.bet !== null ? { label: r.bet, value: formatMoney(replay.bet, replay.currency) } : null,
+    replay.bonus_cost !== null ? { label: r.bonusCost, value: formatMoney(replay.bonus_cost, replay.currency) } : null,
+    replay.payout !== null ? { label: r.paid, value: formatMoney(replay.payout, replay.currency), gold: true } : null,
+    replay.multi !== null ? { label: r.multi, value: formatMulti(replay.multi), gold: true } : null,
   ].filter((s) => s !== null);
 
   const like = () => {
     if (!viewer) {
-      setNotice("Entrá con Twitch para dar me gusta.");
+      setNotice(r.loginToLike);
       return;
     }
     // Se marca al instante y, si la base dice otra cosa, se corrige.
@@ -163,10 +163,10 @@ function ReplayPost({
   };
 
   const share = async () => {
-    const url = `${window.location.origin}/replays#replay-${replay.id}`;
+    const url = `${window.location.origin}${localePath(lang, "/replays")}#replay-${replay.id}`;
     try {
       await navigator.clipboard.writeText(url);
-      setNotice("¡Link copiado!");
+      setNotice(r.linkCopied);
     } catch {
       setNotice(url);
     }
@@ -181,8 +181,8 @@ function ReplayPost({
           <p className="truncate font-semibold">{name}</p>
           <p className="text-xs text-subtle">
             {replay.provider ? `${replay.provider.name} · ` : ""}
-            {formatDate(replay.created_at)}
-            {replay.edited_at ? " · editado" : ""}
+            {formatDate(replay.created_at, lang)}
+            {replay.edited_at ? ` · ${r.edited}` : ""}
           </p>
         </div>
         {viewer && (viewer.id === replay.user?.id || viewer.isMod) ? (
@@ -222,7 +222,7 @@ function ReplayPost({
           onClick={like}
           disabled={pending}
           aria-pressed={liked}
-          aria-label={liked ? "Quitar me gusta" : "Me gusta"}
+          aria-label={liked ? r.unlike : r.like}
           className={cn(
             "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors hover:bg-surface-2",
             liked ? "text-live" : "text-muted hover:text-text",
@@ -240,7 +240,7 @@ function ReplayPost({
         >
           <MessageCircle className="size-5" aria-hidden />
           <span className="num">{formatInteger(comments)}</span>
-          <span className="sr-only">comentarios</span>
+          <span className="sr-only">{r.comments}</span>
         </button>
         <button
           type="button"
@@ -248,8 +248,8 @@ function ReplayPost({
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-text"
         >
           <Link2 className="size-5" aria-hidden />
-          <span className="hidden sm:inline">Compartir</span>
-          <span className="sr-only sm:hidden">Compartir</span>
+          <span className="hidden sm:inline">{r.shareLink}</span>
+          <span className="sr-only sm:hidden">{r.shareLink}</span>
         </button>
         <p aria-live="polite" className="ml-auto truncate px-2 text-xs text-subtle">
           {notice}

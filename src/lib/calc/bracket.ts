@@ -35,6 +35,8 @@ export function groupRounds<T extends BracketMatch>(matches: T[]) {
   return Array.from({ length: total }, (_, i) => ({
     round: i + 1,
     name: roundName(i + 1, total),
+    /** Rondas que faltan para la final (0 = final), para nombrarla en otro idioma. */
+    fromEnd: total - (i + 1),
     matches: matches.filter((m) => m.round === i + 1).sort((a, b) => a.slot - b.slot),
   }));
 }

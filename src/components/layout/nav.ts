@@ -11,30 +11,34 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon };
-export type NavGroup = { title: string | null; items: NavItem[] };
+import type { Messages } from "@/i18n/messages";
+
+type NavKey = keyof Messages["nav"];
+export type NavItem = { href: string; label: NavKey; icon: LucideIcon };
+export type NavGroup = { title: NavKey | null; items: NavItem[] };
 
 /** Menú lateral de la web, agrupado como en Stake. */
 export const NAV_GROUPS: NavGroup[] = [
-  { title: null, items: [{ href: "/", label: "Inicio", icon: House }] },
+  // `label` y `title` son claves de los textos (`nav` en i18n/messages).
+  { title: null, items: [{ href: "/", label: "home", icon: House }] },
   {
-    title: "En vivo",
+    title: "live",
     items: [
-      { href: "/bonus-hunt", label: "Bonus Hunt", icon: Crosshair },
-      { href: "/bonus-buys", label: "Bonus Buy", icon: ShoppingCart },
-      { href: "/bonus-battle", label: "Bonus Battle", icon: Swords },
+      { href: "/bonus-hunt", label: "bonusHunt", icon: Crosshair },
+      { href: "/bonus-buys", label: "bonusBuy", icon: ShoppingCart },
+      { href: "/bonus-battle", label: "bonusBattle", icon: Swords },
     ],
   },
   {
-    title: "Comunidad",
+    title: "community",
     items: [
-      { href: "/wager-race", label: "Wager Race", icon: Trophy },
-      { href: "/sorteos", label: "Sorteos", icon: Gift },
-      { href: "/replays", label: "Replays", icon: Clapperboard },
-      { href: "/cuartel", label: "Cuartel", icon: Castle },
+      { href: "/wager-race", label: "wagerRace", icon: Trophy },
+      { href: "/sorteos", label: "giveaways", icon: Gift },
+      { href: "/replays", label: "replays", icon: Clapperboard },
+      { href: "/cuartel", label: "hq", icon: Castle },
     ],
   },
-  { title: "Info", items: [{ href: "/como-participar", label: "Cómo participar", icon: BookOpen }] },
+  { title: "info", items: [{ href: "/como-participar", label: "howTo", icon: BookOpen }] },
 ];
 
 export function isActivePath(pathname: string, href: string) {

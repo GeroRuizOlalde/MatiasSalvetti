@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { Crown } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatMoney, formatMulti } from "@/lib/format";
@@ -8,11 +10,14 @@ export function BuysTable({
   buys,
   currency,
   bestIndex,
+  lang = "es",
 }: {
   buys: PublicBuy[];
   currency: Enums<"currency_code">;
   bestIndex: number | null;
+  lang?: Locale;
 }) {
+  const c = getI18n(lang).t.common;
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
       <table className="w-full text-sm">
@@ -22,19 +27,19 @@ export function BuysTable({
               #
             </th>
             <th scope="col" className="px-2 py-3 font-semibold">
-              Slot
+              {c.slot}
             </th>
             <th scope="col" className="hidden px-2 py-3 text-right font-semibold sm:table-cell">
-              Apuesta
+              {c.bet}
             </th>
             <th scope="col" className="px-2 py-3 text-right font-semibold">
-              Costo
+              {c.cost}
             </th>
             <th scope="col" className="px-2 py-3 text-right font-semibold">
-              Pago
+              {c.payout}
             </th>
             <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Multi
+              {c.multi}
             </th>
           </tr>
         </thead>
@@ -48,7 +53,7 @@ export function BuysTable({
                 <td className="num px-4 py-3 text-subtle">{i + 1}</td>
                 <td className="max-w-48 px-2 py-3">
                   <p className="flex items-center gap-1.5 truncate font-semibold text-text">
-                    {best ? <Crown className="size-4 shrink-0 text-gold" aria-label="Mejor multi" /> : null}
+                    {best ? <Crown className="size-4 shrink-0 text-gold" aria-label={c.bestMulti} /> : null}
                     <span className="truncate">{buy.slot_name}</span>
                   </p>
                   <p className="truncate text-xs text-subtle">{buy.provider}</p>

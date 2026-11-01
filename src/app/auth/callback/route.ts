@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getTwitchUserById, isTwitchConfigured } from "@/lib/external/twitch";
+import { localePath, splitLocale } from "@/i18n/config";
 import { needsOnboarding, safeNext } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env.server";
 import { getLegalDocument } from "@/lib/legal";
@@ -10,7 +11,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const next = safeNext(searchParams.get("next"));
-  const fail = () => NextResponse.redirect(new URL("/entrar?error=oauth", request.url));
+  const lang = splitLocale(next).lang;
+  const fail = () => NextResponse.redirect(new URL(localePath(lang, "/entrar?error=oauth"), request.url));
 
   if (!code) return fail();
 
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
 
   const terms = await getLegalDocument("terms");
   const destination = needsOnboarding(profile, terms?.version ?? null)
-    ? `/bienvenida?next=${encodeURIComponent(next)}`
+    ? localePath(lang, `/bienvenida?next=${encodeURIComponent(next)}`)
     : next;
 
   return NextResponse.redirect(new URL(destination, request.url));

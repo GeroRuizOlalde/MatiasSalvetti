@@ -1,7 +1,17 @@
+import type { Locale } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
-import { HUNT_STATUS_LABEL, type HuntStatus } from "@/lib/hunt-status";
+import type { HuntStatus } from "@/lib/hunt-status";
 
-export function HuntStatusBadge({ status, className }: { status: HuntStatus; className?: string }) {
+export function HuntStatusBadge({
+  status,
+  className,
+  lang = "es",
+}: {
+  status: HuntStatus;
+  className?: string;
+  lang?: Locale;
+}) {
   return (
     <span
       className={cn(
@@ -13,7 +23,7 @@ export function HuntStatusBadge({ status, className }: { status: HuntStatus; cla
       )}
     >
       {status === "opening" ? <span aria-hidden className="size-1.5 animate-live-pulse rounded-full bg-live" /> : null}
-      {HUNT_STATUS_LABEL[status]}
+      {getI18n(lang).t.status.hunt[status]}
     </span>
   );
 }
