@@ -1187,6 +1187,48 @@ export type Database = {
           },
         ];
       };
+      slot_suggestions: {
+        Row: {
+          id: string;
+          name: string;
+          provider: string | null;
+          name_key: string;
+          times: number;
+          source: "hunt" | "buy" | "battle";
+          suggested_by: string | null;
+          status: "pending" | "added" | "dismissed";
+          slot_id: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          provider?: string | null;
+          name_key: string;
+          times?: number;
+          source: "hunt" | "buy" | "battle";
+          suggested_by?: string | null;
+          status?: "pending" | "added" | "dismissed";
+          slot_id?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["slot_suggestions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "slot_suggestions_suggested_by_fkey";
+            columns: ["suggested_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       replay_likes: {
         Row: { replay_id: string; user_id: string; created_at: string };
         Insert: { replay_id: string; user_id: string; created_at?: string };
@@ -1318,6 +1360,8 @@ export type Database = {
         };
         Returns: undefined;
       };
+      add_slot_suggestion: { Args: { p_id: string; p_name: string; p_provider?: string | null }; Returns: string };
+      dismiss_slot_suggestion: { Args: { p_id: string }; Returns: undefined };
       toggle_replay_like: { Args: { p_replay: string }; Returns: boolean };
       add_replay_comment: { Args: { p_replay: string; p_body: string }; Returns: string };
       review_replay: { Args: { p_id: string; p_approve: boolean; p_reason?: string | null }; Returns: undefined };
