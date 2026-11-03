@@ -4,7 +4,10 @@ import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
+import { BATTLES_TAG } from "@/lib/battles";
+import { BUYS_TAG } from "@/lib/buys";
 import { CASINOS_TAG } from "@/lib/casinos";
+import { HUNTS_TAG } from "@/lib/hunts";
 import { parseCsv } from "@/lib/csv";
 import { fetchSlotReportSlots, SlotReportError } from "@/lib/external/slot-report";
 import { createClient } from "@/lib/supabase/server";
@@ -199,4 +202,49 @@ export async function deleteCasino(_prev: ActionState, formData: FormData): Prom
   updateTag(CASINOS_TAG);
   refresh();
   return { ok: "Casino borrado." };
+}
+
+// -----------------------------------------------------------------------------
+// Slots sugeridos (los que los viewers callearon y no estaban en el catálogo)
+// -----------------------------------------------------------------------------
+
+const suggestionSchema = z.object({
+  id: z.uuid(),
+  name: z.string().trim().min(1, "Poné el nombre del slot.").max(120),
+  provider: z.string().trim().max(80).optional(),
+  decision: z.enum(["save", "add", "dismiss"]),
+});
+
+export async function reviewSlotSuggestion(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("mod");
+  const parsed = suggestionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
+  const { id, name, provider, decision } = parsed.data;
+
+  const supabase = await createClient();
+  if (decision === "dismiss") {
+    const { error } = await supabase.rpc("dismiss_slot_suggestion", { p_id: id });
+    if (error) return { error: "No se pudo descartar: puede que ya la hayan revisado." };
+    refresh();
+    return { ok: "Sugerencia descartada." };
+  }
+  if (decision === "save") {
+    const { data, error } = await supabase
+      .from("slot_suggestions")
+      .update({ name, provider: provider || null })
+      .eq("id", id)
+      .select("id");
+    if (error || !data?.length) return { error: "No se pudo guardar." };
+    refresh();
+    return { ok: "Guardado." };
+  }
+
+  const { error } = await supabase.rpc("add_slot_suggestion", { p_id: id, p_name: name, p_provider: provider || null });
+  if (error) return { error: "No se pudo agregar: puede que ya la hayan revisado." };
+  // Los calls y bonos con ese nombre quedaron vinculados al slot nuevo.
+  updateTag(HUNTS_TAG);
+  updateTag(BUYS_TAG);
+  updateTag(BATTLES_TAG);
+  refresh();
+  return { ok: `${name} agregado al catálogo.` };
 }
