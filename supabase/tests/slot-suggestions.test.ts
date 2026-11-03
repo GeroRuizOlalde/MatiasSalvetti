@@ -93,4 +93,28 @@ describe("slots sugeridos", () => {
     );
     expect(rows).toEqual([{ provider: "Nolimit City" }]);
   });
+
+  it("se puede agregar aunque el slot ya sea un bono de un hunt terminado", async () => {
+    const hunt = await openHunt();
+    await call(viewers[2], hunt, "Tombstone Begins");
+    const callRow = await db.query<{ id: string }>("select id from public.hunt_calls where hunt_id = $1", [hunt]);
+    const bonus = await as(db, mod, () =>
+      db.query<{ id: string }>("select public.accept_hunt_call($1, 100) as id", [callRow.rows[0].id]),
+    );
+    await as(db, mod, () => db.query("update public.hunt_bonuses set payout = 500 where id = $1", [bonus.rows[0].id]));
+    await as(db, mod, () => db.query("update public.hunts set status = 'finished' where id = $1", [hunt]));
+
+    const { id } = await suggestion("tombstone begins");
+    const added = await as(db, mod, () =>
+      db.query<{ slot: string }>("select public.add_slot_suggestion($1, 'Tombstone Begins', 'Nolimit City') as slot", [
+        id,
+      ]),
+    );
+    expect(added.rows[0].slot).toBeTruthy();
+    // El bono del hunt cerrado queda como estaba; el call sí se vincula.
+    const bonusRow = await db.query("select slot_id from public.hunt_bonuses where id = $1", [bonus.rows[0].id]);
+    expect(bonusRow.rows).toEqual([{ slot_id: null }]);
+    const linked = await db.query("select slot_id from public.hunt_calls where id = $1", [callRow.rows[0].id]);
+    expect(linked.rows).toEqual([{ slot_id: added.rows[0].slot }]);
+  });
 });
