@@ -240,7 +240,14 @@ export async function reviewSlotSuggestion(_prev: ActionState, formData: FormDat
   }
 
   const { error } = await supabase.rpc("add_slot_suggestion", { p_id: id, p_name: name, p_provider: provider || null });
-  if (error) return { error: "No se pudo agregar: puede que ya la hayan revisado." };
+  if (error) {
+    const reason = error.message.includes("not_found")
+      ? "ya la revisó otra persona. Recargá la página."
+      : error.message.includes("invalid_name")
+        ? "falta el nombre."
+        : `error de la base (${error.message}).`;
+    return { error: `No se pudo agregar: ${reason}` };
+  }
   // Los calls y bonos con ese nombre quedaron vinculados al slot nuevo.
   updateTag(HUNTS_TAG);
   updateTag(BUYS_TAG);
