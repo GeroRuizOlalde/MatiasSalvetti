@@ -7,6 +7,7 @@ import type { ActionState } from "@/lib/action-state";
 import { parseAmount, parseAmountList } from "@/lib/amounts";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { parseCsv } from "@/lib/csv";
+import { extractWagerRows } from "@/lib/wager-import";
 import { argentinaDateTime, friendlyError } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
 import { hasFile } from "@/lib/uploads";
@@ -101,7 +102,10 @@ export async function deleteRace(_prev: ActionState, formData: FormData): Promis
 
 export type ImportWagerState = ActionState & { unmatched?: string[] };
 
-/** CSV del casino: primera columna el ID de cuenta, segunda el wager del período. */
+/**
+ * Reporte del casino en CSV: el del panel de afiliados tal cual (usa «ID del cliente» e
+ * «Importe total de las apuestas») o uno simple con ID de cuenta y wager del período.
+ */
 export async function importWagers(_prev: ImportWagerState, formData: FormData): Promise<ImportWagerState> {
   await requirePanelProfile("admin");
   const raceId = z.uuid().safeParse(formData.get("race_id"));
@@ -110,17 +114,8 @@ export async function importWagers(_prev: ImportWagerState, formData: FormData):
   if (!hasFile(file)) return { error: "Elegí el archivo CSV del casino." };
   if (file.size > 5 * 1024 * 1024) return { error: "El archivo no puede pesar más de 5 MB." };
 
-  const rows = parseCsv(await file.text());
-  // Encabezado: la primera fila cuya segunda columna no es un monto ("Player ID, Wager").
-  if (rows.length && parseAmount(rows[0][1] ?? "") === null) rows.shift();
-
-  const parsed = rows
-    .map(([accountId = "", wager = ""]) => ({ account_id: accountId.trim(), wager: parseAmount(wager) }))
-    .filter(
-      (r): r is { account_id: string; wager: number } => Boolean(r.account_id) && r.wager !== null && r.wager >= 0,
-    );
+  const { rows: parsed, invalid, columns } = extractWagerRows(parseCsv(await file.text()));
   if (parsed.length === 0) return { error: "No encontramos filas con ID y wager en el archivo." };
-  const invalid = rows.length - parsed.length;
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("import_wagers", {
@@ -132,7 +127,13 @@ export async function importWagers(_prev: ImportWagerState, formData: FormData):
   const result = z.object({ matched: z.number(), unmatched: z.array(z.string()) }).parse(data);
   invalidate();
   return {
-    ok: `Actualizado el wager de ${result.matched} cuentas verificadas.${invalid ? ` ${invalid} filas no se pudieron leer.` : ""}`,
+    ok: [
+      `Actualizado el wager de ${result.matched} cuentas verificadas.`,
+      columns ? `Columnas usadas: «${columns.id}» y «${columns.wager}».` : "",
+      invalid ? `${invalid} filas no se pudieron leer.` : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
     unmatched: result.unmatched,
   };
 }
