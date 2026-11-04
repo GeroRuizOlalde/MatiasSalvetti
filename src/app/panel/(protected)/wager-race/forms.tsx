@@ -115,9 +115,10 @@ export function ImportWagersForm({ raceId }: { raceId: string }) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="race_id" value={raceId} />
       <p className="text-sm text-muted">
-        El reporte del casino en CSV: primera columna el <strong>ID de la cuenta</strong>, segunda el{" "}
-        <strong>wager del período</strong> (reemplaza el valor anterior). Solo cuentan las cuentas verificadas de este
-        casino.
+        Subí el CSV que exporta el panel de afiliados tal cual: se toman las columnas <strong>ID del cliente</strong> e{" "}
+        <strong>Importe total de las apuestas</strong> (también sirve un CSV simple con ID y wager). Bajá siempre el
+        acumulado desde el inicio de la carrera: reemplaza el valor anterior. Solo cuentan las cuentas verificadas de
+        este casino.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor={id} className="sr-only">
