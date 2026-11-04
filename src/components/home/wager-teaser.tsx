@@ -1,3 +1,4 @@
+import { openPrizeSpots, spotsToShow } from "@/lib/wager-spots";
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
 import { CountdownText } from "@/components/wager/countdown-text";
@@ -38,7 +39,7 @@ export function WagerTeaser({ race, top, lang }: { race: PublicRace | null; top:
             {active ? w.fullRanking : w.details}
           </Link>
         </div>
-        {active && top.length ? (
+        {active && (top.length || race.prizes.length) ? (
           <ol className="space-y-3" aria-label={w.podium}>
             {top.map((row) => (
               <li
@@ -56,6 +57,18 @@ export function WagerTeaser({ race, top, lang }: { race: PublicRace | null; top:
                   {row.prize !== null
                     ? formatMoneyShort(row.prize, race.currency)
                     : formatMoney(row.wager, race.currency)}
+                </span>
+              </li>
+            ))}
+            {openPrizeSpots(top.length, race.prizes, spotsToShow(race.prizes, 3, 10)).map((spot) => (
+              <li
+                key={`open-${spot.rank}`}
+                className="flex items-center gap-4 rounded-xl border border-dashed border-line bg-bg/40 px-4 py-3"
+              >
+                <span className="font-display text-2xl text-subtle">#{spot.rank}</span>
+                <span className="min-w-0 flex-1 truncate text-sm text-subtle italic">{t.wager.openSpot}</span>
+                <span className="num text-sm font-bold text-gold/70">
+                  {formatMoneyShort(spot.prize, race.currency)}
                 </span>
               </li>
             ))}

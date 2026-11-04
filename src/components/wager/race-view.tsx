@@ -58,8 +58,17 @@ export function RaceView({
               <p className="text-xs text-subtle">{w.updated(formatDateTime(race.wager_updated_at, lang))}</p>
             ) : null}
           </div>
-          {leaderboard.length ? (
-            <Leaderboard rows={leaderboard} currency={race.currency} highlightUserId={highlightUserId} lang={lang} />
+          {leaderboard.length || race.prizes.length ? (
+            <>
+              <Leaderboard
+                rows={leaderboard}
+                currency={race.currency}
+                highlightUserId={highlightUserId}
+                prizes={race.prizes}
+                lang={lang}
+              />
+              {leaderboard.length ? null : <p className="mt-3 text-sm text-muted">{w.noWager}</p>}
+            </>
           ) : (
             <EmptyState icon={Trophy} title={w.noWagerTitle}>
               {w.noWager}

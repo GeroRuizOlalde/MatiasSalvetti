@@ -5,6 +5,7 @@ import { Countdown } from "@/components/wager/countdown";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/format";
 import { getLeaderboard, getWagerOverview } from "@/lib/wager";
+import { openPrizeSpots, spotsToShow } from "@/lib/wager-spots";
 
 const MEDAL = ["text-gold", "text-[#c9d1dd]", "text-[#d08a4f]"];
 
@@ -21,7 +22,9 @@ export default function WagerOverlayPage({ searchParams }: PageProps<"/overlay/w
 async function WagerOverlay() {
   const { featured: race } = await getWagerOverview();
   if (!race) return <p className={cn(overlayPanel, "text-sm text-muted")}>No hay una Wager Race publicada.</p>;
-  const top = await getLeaderboard(race.id, 5);
+  // Tantos puestos como premios (mínimo 5, máximo 10).
+  const spots = spotsToShow(race.prizes, 5, 10);
+  const top = await getLeaderboard(race.id, spots);
 
   return (
     <div className={cn(overlayPanel, "w-[396px] space-y-3")}>
@@ -49,6 +52,17 @@ async function WagerOverlay() {
             )}
             <span className="min-w-0 flex-1 truncate font-semibold">{row.display_name}</span>
             <span className="num text-xs text-muted">{formatMoney(row.wager, race.currency)}</span>
+          </li>
+        ))}
+        {openPrizeSpots(top.length, race.prizes, spots).map((spot) => (
+          <li key={`open-${spot.rank}`} className="flex items-center gap-2 bg-white/5 px-2 py-1.5 text-sm text-subtle">
+            {spot.rank <= 3 ? (
+              <Medal className={cn("size-4 shrink-0 opacity-50", MEDAL[spot.rank - 1])} aria-hidden />
+            ) : (
+              <span className="num w-4 text-center text-xs">{spot.rank}</span>
+            )}
+            <span className="min-w-0 flex-1 truncate italic">Puesto libre</span>
+            <span className="num text-xs text-gold/80">{formatMoney(spot.prize, race.currency)}</span>
           </li>
         ))}
       </ol>

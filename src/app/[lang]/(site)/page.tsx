@@ -19,6 +19,7 @@ import { getLiveStatus } from "@/lib/live-status";
 import { getOfflineHighlight } from "@/lib/offline-highlight";
 import { getPublicSettings, type PublicSettings } from "@/lib/settings";
 import { getLeaderboard, getWagerOverview } from "@/lib/wager";
+import { spotsToShow } from "@/lib/wager-spots";
 import { getLatestVideos } from "@/lib/external/youtube";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
@@ -130,7 +131,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     getOfflineHighlight(),
   ]);
   const race = wager.featured && wager.featured.phase !== "ended" ? wager.featured : null;
-  const top = race ? await getLeaderboard(race.id, 3) : [];
+  // En la home, tantos puestos como premios (mínimo 3, máximo 10).
+  const top = race ? await getLeaderboard(race.id, spotsToShow(race.prizes, 3, 10)) : [];
   const raceTotal = race?.prizes.reduce((a, b) => a + b, 0) ?? 0;
   const activeHunt = hunts.find((h) => isHuntActive(h.status));
   const partnerCasino = casinos.find((c) => c.slug === settings.partner.casino_slug);
