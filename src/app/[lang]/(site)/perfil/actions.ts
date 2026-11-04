@@ -13,7 +13,9 @@ export type DeleteAccountState = { error?: string };
 export async function deleteAccount(_prev: DeleteAccountState, formData: FormData): Promise<DeleteAccountState> {
   const [t, lang] = await Promise.all([getActionMessages(), getRequestLocale()]);
   const m = t.actions.deleteAccount;
-  const parsed = z.object({ confirm: z.literal(m.word, { error: m.typeWord }) }).safeParse(Object.fromEntries(formData));
+  const parsed = z
+    .object({ confirm: z.literal(m.word, { error: m.typeWord }) })
+    .safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
   const supabase = await createClient();
