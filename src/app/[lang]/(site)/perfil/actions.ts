@@ -13,7 +13,9 @@ export type DeleteAccountState = { error?: string };
 export async function deleteAccount(_prev: DeleteAccountState, formData: FormData): Promise<DeleteAccountState> {
   const [t, lang] = await Promise.all([getActionMessages(), getRequestLocale()]);
   const m = t.actions.deleteAccount;
-  const parsed = z.object({ confirm: z.literal(m.word, { error: m.typeWord }) }).safeParse(Object.fromEntries(formData));
+  const parsed = z
+    .object({ confirm: z.literal(m.word, { error: m.typeWord }) })
+    .safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
   const supabase = await createClient();
@@ -26,7 +28,14 @@ export async function deleteAccount(_prev: DeleteAccountState, formData: FormDat
     return { error: m.admin };
   }
 
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch (configError) {
+    // Sin SUPABASE_SECRET_KEY en el servidor no se pueden borrar usuarios de Auth.
+    console.error("[borrar cuenta] falta configuración", configError);
+    return { error: m.failed };
+  }
   // Capturas de verificación: el storage no se borra en cascada con la base.
   const { data: files } = await admin.storage.from(VERIFICATIONS_BUCKET).list(userId, { limit: 1000 });
   if (files?.length) {
@@ -35,7 +44,10 @@ export async function deleteAccount(_prev: DeleteAccountState, formData: FormDat
 
   // Borra el usuario de Auth; el perfil y sus datos se borran en cascada.
   const { error } = await admin.auth.admin.deleteUser(userId);
-  if (error) return { error: m.failed };
+  if (error) {
+    console.error("[borrar cuenta] no se pudo borrar el usuario", error.message);
+    return { error: m.failed };
+  }
 
   await supabase.auth.signOut();
   redirect(`${localePath(lang, "/")}?cuenta=borrada`);
