@@ -1,3 +1,4 @@
+import { openPrizeSpots } from "@/lib/wager-spots";
 import type { Locale } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { Medal } from "lucide-react";
@@ -13,11 +14,14 @@ export function Leaderboard({
   rows,
   currency,
   highlightUserId,
+  prizes = [],
   lang = "es",
 }: {
   rows: LeaderboardRow[];
   currency: Enums<"currency_code">;
   highlightUserId?: string | null;
+  /** Premios de la carrera: los puestos con premio sin nadie se muestran como «Puesto libre». */
+  prizes?: number[];
   lang?: Locale;
 }) {
   const { t } = getI18n(lang);
@@ -67,6 +71,25 @@ export function Leaderboard({
               <td className="num px-2 py-3 text-right whitespace-nowrap">{formatMoney(row.wager, currency)}</td>
               <td className="num px-4 py-3 text-right font-semibold whitespace-nowrap text-gold">
                 {row.prize !== null ? formatMoney(row.prize, currency) : "—"}
+              </td>
+            </tr>
+          ))}
+          {openPrizeSpots(rows.length, prizes).map((spot) => (
+            <tr key={`open-${spot.rank}`} className="text-subtle">
+              <td className="num px-4 py-3">
+                {spot.rank <= 3 ? (
+                  <Medal
+                    className={cn("size-5 opacity-50", MEDAL[spot.rank - 1])}
+                    aria-label={t.wager.rank(spot.rank)}
+                  />
+                ) : (
+                  <span>{spot.rank}</span>
+                )}
+              </td>
+              <td className="px-2 py-3 italic">{t.wager.openSpot}</td>
+              <td className="num px-2 py-3 text-right">—</td>
+              <td className="num px-4 py-3 text-right font-semibold whitespace-nowrap text-gold/70">
+                {formatMoney(spot.prize, currency)}
               </td>
             </tr>
           ))}

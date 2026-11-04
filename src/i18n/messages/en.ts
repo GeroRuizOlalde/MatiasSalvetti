@@ -208,6 +208,7 @@ export const en: Messages = {
     wager: "Wager",
     prize: "Prize",
     rank: (n) => `Rank ${n}`,
+    openSpot: "Open spot",
   },
   casino: {
     code: "Code",

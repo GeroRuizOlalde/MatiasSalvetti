@@ -208,6 +208,7 @@ export const es = {
     wager: "Wager",
     prize: "Premio",
     rank: (n: number) => `Puesto ${n}`,
+    openSpot: "Puesto libre",
   },
   casino: {
     code: "Código",
