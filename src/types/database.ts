@@ -275,6 +275,7 @@ export type Database = {
           status: Database["public"]["Enums"]["call_status"];
           bonus_id: string | null;
           reviewed_by: string | null;
+          reject_reason: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at: string | null;
           created_at: string;
           updated_at: string;
@@ -288,6 +289,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["call_status"];
           bonus_id?: string | null;
           reviewed_by?: string | null;
+          reject_reason?: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -418,6 +420,7 @@ export type Database = {
           status: Database["public"]["Enums"]["call_status"];
           buy_id: string | null;
           reviewed_by: string | null;
+          reject_reason: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at: string | null;
           created_at: string;
           updated_at: string;
@@ -431,6 +434,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["call_status"];
           buy_id?: string | null;
           reviewed_by?: string | null;
+          reject_reason?: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -576,6 +580,7 @@ export type Database = {
           status: Database["public"]["Enums"]["call_status"];
           entry_id: string | null;
           reviewed_by: string | null;
+          reject_reason: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at: string | null;
           created_at: string;
           updated_at: string;
@@ -589,6 +594,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["call_status"];
           entry_id?: string | null;
           reviewed_by?: string | null;
+          reject_reason?: "not_triggered" | "already_called" | "unavailable" | null;
           reviewed_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -1376,13 +1382,13 @@ export type Database = {
       handle_shop_order: { Args: { p_order: string; p_deliver: boolean; p_note?: string | null }; Returns: undefined };
       hit_rate_limit: { Args: { p_action: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
       battle_taken_slots: { Args: { p_battle: string }; Returns: { slot_name: string }[] };
-      reject_battle_call: { Args: { p_call: string }; Returns: undefined };
+      reject_battle_call: { Args: { p_call: string; p_reason?: string }; Returns: undefined };
       submit_battle_call: {
         Args: { p_battle: string; p_slot?: string | null; p_slot_name?: string | null };
         Returns: string;
       };
       buy_taken_slots: { Args: { p_session: string }; Returns: { slot_name: string }[] };
-      reject_buy_call: { Args: { p_call: string }; Returns: undefined };
+      reject_buy_call: { Args: { p_call: string; p_reason?: string }; Returns: undefined };
       submit_buy_call: {
         Args: { p_session: string; p_slot?: string | null; p_slot_name?: string | null };
         Returns: string;
@@ -1398,7 +1404,7 @@ export type Database = {
       mask_account_id: { Args: { p_id: string }; Returns: string };
       open_buy_poll: { Args: { p_session: string; p_options: Json }; Returns: string };
       pick_battle_entry: { Args: { p_entry: string }; Returns: undefined };
-      reject_hunt_call: { Args: { p_call: string }; Returns: undefined };
+      reject_hunt_call: { Args: { p_call: string; p_reason?: string }; Returns: undefined };
       reset_battle: { Args: { p_battle: string }; Returns: undefined };
       review_casino_account: {
         Args: { p_id: string; p_approve: boolean; p_reason?: string | null };

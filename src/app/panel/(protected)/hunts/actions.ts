@@ -8,6 +8,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { HUNTS_TAG, huntTag } from "@/lib/hunts";
 import { checkbox, friendlyError, optionalAmount, optionalUuid, positiveAmount, resolveSlot } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
+import { CALL_REJECT_REASONS } from "@/lib/call-reject";
 
 const ERRORS: Record<string, string> = {
   hunt_finished: "El hunt está terminado. Pasalo a «Abriendo» para corregir algo.",
@@ -174,7 +175,7 @@ export async function deleteBonus(_prev: ActionState, formData: FormData): Promi
 const callSchema = z.object({
   id: z.uuid(),
   hunt_id: z.uuid(),
-  decision: z.enum(["accept", "reject"]),
+  decision: z.enum(["accept", ...CALL_REJECT_REASONS]),
   bet: z.string().optional(),
 });
 
@@ -185,8 +186,8 @@ export async function reviewCall(_prev: ActionState, formData: FormData): Promis
   const { id, hunt_id, decision } = parsed.data;
 
   const supabase = await createClient();
-  if (decision === "reject") {
-    const { error } = await supabase.rpc("reject_hunt_call", { p_call: id });
+  if (decision !== "accept") {
+    const { error } = await supabase.rpc("reject_hunt_call", { p_call: id, p_reason: decision });
     if (error) return { error: friendly(error.message) };
     refresh();
     return { ok: "Call rechazado." };

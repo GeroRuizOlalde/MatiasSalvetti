@@ -8,6 +8,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { BATTLES_TAG, battleTag } from "@/lib/battles";
 import { friendlyError, optionalAmount, optionalUuid, resolveSlot } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
+import { CALL_REJECT_REASONS } from "@/lib/call-reject";
 
 const ERRORS: Record<string, string> = {
   battle_started: "La battle ya arrancó: borrá el cuadro para cambiar los slots o la instancia.",
@@ -216,7 +217,7 @@ export async function saveMatch(_prev: ActionState, formData: FormData): Promise
 // Calls de viewers
 // -----------------------------------------------------------------------------
 
-const callSchema = z.object({ id: z.uuid(), battle_id: z.uuid(), decision: z.enum(["accept", "reject"]) });
+const callSchema = z.object({ id: z.uuid(), battle_id: z.uuid(), decision: z.enum(["accept", ...CALL_REJECT_REASONS]) });
 
 /** Acepta el call (el slot entra al cuadro a nombre del viewer) o lo rechaza. */
 export async function reviewBattleCall(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -229,7 +230,7 @@ export async function reviewBattleCall(_prev: ActionState, formData: FormData): 
   const { error } =
     decision === "accept"
       ? await supabase.rpc("accept_battle_call", { p_call: id })
-      : await supabase.rpc("reject_battle_call", { p_call: id });
+      : await supabase.rpc("reject_battle_call", { p_call: id, p_reason: decision });
   if (error) return { error: friendly(error.message) };
   invalidate(battle_id);
   return { ok: decision === "accept" ? "Call aceptado: el slot entró al cuadro." : "Call rechazado." };

@@ -3,34 +3,69 @@
 import { Trash2 } from "lucide-react";
 import { useActionState, useId, useState } from "react";
 import { SlotPicker } from "@/components/hunts/slot-picker";
-import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
+import {
+  Field,
+  FormMessage,
+  inputClass,
+  SubmitButton,
+} from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { formatMulti } from "@/lib/format";
 import { addBonus, deleteBonus, reviewCall, updateBonus } from "../actions";
 import { AmountInput } from "@/components/ui/amount-input";
-import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
+import {
+  confirmFromText,
+  useConfirmSubmit,
+} from "@/components/ui/confirm-dialog";
+import {
+  FINAL_REJECT_TEXT,
+  isFinalReject,
+  RejectCallButtons,
+} from "@/components/panel/reject-call-buttons";
 
 const moneyInput = cn(inputClass, "num");
 
-export function AddBonusForm({ huntId, defaultBet }: { huntId: string; defaultBet?: number }) {
+export function AddBonusForm({
+  huntId,
+  defaultBet,
+}: {
+  huntId: string;
+  defaultBet?: number;
+}) {
   // Remontar el picker después de cada alta lo deja vacío.
   const [round, setRound] = useState(0);
-  const [state, formAction] = useActionState<ActionState, FormData>(async (prev, data) => {
-    const result = await addBonus(prev, data);
-    if (result.ok) setRound((r) => r + 1);
-    return result;
-  }, INITIAL_ACTION_STATE);
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    async (prev, data) => {
+      const result = await addBonus(prev, data);
+      if (result.ok) setRound((r) => r + 1);
+      return result;
+    },
+    INITIAL_ACTION_STATE,
+  );
   const id = useId();
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-start">
+    <form
+      action={formAction}
+      className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-start"
+    >
       <input type="hidden" name="hunt_id" value={huntId} />
-      <Field id={`${id}-slot`} label="Slot" hint="Si no está en el catálogo, se agrega.">
+      <Field
+        id={`${id}-slot`}
+        label="Slot"
+        hint="Si no está en el catálogo, se agrega."
+      >
         <SlotPicker key={round} id={`${id}-slot`} required />
       </Field>
       <Field id={`${id}-bet`} label="Apuesta">
-        <AmountInput id={`${id}-bet`} name="bet" required defaultValue={defaultBet} className={moneyInput} />
+        <AmountInput
+          id={`${id}-bet`}
+          name="bet"
+          required
+          defaultValue={defaultBet}
+          className={moneyInput}
+        />
       </Field>
       <Field id={`${id}-payout`} label="Pago (si ya se abrió)">
         <AmountInput id={`${id}-payout`} name="payout" className={moneyInput} />
@@ -44,13 +79,30 @@ export function AddBonusForm({ huntId, defaultBet }: { huntId: string; defaultBe
 type Bonus = { id: string; bet: number; payout: number | null };
 
 /** Fila editable: apuesta y pago. Con el pago cargado, el bono queda abierto. */
-export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus: Bonus; locked: boolean }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(updateBonus, INITIAL_ACTION_STATE);
-  const [deleteState, deleteAction] = useActionState<ActionState, FormData>(deleteBonus, INITIAL_ACTION_STATE);
+export function BonusRowForm({
+  huntId,
+  bonus,
+  locked,
+}: {
+  huntId: string;
+  bonus: Bonus;
+  locked: boolean;
+}) {
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    updateBonus,
+    INITIAL_ACTION_STATE,
+  );
+  const [deleteState, deleteAction] = useActionState<ActionState, FormData>(
+    deleteBonus,
+    INITIAL_ACTION_STATE,
+  );
   const confirmDelete = useConfirmSubmit(confirmFromText("¿Borrar este bono?"));
-  const [payout, setPayout] = useState(bonus.payout === null ? "" : String(bonus.payout));
+  const [payout, setPayout] = useState(
+    bonus.payout === null ? "" : String(bonus.payout),
+  );
   const [bet, setBet] = useState(String(bonus.bet));
-  const preview = payout !== "" && Number(bet) > 0 ? Number(payout) / Number(bet) : null;
+  const preview =
+    payout !== "" && Number(bet) > 0 ? Number(payout) / Number(bet) : null;
   const id = useId();
   const message = deleteState.error ? deleteState : state;
 
@@ -83,7 +135,9 @@ export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus:
           onValueChange={setPayout}
           className={cn(moneyInput, "h-9 w-32")}
         />
-        <span className="num w-20 text-right text-sm text-gold">{preview !== null ? formatMulti(preview) : "—"}</span>
+        <span className="num w-20 text-right text-sm text-gold">
+          {preview !== null ? formatMulti(preview) : "—"}
+        </span>
         {locked ? null : (
           <SubmitButton variant="secondary" pendingLabel="…">
             Guardar
@@ -104,7 +158,9 @@ export function BonusRowForm({ huntId, bonus, locked }: { huntId: string; bonus:
           </button>
         </form>
       )}
-      {message.error ? <FormMessage state={{ error: message.error }} className="w-full" /> : null}
+      {message.error ? (
+        <FormMessage state={{ error: message.error }} className="w-full" />
+      ) : null}
     </div>
   );
 }
@@ -118,18 +174,23 @@ export function CallReviewForm({
   callId: string;
   defaultBet?: number;
 }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(reviewCall, INITIAL_ACTION_STATE);
-  // Rechazar es definitivo: se confirma. Aceptar va directo.
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    reviewCall,
+    INITIAL_ACTION_STATE,
+  );
+  // «No salió» es definitivo: se confirma. Aceptar y los otros motivos van directo.
   const confirmReject = useConfirmSubmit(
-    confirmFromText(
-      "¿Rechazar el call? El viewer no va a poder pedir otro slot. Usalo, por ejemplo, si el bono no salió.",
-    ),
-    (b) => b?.getAttribute("value") === "reject",
+    confirmFromText(FINAL_REJECT_TEXT),
+    isFinalReject,
   );
   const id = useId();
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2" onSubmit={confirmReject.onSubmit}>
+    <form
+      action={formAction}
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={confirmReject.onSubmit}
+    >
       {confirmReject.dialog}
       <input type="hidden" name="id" value={callId} />
       <input type="hidden" name="hunt_id" value={huntId} />
@@ -151,15 +212,7 @@ export function CallReviewForm({
       >
         Aceptar
       </button>
-      <button
-        type="submit"
-        name="decision"
-        value="reject"
-        formNoValidate
-        className="h-9 rounded-lg px-3 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-live"
-      >
-        Rechazar
-      </button>
+      <RejectCallButtons />
       <FormMessage state={state} className="w-full" />
     </form>
   );

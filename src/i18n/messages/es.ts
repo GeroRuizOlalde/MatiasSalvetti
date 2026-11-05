@@ -2,7 +2,8 @@
 
 export const es = {
   meta: {
-    description: "La web oficial de Chupetti: bonus hunts, bonus buys, bonus battles, Wager Race y sorteos en vivo.",
+    description:
+      "La web oficial de Chupetti: bonus hunts, bonus buys, bonus battles, Wager Race y sorteos en vivo.",
   },
   layout: {
     skipToContent: "Saltar al contenido",
@@ -39,7 +40,8 @@ export const es = {
     question: "¿Sos mayor de 18?",
     deniedTitle: "Volvé cuando tengas 18",
     text: "Esta web habla de casino online y apuestas. Para entrar tenés que ser mayor de 18 años.",
-    deniedText: "Esta web habla de casino online y es solo para mayores de edad.",
+    deniedText:
+      "Esta web habla de casino online y es solo para mayores de edad.",
     yes: "Sí, tengo 18 o más",
     no: "No",
   },
@@ -75,15 +77,26 @@ export const es = {
     empty: "No tenés notificaciones todavía.",
   },
   status: {
-    hunt: { draft: "Borrador", collecting: "Juntando bonos", opening: "Abriendo", finished: "Terminado" },
+    hunt: {
+      draft: "Borrador",
+      collecting: "Juntando bonos",
+      opening: "Abriendo",
+      finished: "Terminado",
+    },
     buys: { draft: "Borrador", live: "En vivo", finished: "Terminada" },
-    battle: { draft: "Borrador", open: "Calls abiertos", live: "En juego", finished: "Terminada" },
+    battle: {
+      draft: "Borrador",
+      open: "Calls abiertos",
+      live: "En juego",
+      finished: "Terminada",
+    },
   },
   home: {
     stats: {
       label: "Números del canal",
       years: "años en stream",
-      openHunts: (n: number): string => (n === 1 ? "bonus hunt abierto" : "bonus hunts abiertos"),
+      openHunts: (n: number): string =>
+        n === 1 ? "bonus hunt abierto" : "bonus hunts abiertos",
       bestMulti: "mejor multiplicador",
       monthlyPrizes: "en premios este mes",
     },
@@ -92,7 +105,8 @@ export const es = {
         "Slots, bonus hunts, batallas y CS2 en vivo. Todos los meses reparto premios con la Wager Race y los sorteos de la comunidad.",
       watchOn: (platform: string) => `Ver el stream en ${platform}`,
       socials: "Redes de Chupetti",
-      characterAlt: "Ilustración de Chupetti con bata violeta de bordes neón y fichas de casino en la mano",
+      characterAlt:
+        "Ilustración de Chupetti con bata violeta de bordes neón y fichas de casino en la mano",
       liveOn: (platform: string) => `En vivo en ${platform}`,
       watching: (n: string) => `${n} viendo`,
       offline: "Offline",
@@ -189,7 +203,9 @@ export const es = {
   },
   battle: {
     roundName: (fromEnd: number, round: number): string =>
-      ["Final", "Semifinal", "Cuartos", "Octavos", "16avos", "32avos"][fromEnd] ?? `Ronda ${round}`,
+      ["Final", "Semifinal", "Cuartos", "Octavos", "16avos", "32avos"][
+        fromEnd
+      ] ?? `Ronda ${round}`,
   },
   wager: {
     phase: { upcoming: "Próxima", running: "En curso", ended: "Terminada" },
@@ -198,7 +214,8 @@ export const es = {
     ranking: "Ranking",
     updated: (when: string) => `Actualizado ${when}`,
     noWagerTitle: "Todavía sin wager",
-    noWager: "El ranking se arma con los reportes del casino. Verificá tu cuenta para aparecer.",
+    noWager:
+      "El ranking se arma con los reportes del casino. Verificá tu cuenta para aparecer.",
     prizes: "Premios",
     place: (n: number) => `${n}.º puesto`,
     total: "Total",
@@ -222,7 +239,8 @@ export const es = {
     beforeYouJoin: "Antes de participar tenés que",
     confirmAge: "confirmar tu edad y aceptar las bases",
     banned: "Tu cuenta no puede participar.",
-    tooNew: "Tu cuenta de Twitch todavía no cumple la antigüedad mínima para participar.",
+    tooNew:
+      "Tu cuenta de Twitch todavía no cumple la antigüedad mínima para participar.",
   },
   legal: {
     noContentTitle: "Sin contenido",
@@ -246,9 +264,13 @@ export const es = {
     hunt: {
       calls_closed: "Los calls de este hunt ya están cerrados.",
       call_already_accepted: "Tu call ya está en el hunt.",
-      call_rejected: "Tu call ya fue rechazado: no podés pedir otro en este hunt.",
-      call_already_sent: "Ya mandaste tu call para este hunt. No se puede cambiar.",
-      slot_taken: "Esa máquina ya la pidió otro viewer (o ya está en el hunt). Elegí otra.",
+      call_rejected:
+        "Tu call ya fue rechazado: no podés pedir otro en este hunt.",
+      call_same_slot: "Esa máquina ya te la rechazaron. Elegí otra.",
+      call_already_sent:
+        "Ya mandaste tu call para este hunt. No se puede cambiar.",
+      slot_taken:
+        "Esa máquina ya la pidió otro viewer (o ya está en el hunt). Elegí otra.",
       invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
       guesses_closed: "Las apuestas del balance ya están cerradas.",
       invalid_amount: "Revisá el monto.",
@@ -263,16 +285,23 @@ export const es = {
     buys: {
       calls_closed: "Los calls de esta sesión están cerrados.",
       call_already_accepted: "Tu call ya está en la sesión.",
-      call_rejected: "Tu call ya fue rechazado: no podés pedir otro en esta sesión.",
-      call_already_sent: "Ya mandaste tu call para esta sesión. No se puede cambiar.",
-      slot_taken: "Esa máquina ya la pidió otro viewer (o ya se compró). Elegí otra.",
+      call_rejected:
+        "Tu call ya fue rechazado: no podés pedir otro en esta sesión.",
+      call_same_slot: "Esa máquina ya te la rechazaron. Elegí otra.",
+      call_already_sent:
+        "Ya mandaste tu call para esta sesión. No se puede cambiar.",
+      slot_taken:
+        "Esa máquina ya la pidió otro viewer (o ya se compró). Elegí otra.",
       invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
     } as Record<string, string>,
     battle: {
       calls_closed: "Los calls de esta battle están cerrados.",
       call_already_accepted: "Tu slot ya está en la battle.",
-      call_rejected: "Tu call ya fue rechazado: no podés pedir otro en esta battle.",
-      call_already_sent: "Ya mandaste tu call para esta battle. No se puede cambiar.",
+      call_rejected:
+        "Tu call ya fue rechazado: no podés pedir otro en esta battle.",
+      call_same_slot: "Esa máquina ya te la rechazaron. Elegí otra.",
+      call_already_sent:
+        "Ya mandaste tu call para esta battle. No se puede cambiar.",
       slot_taken: "Esa máquina ya la pidió otro viewer. Elegí otra.",
       battle_full: "El cuadro ya está completo.",
       invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
@@ -292,10 +321,12 @@ export const es = {
     giveaways: {
       giveaway_closed: "Este sorteo no está abierto.",
       level_too_low: "Todavía no tenés el nivel que pide este sorteo.",
-      casino_not_verified: "Para este sorteo necesitás una cuenta verificada en el casino.",
+      casino_not_verified:
+        "Para este sorteo necesitás una cuenta verificada en el casino.",
       already_entered: "Ya estás participando.",
       max_tickets_reached: "Ya pusiste el máximo de tickets.",
-      not_enough_tickets: "No tenés tickets suficientes. Conseguilos en la tienda del Cuartel.",
+      not_enough_tickets:
+        "No tenés tickets suficientes. Conseguilos en la tienda del Cuartel.",
     } as Record<string, string>,
     checkTickets: "Revisá la cantidad de tickets.",
     entered: "¡Listo! Ya estás participando.",
@@ -304,28 +335,33 @@ export const es = {
       adult: "Tenés que confirmar que sos mayor de 18.",
       accept: "Tenés que aceptar las bases y condiciones.",
       check: "Revisá el formulario.",
-      changed: "Las bases cambiaron mientras leías. Recargá la página y aceptá la versión nueva.",
+      changed:
+        "Las bases cambiaron mientras leías. Recargá la página y aceptá la versión nueva.",
       failed: "No pudimos guardar tu confirmación. Probá de nuevo.",
     },
     deleteAccount: {
       word: "BORRAR",
       typeWord: "Escribí BORRAR para confirmar.",
-      admin: "Una cuenta admin no se puede borrar desde acá. Pasale el rol a otra cuenta primero.",
+      admin:
+        "Una cuenta admin no se puede borrar desde acá. Pasale el rol a otra cuenta primero.",
       failed: "No pudimos borrar la cuenta. Probá de nuevo o escribinos.",
     },
     verification: {
       invalid_casino: "Elegí un casino de la lista.",
-      invalid_account_id: "El ID de cuenta tiene que tener entre 3 y 64 letras o números.",
+      invalid_account_id:
+        "El ID de cuenta tiene que tener entre 3 y 64 letras o números.",
       invalid_screenshot: "Subí la captura de nuevo.",
       already_verified: "Esa cuenta ya está verificada.",
-      account_taken: "Esa cuenta de casino ya está cargada por otro usuario. Si es tuya, escribinos.",
+      account_taken:
+        "Esa cuenta de casino ya está cargada por otro usuario. Si es tuya, escribinos.",
     } as Record<string, string>,
     pickCasino: "Elegí un casino.",
     screenshotRequired: "Subí una captura donde se vea tu ID de cuenta.",
     screenshotType: "La captura tiene que ser PNG, JPG o WebP.",
     screenshotSize: "La captura no puede pesar más de 5 MB.",
     screenshotUpload: "No se pudo subir la captura.",
-    verificationSent: "¡Listo! Un admin va a revisar tu cuenta. Te avisamos acá y en tu perfil.",
+    verificationSent:
+      "¡Listo! Un admin va a revisar tu cuenta. Te avisamos acá y en tu perfil.",
     replays: {
       invalid_url: "Pegá el link completo del replay (empieza con https://).",
       invalid_slot: "Elegí o escribí el slot.",
@@ -334,7 +370,8 @@ export const es = {
       invalid_note: "El comentario es muy largo.",
       invalid_comment: "Escribí un comentario (hasta 300 letras).",
       replay_duplicate: "Ese replay ya lo compartió alguien.",
-      too_many_pending: "Tenés 5 replays esperando revisión. Esperá a que el panel los revise.",
+      too_many_pending:
+        "Tenés 5 replays esperando revisión. Esperá a que el panel los revise.",
       not_found: "Ese replay ya no está publicado.",
       forbidden: "Solo podés editar tus replays.",
     } as Record<string, string>,
@@ -347,7 +384,8 @@ export const es = {
       payout: "Lo que pagó tiene que ser un número mayor o igual a 0.",
       multi: "El multi tiene que ser mayor a 0.",
       sent: "¡Listo! Tu replay se publica cuando lo revise el panel.",
-      backToReview: "Guardado. Vuelve a revisión: se publica cuando lo apruebe el panel.",
+      backToReview:
+        "Guardado. Vuelve a revisión: se publica cuando lo apruebe el panel.",
       saved: "Cambios guardados.",
       deleteFailed: "No se pudo borrar: puede que ya lo hayan revisado.",
       deleted: "Replay borrado.",
@@ -356,36 +394,47 @@ export const es = {
   },
   slotPicker: {
     placeholder: "Buscá el slot",
-    notInCatalog: (name: string) => `No está en el catálogo. Podés usar «${name}» igual.`,
+    notInCatalog: (name: string) =>
+      `No está en el catálogo. Podés usar «${name}» igual.`,
   },
   calls: {
     buyQuestion: "¿Qué slot querés que compre?",
     huntQuestion: "¿Qué slot querés que busque?",
     request: "Pedir",
     rule: (scope: string) =>
-      `Una máquina por ${scope}. El call no se puede cambiar y, si se rechaza, no podés pedir otro: elegí bien.`,
+      `Una máquina por ${scope}. El call no se puede cambiar y, si se rechaza porque el bono no salió, no podés pedir otro: elegí bien.`,
     taken: "Ya pedidas:",
     yourCall: "Tu call:",
+    rejectedRetry: {
+      already_called:
+        "Rechazado: esa máquina ya la pidió otro viewer. Podés pedir otra.",
+      unavailable:
+        "Rechazado: la máquina no está disponible. Podés pedir otra.",
+    },
     status: {
       hunt: {
         pending: "Pendiente de revisión",
         accepted: "¡Aceptado! Ya está en el hunt.",
-        rejected: "Rechazado: ya no podés pedir otro en este hunt.",
+        rejected:
+          "Rechazado: el bono no salió. Ya no podés pedir otro en este hunt.",
       },
       buys: {
         pending: "Pendiente de revisión",
         accepted: "¡Aceptado! Ya está en la sesión.",
-        rejected: "Rechazado: ya no podés pedir otro en esta sesión.",
+        rejected:
+          "Rechazado: el bono no salió. Ya no podés pedir otro en esta sesión.",
       },
       battle: {
         pending: "Pendiente de revisión",
         accepted: "¡Aceptado! Ya está en la battle.",
-        rejected: "Rechazado: ya no podés pedir otro en esta battle.",
+        rejected:
+          "Rechazado: el bono no salió. Ya no podés pedir otro en esta battle.",
       },
     },
   },
   hunt: {
-    metaDescription: "Seguí cada hunt en vivo: bonos, balance, calls y adiviná el balance.",
+    metaDescription:
+      "Seguí cada hunt en vivo: bonos, balance, calls y adiviná el balance.",
     detailDescription: (bonuses: string, casino: string | null) =>
       `${bonuses} bonos${casino ? ` en ${casino}` : ""}. Seguí la apertura en vivo y adiviná el balance.`,
     kicker: "juntamos y abrimos",
@@ -400,13 +449,15 @@ export const es = {
     noBonusesTitle: "Todavía sin bonos",
     noBonuses: "Los bonos aparecen acá a medida que caen en el stream.",
     gtb: "Adiviná el balance",
-    guessers: (n: number): string => (n === 1 ? "persona apostó" : "personas apostaron"),
+    guessers: (n: number): string =>
+      n === 1 ? "persona apostó" : "personas apostaron",
     gtbOpen: "Gana el que más se acerque al balance final.",
     gtbClosed: "Las apuestas están cerradas.",
     playedAt: "Se juega en",
     winner: "Ganador",
     noGuesses: "Nadie apostó en este hunt.",
-    loginHint: "Entrá con tu cuenta de Twitch para pedir un slot o adivinar el balance.",
+    loginHint:
+      "Entrá con tu cuenta de Twitch para pedir un slot o adivinar el balance.",
     scope: "hunt",
     yourGuess: "Tu apuesta:",
     changeGuess: "Cambiar mi apuesta",
@@ -415,7 +466,8 @@ export const es = {
     bet: "Apostar",
   },
   buys: {
-    metaDescription: "Todas las compras de bonus, sesión por sesión. Pedí cuál sigue.",
+    metaDescription:
+      "Todas las compras de bonus, sesión por sesión. Pedí cuál sigue.",
     detailDescription: (buys: string, casino: string | null) =>
       `${buys} compras${casino ? ` en ${casino}` : ""}. Mirá cuánto pagó cada una y pedí la próxima.`,
     kicker: "una atrás de otra",
@@ -430,11 +482,13 @@ export const es = {
     noBuysTitle: "Todavía sin compras",
     noBuys: "Las compras aparecen acá a medida que se hacen en el stream.",
     requestSlot: "Pedí tu slot",
-    loginHint: "Entrá con tu cuenta de Twitch para pedir el próximo slot que se compra.",
+    loginHint:
+      "Entrá con tu cuenta de Twitch para pedir el próximo slot que se compra.",
     scope: "sesión",
   },
   battles: {
-    metaDescription: "Slots cara a cara en eliminación directa. Calleá el tuyo y pasá de ronda.",
+    metaDescription:
+      "Slots cara a cara en eliminación directa. Calleá el tuyo y pasá de ronda.",
     detailDescription: (slots: string, casino: string | null) =>
       `${slots} slots cara a cara${casino ? ` en ${casino}` : ""}. Calleá tu slot y pasá de ronda.`,
     kicker: "cara a cara",
@@ -450,32 +504,41 @@ export const es = {
     calledBy: "Lo calleó",
     bracket: "Cuadro",
     noBracketTitle: "El cuadro se arma al arrancar",
-    noBracket: "Mientras tanto, calleá tu slot: cuando estén todos, arranca y en cada cruce pasa el que paga más.",
+    noBracket:
+      "Mientras tanto, calleá tu slot: cuando estén todos, arranca y en cada cruce pasa el que paga más.",
     slots: "Slots",
     spots: (taken: string, size: string) => `${taken} de ${size} lugares`,
     noEntries: "Todavía no entró ningún slot.",
     callSlot: "Calleá tu slot",
-    loginHint: "Entrá con tu cuenta de Twitch para callear el slot con el que entrás a la battle.",
+    loginHint:
+      "Entrá con tu cuenta de Twitch para callear el slot con el que entrás a la battle.",
     scope: "battle",
     full: "El cuadro ya está completo.",
   },
   wagerPage: {
-    metaDescription: "El ranking de wager con premios para la comunidad. Verificá tu cuenta de casino y competí.",
+    metaDescription:
+      "El ranking de wager con premios para la comunidad. Verificá tu cuenta de casino y competí.",
     kicker: "competí con la comunidad",
     intro:
       "Jugá en el casino de la carrera con tu cuenta verificada: el que más wager suma en el período se lleva el premio más grande.",
     emptyTitle: "La próxima carrera se anuncia pronto",
-    empty: "Mientras tanto, verificá tu cuenta de casino para estar listo cuando arranque.",
+    empty:
+      "Mientras tanto, verificá tu cuenta de casino para estar listo cuando arranque.",
     past: "Carreras anteriores",
     endedOn: (date: string) => `Terminó el ${date}`,
     verification: "Verificación",
-    loginHint: "Entrá con tu cuenta de Twitch para verificar tu cuenta de casino y aparecer en el ranking.",
+    loginHint:
+      "Entrá con tu cuenta de Twitch para verificar tu cuenta de casino y aparecer en el ranking.",
     yourAccount: "Tu cuenta",
     ordinal: (rank: number) => `${rank}.º`,
     youAre: "Vas",
     with: "con",
     ofWager: "de wager.",
-    status: { pending: "En revisión", approved: "Verificada", rejected: "Rechazada" },
+    status: {
+      pending: "En revisión",
+      approved: "Verificada",
+      rejected: "Rechazada",
+    },
     casino: "Casino",
     verifyHint: (casino: string | null) =>
       `Para aparecer en el ranking verificá tu cuenta ${casino ? `de ${casino}` : "de casino"} desde`,
@@ -483,13 +546,15 @@ export const es = {
   },
   legalPages: {
     terms: "Bases y condiciones",
-    termsDescription: "Bases y condiciones para participar en las dinámicas de la comunidad.",
+    termsDescription:
+      "Bases y condiciones para participar en las dinámicas de la comunidad.",
     privacy: "Política de privacidad",
     privacyDescription: "Qué datos guardamos y para qué.",
   },
   howTo: {
     title: "Cómo participar",
-    metaDescription: "Los pasos para sumarte a calls, apuestas de balance, sorteos y la Wager Race.",
+    metaDescription:
+      "Los pasos para sumarte a calls, apuestas de balance, sorteos y la Wager Race.",
     kicker: "arrancá acá",
     intro: "Cinco pasos y ya estás adentro.",
     step1Title: "Entrá con tu cuenta de Twitch",
@@ -528,15 +593,21 @@ export const es = {
     casinos: "Casinos",
   },
   replays: {
-    metaDescription: "Los mejores bonos de la comunidad: replays de slots compartidos por los viewers.",
+    metaDescription:
+      "Los mejores bonos de la comunidad: replays de slots compartidos por los viewers.",
     kicker: "de la comunidad",
     intro:
       "Los mejores bonos de los viewers. ¿Te pagó algo grande? Pegá el link del replay que te da el juego y, cuando lo apruebe el panel, aparece acá.",
     loginHint: "Entrá con tu cuenta de Twitch para compartir tus replays.",
     share: "Compartí tu replay",
     yours: "Tus replays",
-    status: { pending: "En revisión", approved: "Publicado", rejected: "No publicado" },
-    reason: (reason: string) => `Motivo: ${reason}. Si lo corregís, vuelve a revisión.`,
+    status: {
+      pending: "En revisión",
+      approved: "Publicado",
+      rejected: "No publicado",
+    },
+    reason: (reason: string) =>
+      `Motivo: ${reason}. Si lo corregís, vuelve a revisión.`,
     deleteConfirm: "¿Borrar este replay? Todavía no se revisó.",
     delete: "Borrar replay",
     deleteLabel: "Borrar",
@@ -592,10 +663,12 @@ export const es = {
       multi: "Multi",
       multiFormula: "(pago ÷ apuesta)",
       multiManual: "Multi (x)",
-      multiHint: "Si no sabés la apuesta o el pago, poné directo cuántas x pagó.",
+      multiHint:
+        "Si no sabés la apuesta o el pago, poné directo cuántas x pagó.",
       multiPlaceholder: "Ej.: 2.500",
       note: "Comentario (opcional)",
-      notePlaceholder: "Ej.: Entró con 3 scatters y pagó todo en el último giro.",
+      notePlaceholder:
+        "Ej.: Entró con 3 scatters y pagó todo en el último giro.",
     },
   },
   giveaways: {
@@ -622,7 +695,8 @@ export const es = {
     closesIn: "Cierra en",
     winners: "Ganadores",
     winner: "Ganador",
-    drawSoon: "El sorteo se hace en vivo. Pronto vas a ver acá a los ganadores.",
+    drawSoon:
+      "El sorteo se hace en vivo. Pronto vas a ver acá a los ganadores.",
     loginToJoin: "Entrá con Twitch para participar",
     beforeJoin: "Para participar tenés que",
     confirmAge: "confirmar tu edad y aceptar las bases",
@@ -641,7 +715,8 @@ export const es = {
     title: "Cuartel",
     metaDescription: "Tus puntos, nivel, misiones y la tienda.",
     kicker: "tu base",
-    intro: "Sumá XP y puntos participando en los streams, cumplí misiones y canjeá premios en la tienda.",
+    intro:
+      "Sumá XP y puntos participando en los streams, cumplí misiones y canjeá premios en la tienda.",
     blocked: [
       "Para reclamar misiones y canjear premios tenés que ",
       "confirmar tu edad y aceptar las bases",
@@ -662,13 +737,18 @@ export const es = {
     available: (n: string) => `${n} disponibles`,
     unlimited: "Sin límite de stock",
     redeeming: "Canjeando…",
-    redeemConfirm: (item: string, cost: string) => `¿Canjear «${item}» por ${cost} puntos?`,
+    redeemConfirm: (item: string, cost: string) =>
+      `¿Canjear «${item}» por ${cost} puntos?`,
     redeem: "Canjear",
     shopSoonTitle: "La tienda abre pronto",
     shopSoon: "Andá juntando puntos.",
     myOrders: "Mis canjes",
     pointsN: (n: string) => `${n} puntos`,
-    orderStatus: { pending: "Pendiente de entrega", delivered: "Entregado", cancelled: "Cancelado (puntos devueltos)" },
+    orderStatus: {
+      pending: "Pendiente de entrega",
+      delivered: "Entregado",
+      cancelled: "Cancelado (puntos devueltos)",
+    },
     history: "Historial",
     noHistory: "Todavía no sumaste puntos. Participá en el próximo stream.",
     howToEarn: "Cómo sumar",
@@ -676,7 +756,8 @@ export const es = {
     levelShort: (n: number) => `Nv ${n}`,
     level: (n: number) => `Nivel ${n}`,
     progress: "Progreso al siguiente nivel",
-    xpToNext: (into: string, next: string, level: number) => `${into} / ${next} XP para el nivel ${level}`,
+    xpToNext: (into: string, next: string, level: number) =>
+      `${into} / ${next} XP para el nivel ${level}`,
     points: "Puntos",
     tickets: "Tickets",
     secretWord: "Palabra secreta",
@@ -684,12 +765,30 @@ export const es = {
     open: "Abrir",
     claim: "Reclamar",
     rewards: {
-      hunt_call: ["Call aceptado", "Cuando aceptan tu slot en un Bonus Hunt, un Bonus Buy o una Bonus Battle."],
-      hunt_winner: ["Ganador Bonus Hunt", "El call que pagó el mejor multi del hunt."],
-      buy_winner: ["Ganador Bonus Buy", "El call que pagó el mejor multi de la sesión."],
-      gtb_participation: ["Adiviná el balance", "Por apostar en el GTB, al terminar el hunt."],
-      gtb_win: ["Ganar el GTB", "Extra para el que más se acercó al balance final."],
-      battle_champion: ["Campeón de la Battle", "Extra si el slot que calleaste gana la battle."],
+      hunt_call: [
+        "Call aceptado",
+        "Cuando aceptan tu slot en un Bonus Hunt, un Bonus Buy o una Bonus Battle.",
+      ],
+      hunt_winner: [
+        "Ganador Bonus Hunt",
+        "El call que pagó el mejor multi del hunt.",
+      ],
+      buy_winner: [
+        "Ganador Bonus Buy",
+        "El call que pagó el mejor multi de la sesión.",
+      ],
+      gtb_participation: [
+        "Adiviná el balance",
+        "Por apostar en el GTB, al terminar el hunt.",
+      ],
+      gtb_win: [
+        "Ganar el GTB",
+        "Extra para el que más se acercó al balance final.",
+      ],
+      battle_champion: [
+        "Campeón de la Battle",
+        "Extra si el slot que calleaste gana la battle.",
+      ],
     } as Record<string, [string, string]>,
     pointKinds: {
       buy_vote: "Votar en Buys",
@@ -709,9 +808,17 @@ export const es = {
     termsAccepted: "Bases aceptadas",
     version: (n: number) => `Versión ${n}`,
     pending: "Pendiente",
-    ageMissing: ["Todavía no confirmaste tu edad. ", "Completalo acá", " para poder participar."],
+    ageMissing: [
+      "Todavía no confirmaste tu edad. ",
+      "Completalo acá",
+      " para poder participar.",
+    ],
     accounts: "Cuentas de casino",
-    accountStatus: { pending: "En revisión", approved: "Verificada", rejected: "Rechazada" },
+    accountStatus: {
+      pending: "En revisión",
+      approved: "Verificada",
+      rejected: "Rechazada",
+    },
     noAccounts: "Todavía no cargaste ninguna.",
     verifyTitle: "Verificar una cuenta",
     verifyText:
@@ -720,12 +827,14 @@ export const es = {
     casino: "Casino",
     accountId: "ID de tu cuenta en el casino",
     accountIdHint: "Lo encontrás en tu perfil del casino.",
-    sampleAlt: "Ejemplo: el perfil del casino con el número de cuenta y el nivel marcados en un recuadro rojo",
+    sampleAlt:
+      "Ejemplo: el perfil del casino con el número de cuenta y el nivel marcados en un recuadro rojo",
     sampleTitle: "Ejemplo de captura:",
     sampleText:
       "entrá a tu perfil en el casino y sacale captura a la parte donde se ve tu número de cuenta (lo marcado en rojo). Ese número es el que va en «ID de tu cuenta».",
     screenshot: "Captura de pantalla",
-    screenshotHint: "Donde se vea el ID y tu usuario. PNG, JPG o WebP, hasta 5 MB. Solo la ve el admin.",
+    screenshotHint:
+      "Donde se vea el ID y tu usuario. PNG, JPG o WebP, hasta 5 MB. Solo la ve el admin.",
     sendVerification: "Enviar verificación",
     deleteAccount: "Borrar mi cuenta",
     deleteText:
@@ -736,7 +845,8 @@ export const es = {
   auth: {
     signInTitle: "Entrar",
     signInKicker: "entrá al casino",
-    signInText: "Usamos tu cuenta de Twitch para que participes en calls, apuestas, sorteos y el Cuartel.",
+    signInText:
+      "Usamos tu cuenta de Twitch para que participes en calls, apuestas, sorteos y el Cuartel.",
     adultsOnly: "Solo para mayores de 18 años.",
     errors: {
       oauth: "No pudimos completar el login con Twitch. Probá de nuevo.",
@@ -752,7 +862,14 @@ export const es = {
     allSet: "Ya está todo listo.",
     continue: "Seguir",
     confirmAdult: ["Confirmo que soy ", "mayor de 18 años", "."],
-    acceptTerms: ["Leí y acepto las ", "bases y condiciones", " (versión ", ") y la ", "política de privacidad", "."],
+    acceptTerms: [
+      "Leí y acepto las ",
+      "bases y condiciones",
+      " (versión ",
+      ") y la ",
+      "política de privacidad",
+      ".",
+    ],
     saving: "Guardando…",
     enter: "Entrar",
   },

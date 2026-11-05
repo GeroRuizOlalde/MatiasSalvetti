@@ -4,7 +4,8 @@ import type { Messages } from "./es";
 
 export const en: Messages = {
   meta: {
-    description: "Chupetti's official site: bonus hunts, bonus buys, bonus battles, Wager Race and live giveaways.",
+    description:
+      "Chupetti's official site: bonus hunts, bonus buys, bonus battles, Wager Race and live giveaways.",
   },
   layout: {
     skipToContent: "Skip to content",
@@ -46,7 +47,8 @@ export const en: Messages = {
     no: "No",
   },
   live: {
-    liveNow: (platform, viewers) => `Live now on ${platform}${viewers ? `, ${viewers} watching` : ""}`,
+    liveNow: (platform, viewers) =>
+      `Live now on ${platform}${viewers ? `, ${viewers} watching` : ""}`,
     live: "LIVE",
     on: (platform) => `on ${platform}`,
     giveaway: "Giveaway open",
@@ -76,9 +78,19 @@ export const en: Messages = {
     empty: "You don't have any notifications yet.",
   },
   status: {
-    hunt: { draft: "Draft", collecting: "Collecting bonuses", opening: "Opening", finished: "Finished" },
+    hunt: {
+      draft: "Draft",
+      collecting: "Collecting bonuses",
+      opening: "Opening",
+      finished: "Finished",
+    },
     buys: { draft: "Draft", live: "Live", finished: "Finished" },
-    battle: { draft: "Draft", open: "Calls open", live: "In play", finished: "Finished" },
+    battle: {
+      draft: "Draft",
+      open: "Calls open",
+      live: "In play",
+      finished: "Finished",
+    },
   },
   home: {
     stats: {
@@ -93,7 +105,8 @@ export const en: Messages = {
         "Slots, bonus hunts, battles and CS2 live. Every month I give away prizes with the Wager Race and community giveaways.",
       watchOn: (platform) => `Watch the stream on ${platform}`,
       socials: "Chupetti's socials",
-      characterAlt: "Illustration of Chupetti in a purple robe with neon edges holding casino chips",
+      characterAlt:
+        "Illustration of Chupetti in a purple robe with neon edges holding casino chips",
       liveOn: (platform) => `Live on ${platform}`,
       watching: (n) => `${n} watching`,
       offline: "Offline",
@@ -112,7 +125,8 @@ export const en: Messages = {
       see: (title) => `See ${title}`,
       huntDescription:
         "I collect bonuses during the stream and open them all together. Follow every slot, the break-even and guess the final balance.",
-      buysDescription: "Direct bonus buy sessions. How much each one cost, how much it paid and the running result.",
+      buysDescription:
+        "Direct bonus buy sessions. How much each one cost, how much it paid and the running result.",
       battleDescription:
         "Slots picked by chat, head to head. The one with the best multiplier goes through. Pick your slot.",
       running: "Live",
@@ -189,7 +203,14 @@ export const en: Messages = {
   },
   battle: {
     roundName: (fromEnd, round) =>
-      ["Final", "Semifinal", "Quarterfinals", "Round of 16", "Round of 32", "Round of 64"][fromEnd] ?? `Round ${round}`,
+      [
+        "Final",
+        "Semifinal",
+        "Quarterfinals",
+        "Round of 16",
+        "Round of 32",
+        "Round of 64",
+      ][fromEnd] ?? `Round ${round}`,
   },
   wager: {
     phase: { upcoming: "Upcoming", running: "Live", ended: "Finished" },
@@ -198,9 +219,11 @@ export const en: Messages = {
     ranking: "Leaderboard",
     updated: (when) => `Updated ${when}`,
     noWagerTitle: "No wager yet",
-    noWager: "The leaderboard is built from the casino reports. Verify your account to show up.",
+    noWager:
+      "The leaderboard is built from the casino reports. Verify your account to show up.",
     prizes: "Prizes",
-    place: (n) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"} place`,
+    place: (n) =>
+      `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"} place`,
     total: "Total",
     rules: "Rules",
     signUpAt: "Sign up at",
@@ -222,7 +245,8 @@ export const en: Messages = {
     beforeYouJoin: "Before joining you need to",
     confirmAge: "confirm your age and accept the terms",
     banned: "Your account can't participate.",
-    tooNew: "Your Twitch account doesn't meet the minimum age to participate yet.",
+    tooNew:
+      "Your Twitch account doesn't meet the minimum age to participate yet.",
   },
   legal: {
     noContentTitle: "No content",
@@ -246,9 +270,14 @@ export const en: Messages = {
     hunt: {
       calls_closed: "Calls for this hunt are already closed.",
       call_already_accepted: "Your call is already in the hunt.",
-      call_rejected: "Your call was rejected: you can't request another one in this hunt.",
-      call_already_sent: "You already sent your call for this hunt. It can't be changed.",
-      slot_taken: "Another viewer already requested that slot (or it's already in the hunt). Pick another one.",
+      call_rejected:
+        "Your call was rejected: you can't request another one in this hunt.",
+      call_same_slot:
+        "That slot was already rejected for you. Pick another one.",
+      call_already_sent:
+        "You already sent your call for this hunt. It can't be changed.",
+      slot_taken:
+        "Another viewer already requested that slot (or it's already in the hunt). Pick another one.",
       invalid_slot: "Pick a slot from the list or type its name.",
       guesses_closed: "Balance guesses are already closed.",
       invalid_amount: "Check the amount.",
@@ -263,17 +292,27 @@ export const en: Messages = {
     buys: {
       calls_closed: "Calls for this session are closed.",
       call_already_accepted: "Your call is already in the session.",
-      call_rejected: "Your call was rejected: you can't request another one in this session.",
-      call_already_sent: "You already sent your call for this session. It can't be changed.",
-      slot_taken: "Another viewer already requested that slot (or it was already bought). Pick another one.",
+      call_rejected:
+        "Your call was rejected: you can't request another one in this session.",
+      call_same_slot:
+        "That slot was already rejected for you. Pick another one.",
+      call_already_sent:
+        "You already sent your call for this session. It can't be changed.",
+      slot_taken:
+        "Another viewer already requested that slot (or it was already bought). Pick another one.",
       invalid_slot: "Pick a slot from the list or type its name.",
     },
     battle: {
       calls_closed: "Calls for this battle are closed.",
       call_already_accepted: "Your slot is already in the battle.",
-      call_rejected: "Your call was rejected: you can't request another one in this battle.",
-      call_already_sent: "You already sent your call for this battle. It can't be changed.",
-      slot_taken: "Another viewer already requested that slot. Pick another one.",
+      call_rejected:
+        "Your call was rejected: you can't request another one in this battle.",
+      call_same_slot:
+        "That slot was already rejected for you. Pick another one.",
+      call_already_sent:
+        "You already sent your call for this battle. It can't be changed.",
+      slot_taken:
+        "Another viewer already requested that slot. Pick another one.",
       battle_full: "The bracket is already full.",
       invalid_slot: "Pick a slot from the list or type its name.",
     },
@@ -295,7 +334,8 @@ export const en: Messages = {
       casino_not_verified: "This giveaway requires a verified casino account.",
       already_entered: "You're already in.",
       max_tickets_reached: "You already entered the maximum tickets.",
-      not_enough_tickets: "You don't have enough tickets. Get them in the HQ shop.",
+      not_enough_tickets:
+        "You don't have enough tickets. Get them in the HQ shop.",
     },
     checkTickets: "Check the number of tickets.",
     entered: "Done! You're in.",
@@ -304,13 +344,15 @@ export const en: Messages = {
       adult: "You must confirm you're 18 or older.",
       accept: "You must accept the terms and conditions.",
       check: "Check the form.",
-      changed: "The terms changed while you were reading. Reload the page and accept the new version.",
+      changed:
+        "The terms changed while you were reading. Reload the page and accept the new version.",
       failed: "We couldn't save your confirmation. Please try again.",
     },
     deleteAccount: {
       word: "DELETE",
       typeWord: "Type DELETE to confirm.",
-      admin: "An admin account can't be deleted from here. Give the role to another account first.",
+      admin:
+        "An admin account can't be deleted from here. Give the role to another account first.",
       failed: "We couldn't delete the account. Try again or contact us.",
     },
     verification: {
@@ -318,14 +360,16 @@ export const en: Messages = {
       invalid_account_id: "The account ID must be 3 to 64 letters or numbers.",
       invalid_screenshot: "Upload the screenshot again.",
       already_verified: "That account is already verified.",
-      account_taken: "That casino account is already linked to another user. If it's yours, contact us.",
+      account_taken:
+        "That casino account is already linked to another user. If it's yours, contact us.",
     },
     pickCasino: "Pick a casino.",
     screenshotRequired: "Upload a screenshot showing your account ID.",
     screenshotType: "The screenshot must be PNG, JPG or WebP.",
     screenshotSize: "The screenshot can't be larger than 5 MB.",
     screenshotUpload: "Couldn't upload the screenshot.",
-    verificationSent: "Done! An admin will review your account. We'll let you know here and on your profile.",
+    verificationSent:
+      "Done! An admin will review your account. We'll let you know here and on your profile.",
     replays: {
       invalid_url: "Paste the full replay link (it starts with https://).",
       invalid_slot: "Pick or type the slot.",
@@ -334,7 +378,8 @@ export const en: Messages = {
       invalid_note: "The comment is too long.",
       invalid_comment: "Write a comment (up to 300 characters).",
       replay_duplicate: "Someone already shared that replay.",
-      too_many_pending: "You have 5 replays waiting for review. Wait until the panel reviews them.",
+      too_many_pending:
+        "You have 5 replays waiting for review. Wait until the panel reviews them.",
       not_found: "That replay is no longer published.",
       forbidden: "You can only edit your own replays.",
     },
@@ -347,7 +392,8 @@ export const en: Messages = {
       payout: "The payout must be a number greater than or equal to 0.",
       multi: "The multi must be greater than 0.",
       sent: "Done! Your replay will be published once the panel reviews it.",
-      backToReview: "Saved. It goes back to review: it'll be published once the panel approves it.",
+      backToReview:
+        "Saved. It goes back to review: it'll be published once the panel approves it.",
       saved: "Changes saved.",
       deleteFailed: "Couldn't delete it: it may have been reviewed already.",
       deleted: "Replay deleted.",
@@ -356,36 +402,47 @@ export const en: Messages = {
   },
   slotPicker: {
     placeholder: "Search for the slot",
-    notInCatalog: (name) => `It's not in the catalog. You can still use «${name}».`,
+    notInCatalog: (name) =>
+      `It's not in the catalog. You can still use «${name}».`,
   },
   calls: {
     buyQuestion: "Which slot do you want me to buy?",
     huntQuestion: "Which slot do you want me to hunt?",
     request: "Request",
     rule: (scope) =>
-      `One slot per ${scope}. Your call can't be changed and, if it's rejected, you can't request another one: choose wisely.`,
+      `One slot per ${scope}. Your call can't be changed and, if it's rejected because the bonus didn't trigger, you can't request another one: choose wisely.`,
     taken: "Already requested:",
     yourCall: "Your call:",
+    rejectedRetry: {
+      already_called:
+        "Rejected: another viewer already requested that slot. You can request another one.",
+      unavailable:
+        "Rejected: that slot isn't available. You can request another one.",
+    },
     status: {
       hunt: {
         pending: "Pending review",
         accepted: "Accepted! It's in the hunt.",
-        rejected: "Rejected: you can't request another one in this hunt.",
+        rejected:
+          "Rejected: the bonus didn't trigger. You can't request another one in this hunt.",
       },
       buys: {
         pending: "Pending review",
         accepted: "Accepted! It's in the session.",
-        rejected: "Rejected: you can't request another one in this session.",
+        rejected:
+          "Rejected: the bonus didn't trigger. You can't request another one in this session.",
       },
       battle: {
         pending: "Pending review",
         accepted: "Accepted! It's in the battle.",
-        rejected: "Rejected: you can't request another one in this battle.",
+        rejected:
+          "Rejected: the bonus didn't trigger. You can't request another one in this battle.",
       },
     },
   },
   hunt: {
-    metaDescription: "Follow every hunt live: bonuses, balance, calls and guess the balance.",
+    metaDescription:
+      "Follow every hunt live: bonuses, balance, calls and guess the balance.",
     detailDescription: (bonuses, casino) =>
       `${bonuses} bonuses${casino ? ` at ${casino}` : ""}. Follow the opening live and guess the balance.`,
     kicker: "we collect and open",
@@ -406,7 +463,8 @@ export const en: Messages = {
     playedAt: "Played at",
     winner: "Winner",
     noGuesses: "Nobody guessed in this hunt.",
-    loginHint: "Sign in with your Twitch account to request a slot or guess the balance.",
+    loginHint:
+      "Sign in with your Twitch account to request a slot or guess the balance.",
     scope: "hunt",
     yourGuess: "Your guess:",
     changeGuess: "Change my guess",
@@ -415,11 +473,13 @@ export const en: Messages = {
     bet: "Guess",
   },
   buys: {
-    metaDescription: "Every bonus buy, session by session. Request the next one.",
+    metaDescription:
+      "Every bonus buy, session by session. Request the next one.",
     detailDescription: (buys, casino) =>
       `${buys} buys${casino ? ` at ${casino}` : ""}. See how much each one paid and request the next one.`,
     kicker: "one after another",
-    intro: "Live bonus buys, with what each one cost and paid. While the session is live, request which slot we buy.",
+    intro:
+      "Live bonus buys, with what each one cost and paid. While the session is live, request which slot we buy.",
     emptyTitle: "No sessions yet",
     empty: "The first one shows up here as soon as it starts on stream.",
     live: "Live",
@@ -429,11 +489,13 @@ export const en: Messages = {
     noBuysTitle: "No buys yet",
     noBuys: "Buys show up here as they happen on stream.",
     requestSlot: "Request your slot",
-    loginHint: "Sign in with your Twitch account to request the next slot to buy.",
+    loginHint:
+      "Sign in with your Twitch account to request the next slot to buy.",
     scope: "session",
   },
   battles: {
-    metaDescription: "Slots head to head in a knockout bracket. Call yours and go through.",
+    metaDescription:
+      "Slots head to head in a knockout bracket. Call yours and go through.",
     detailDescription: (slots, casino) =>
       `${slots} slots head to head${casino ? ` at ${casino}` : ""}. Call your slot and go through.`,
     kicker: "head to head",
@@ -449,45 +511,57 @@ export const en: Messages = {
     calledBy: "Called by",
     bracket: "Bracket",
     noBracketTitle: "The bracket is set when it starts",
-    noBracket: "Meanwhile, call your slot: once everyone's in, it starts and the one that pays more goes through.",
+    noBracket:
+      "Meanwhile, call your slot: once everyone's in, it starts and the one that pays more goes through.",
     slots: "Slots",
     spots: (taken, size) => `${taken} of ${size} spots`,
     noEntries: "No slots in yet.",
     callSlot: "Call your slot",
-    loginHint: "Sign in with your Twitch account to call the slot you enter the battle with.",
+    loginHint:
+      "Sign in with your Twitch account to call the slot you enter the battle with.",
     scope: "battle",
     full: "The bracket is already full.",
   },
   wagerPage: {
-    metaDescription: "The wager leaderboard with prizes for the community. Verify your casino account and compete.",
+    metaDescription:
+      "The wager leaderboard with prizes for the community. Verify your casino account and compete.",
     kicker: "compete with the community",
     intro:
       "Play at the race's casino with your verified account: whoever wagers the most during the period takes the biggest prize.",
     emptyTitle: "The next race will be announced soon",
-    empty: "Meanwhile, verify your casino account so you're ready when it starts.",
+    empty:
+      "Meanwhile, verify your casino account so you're ready when it starts.",
     past: "Previous races",
     endedOn: (date) => `Ended on ${date}`,
     verification: "Verification",
-    loginHint: "Sign in with your Twitch account to verify your casino account and show up on the leaderboard.",
+    loginHint:
+      "Sign in with your Twitch account to verify your casino account and show up on the leaderboard.",
     yourAccount: "Your account",
     ordinal: (rank) => `#${rank}`,
     youAre: "You're",
     with: "with",
     ofWager: "wagered.",
-    status: { pending: "In review", approved: "Verified", rejected: "Rejected" },
+    status: {
+      pending: "In review",
+      approved: "Verified",
+      rejected: "Rejected",
+    },
     casino: "Casino",
-    verifyHint: (casino) => `To show up on the leaderboard, verify your ${casino ?? "casino"} account from`,
+    verifyHint: (casino) =>
+      `To show up on the leaderboard, verify your ${casino ?? "casino"} account from`,
     yourProfile: "your profile",
   },
   legalPages: {
     terms: "Terms and conditions",
-    termsDescription: "Terms and conditions to take part in the community activities.",
+    termsDescription:
+      "Terms and conditions to take part in the community activities.",
     privacy: "Privacy policy",
     privacyDescription: "What data we store and why.",
   },
   howTo: {
     title: "How to join",
-    metaDescription: "The steps to join calls, balance guesses, giveaways and the Wager Race.",
+    metaDescription:
+      "The steps to join calls, balance guesses, giveaways and the Wager Race.",
     kicker: "start here",
     intro: "Five steps and you're in.",
     step1Title: "Sign in with your Twitch account",
@@ -497,7 +571,11 @@ export const en: Messages = {
       " at the top right. No need to create another account: we use your Twitch user for everything.",
     ],
     step2Title: "Confirm your age and accept the terms",
-    step2: ["The first time, we ask you to confirm you're 18 or older and to accept the ", "terms and conditions", "."],
+    step2: [
+      "The first time, we ask you to confirm you're 18 or older and to accept the ",
+      "terms and conditions",
+      ".",
+    ],
     step3Title: "Create your casino account with Chupetti's link",
     step3:
       "For the Wager Race and some giveaways you need to sign up from the links below and use the code. If you already had an account at that casino, it may not count.",
@@ -522,15 +600,21 @@ export const en: Messages = {
     casinos: "Casinos",
   },
   replays: {
-    metaDescription: "The community's best bonuses: slot replays shared by viewers.",
+    metaDescription:
+      "The community's best bonuses: slot replays shared by viewers.",
     kicker: "from the community",
     intro:
       "The viewers' best bonuses. Did something big pay out? Paste the replay link the game gives you and, once the panel approves it, it shows up here.",
     loginHint: "Sign in with your Twitch account to share your replays.",
     share: "Share your replay",
     yours: "Your replays",
-    status: { pending: "In review", approved: "Published", rejected: "Not published" },
-    reason: (reason) => `Reason: ${reason}. If you fix it, it goes back to review.`,
+    status: {
+      pending: "In review",
+      approved: "Published",
+      rejected: "Not published",
+    },
+    reason: (reason) =>
+      `Reason: ${reason}. If you fix it, it goes back to review.`,
     deleteConfirm: "Delete this replay? It hasn't been reviewed yet.",
     delete: "Delete replay",
     deleteLabel: "Delete",
@@ -586,10 +670,12 @@ export const en: Messages = {
       multi: "Multi",
       multiFormula: "(payout ÷ bet)",
       multiManual: "Multi (x)",
-      multiHint: "If you don't know the bet or payout, enter how many x it paid.",
+      multiHint:
+        "If you don't know the bet or payout, enter how many x it paid.",
       multiPlaceholder: "E.g. 2.500",
       note: "Comment (optional)",
-      notePlaceholder: "E.g. Landed 3 scatters and paid it all on the last spin.",
+      notePlaceholder:
+        "E.g. Landed 3 scatters and paid it all on the last spin.",
     },
   },
   giveaways: {
@@ -635,7 +721,8 @@ export const en: Messages = {
     title: "HQ",
     metaDescription: "Your points, level, missions and the shop.",
     kicker: "your base",
-    intro: "Earn XP and points by joining the streams, complete missions and redeem rewards in the shop.",
+    intro:
+      "Earn XP and points by joining the streams, complete missions and redeem rewards in the shop.",
     blocked: [
       "To claim missions and redeem rewards you need to ",
       "confirm your age and accept the terms",
@@ -662,7 +749,11 @@ export const en: Messages = {
     shopSoon: "Keep collecting points.",
     myOrders: "My redemptions",
     pointsN: (n) => `${n} points`,
-    orderStatus: { pending: "Pending delivery", delivered: "Delivered", cancelled: "Cancelled (points refunded)" },
+    orderStatus: {
+      pending: "Pending delivery",
+      delivered: "Delivered",
+      cancelled: "Cancelled (points refunded)",
+    },
     history: "History",
     noHistory: "You haven't earned points yet. Join the next stream.",
     howToEarn: "How to earn",
@@ -678,12 +769,30 @@ export const en: Messages = {
     open: "Open",
     claim: "Claim",
     rewards: {
-      hunt_call: ["Accepted call", "When your slot is accepted in a Bonus Hunt, Bonus Buy or Bonus Battle."],
-      hunt_winner: ["Bonus Hunt winner", "The call that paid the best multi of the hunt."],
-      buy_winner: ["Bonus Buy winner", "The call that paid the best multi of the session."],
-      gtb_participation: ["Guess the balance", "For guessing in the GTB, when the hunt ends."],
-      gtb_win: ["Win the GTB", "Extra for whoever got closest to the final balance."],
-      battle_champion: ["Battle champion", "Extra if the slot you called wins the battle."],
+      hunt_call: [
+        "Accepted call",
+        "When your slot is accepted in a Bonus Hunt, Bonus Buy or Bonus Battle.",
+      ],
+      hunt_winner: [
+        "Bonus Hunt winner",
+        "The call that paid the best multi of the hunt.",
+      ],
+      buy_winner: [
+        "Bonus Buy winner",
+        "The call that paid the best multi of the session.",
+      ],
+      gtb_participation: [
+        "Guess the balance",
+        "For guessing in the GTB, when the hunt ends.",
+      ],
+      gtb_win: [
+        "Win the GTB",
+        "Extra for whoever got closest to the final balance.",
+      ],
+      battle_champion: [
+        "Battle champion",
+        "Extra if the slot you called wins the battle.",
+      ],
     },
     pointKinds: {
       buy_vote: "Buy vote",
@@ -703,9 +812,17 @@ export const en: Messages = {
     termsAccepted: "Terms accepted",
     version: (n) => `Version ${n}`,
     pending: "Pending",
-    ageMissing: ["You haven't confirmed your age yet. ", "Complete it here", " to be able to participate."],
+    ageMissing: [
+      "You haven't confirmed your age yet. ",
+      "Complete it here",
+      " to be able to participate.",
+    ],
     accounts: "Casino accounts",
-    accountStatus: { pending: "In review", approved: "Verified", rejected: "Rejected" },
+    accountStatus: {
+      pending: "In review",
+      approved: "Verified",
+      rejected: "Rejected",
+    },
     noAccounts: "You haven't added any yet.",
     verifyTitle: "Verify an account",
     verifyText:
@@ -714,22 +831,26 @@ export const en: Messages = {
     casino: "Casino",
     accountId: "Your casino account ID",
     accountIdHint: "You'll find it in your casino profile.",
-    sampleAlt: "Example: the casino profile with the account number and level marked in a red box",
+    sampleAlt:
+      "Example: the casino profile with the account number and level marked in a red box",
     sampleTitle: "Screenshot example:",
     sampleText:
       "go to your casino profile and take a screenshot of the part that shows your account number (marked in red). That number goes in «Your casino account ID».",
     screenshot: "Screenshot",
-    screenshotHint: "Showing the ID and your username. PNG, JPG or WebP, up to 5 MB. Only the admin sees it.",
+    screenshotHint:
+      "Showing the ID and your username. PNG, JPG or WebP, up to 5 MB. Only the admin sees it.",
     sendVerification: "Send verification",
     deleteAccount: "Delete my account",
-    deleteText: "Your profile, points, verifications and participation history are deleted. This can't be undone.",
+    deleteText:
+      "Your profile, points, verifications and participation history are deleted. This can't be undone.",
     typeToConfirm: ["Type ", " to confirm"],
     deleting: "Deleting…",
   },
   auth: {
     signInTitle: "Sign in",
     signInKicker: "step into the casino",
-    signInText: "We use your Twitch account so you can join calls, guesses, giveaways and the HQ.",
+    signInText:
+      "We use your Twitch account so you can join calls, guesses, giveaways and the HQ.",
     adultsOnly: "For adults 18+ only.",
     errors: {
       oauth: "We couldn't complete the Twitch login. Please try again.",
@@ -741,7 +862,8 @@ export const en: Messages = {
     welcomeText:
       "Before joining we need you to confirm your age and accept the terms. You only do it once (and again only if the terms change).",
     noTermsTitle: "Terms not published",
-    noTerms: "The terms and conditions haven't been published yet. Come back in a bit.",
+    noTerms:
+      "The terms and conditions haven't been published yet. Come back in a bit.",
     allSet: "You're all set.",
     continue: "Continue",
     confirmAdult: ["I confirm I'm ", "18 or older", "."],
