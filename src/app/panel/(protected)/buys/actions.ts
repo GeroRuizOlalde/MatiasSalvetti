@@ -8,6 +8,7 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { BUYS_TAG, buySessionTag } from "@/lib/buys";
 import { checkbox, friendlyError, optionalAmount, optionalUuid, positiveAmount, resolveSlot } from "@/lib/panel-forms";
 import { createClient } from "@/lib/supabase/server";
+import { CALL_REJECT_REASONS } from "@/lib/call-reject";
 
 const ERRORS: Record<string, string> = {
   session_finished: "La sesión está terminada. Pasala a «En vivo» para corregir algo.",
@@ -162,7 +163,7 @@ export async function deleteBuy(_prev: ActionState, formData: FormData): Promise
 const callSchema = z.object({
   id: z.uuid(),
   session_id: z.uuid(),
-  decision: z.enum(["accept", "reject"]),
+  decision: z.enum(["accept", ...CALL_REJECT_REASONS]),
   bet: z.string().optional(),
   cost: z.string().optional(),
 });
@@ -175,8 +176,8 @@ export async function reviewBuyCall(_prev: ActionState, formData: FormData): Pro
   const { id, session_id, decision } = parsed.data;
 
   const supabase = await createClient();
-  if (decision === "reject") {
-    const { error } = await supabase.rpc("reject_buy_call", { p_call: id });
+  if (decision !== "accept") {
+    const { error } = await supabase.rpc("reject_buy_call", { p_call: id, p_reason: decision });
     if (error) return { error: friendly(error.message) };
     refresh();
     return { ok: "Call rechazado." };

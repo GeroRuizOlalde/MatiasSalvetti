@@ -4,7 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { BonusTable } from "@/components/hunts/bonus-table";
-import { ParticipationGate, ParticipationTitle, participationBox } from "@/components/participation-gate";
+import {
+  ParticipationGate,
+  ParticipationTitle,
+  participationBox,
+} from "@/components/participation-gate";
 import { HuntStatsGrid } from "@/components/hunts/hunt-stats";
 import { HuntStatusBadge } from "@/components/hunts/status-badge";
 import { Avatar } from "@/components/ui/avatar";
@@ -12,27 +16,40 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { RealtimeRefresh } from "@/components/ui/realtime-refresh";
 import { huntStats } from "@/lib/calc/hunt";
 import { cn } from "@/lib/cn";
-import { currencyPrefix, formatDate, formatInteger, formatMoney } from "@/lib/format";
+import {
+  currencyPrefix,
+  formatDate,
+  formatInteger,
+  formatMoney,
+} from "@/lib/format";
 import { getPublicHunt, type PublicHunt } from "@/lib/hunts";
 import { createClient } from "@/lib/supabase/server";
 import { CallForm } from "@/components/calls/call-form";
+import { retryReason } from "@/lib/call-reject";
 import type { Locale } from "@/i18n/config";
 import { getI18n, pageLocale } from "@/i18n/server";
 import { submitCall } from "../actions";
 import { GuessForm } from "./participation-forms";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/bonus-hunt/[id]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[lang]/bonus-hunt/[id]">): Promise<Metadata> {
   const [{ id }, lang] = await Promise.all([params, pageLocale(params)]);
   const { t } = getI18n(lang);
   const hunt = await getPublicHunt(id);
   if (!hunt) return { title: "Bonus Hunt" };
   return {
     title: `${hunt.title} · Bonus Hunt`,
-    description: t.hunt.detailDescription(formatInteger(hunt.bonuses.length), hunt.casino?.name ?? null),
+    description: t.hunt.detailDescription(
+      formatInteger(hunt.bonuses.length),
+      hunt.casino?.name ?? null,
+    ),
   };
 }
 
-export default function HuntPage({ params }: PageProps<"/[lang]/bonus-hunt/[id]">) {
+export default function HuntPage({
+  params,
+}: PageProps<"/[lang]/bonus-hunt/[id]">) {
   return (
     <Suspense fallback={<HuntSkeleton />}>
       <HuntDetail params={params} />
@@ -40,19 +57,28 @@ export default function HuntPage({ params }: PageProps<"/[lang]/bonus-hunt/[id]"
   );
 }
 
-async function HuntDetail({ params }: Pick<PageProps<"/[lang]/bonus-hunt/[id]">, "params">) {
+async function HuntDetail({
+  params,
+}: Pick<PageProps<"/[lang]/bonus-hunt/[id]">, "params">) {
   const [{ id }, lang] = await Promise.all([params, pageLocale(params)]);
   const { t, href } = getI18n(lang);
   const hunt = await getPublicHunt(id);
   if (!hunt) notFound();
 
-  const stats = huntStats(hunt.start_cost, hunt.bonusList, hunt.opening_balance);
+  const stats = huntStats(
+    hunt.start_cost,
+    hunt.bonusList,
+    hunt.opening_balance,
+  );
   const finished = hunt.status === "finished";
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-10 pb-16">
       {finished ? null : <RealtimeRefresh table="hunts" id={hunt.id} />}
-      <Link href={href("/bonus-hunt")} className="flex items-center gap-1 text-sm text-subtle hover:text-text">
+      <Link
+        href={href("/bonus-hunt")}
+        className="flex items-center gap-1 text-sm text-subtle hover:text-text"
+      >
         <ArrowLeft className="size-4" aria-hidden /> {t.hunt.all}
       </Link>
 
@@ -64,7 +90,9 @@ async function HuntDetail({ params }: Pick<PageProps<"/[lang]/bonus-hunt/[id]">,
             {hunt.casino ? ` · ${hunt.casino.name}` : ""}
           </span>
         </div>
-        <h1 className="mt-2 font-display text-5xl tracking-wide uppercase sm:text-6xl">{hunt.title}</h1>
+        <h1 className="mt-2 font-display text-5xl tracking-wide uppercase sm:text-6xl">
+          {hunt.title}
+        </h1>
       </header>
 
       <HuntStatsGrid
@@ -78,7 +106,10 @@ async function HuntDetail({ params }: Pick<PageProps<"/[lang]/bonus-hunt/[id]">,
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem]">
         <section aria-labelledby="bonus-title" className="min-w-0">
-          <h2 id="bonus-title" className="mb-3 font-display text-3xl tracking-wide uppercase">
+          <h2
+            id="bonus-title"
+            className="mb-3 font-display text-3xl tracking-wide uppercase"
+          >
             {t.hunt.bonuses}
           </h2>
           {hunt.bonusList.length ? (
@@ -98,18 +129,26 @@ async function HuntDetail({ params }: Pick<PageProps<"/[lang]/bonus-hunt/[id]">,
         <aside className="space-y-4">
           {finished ? <Results hunt={hunt} lang={lang} /> : null}
           {hunt.calls_open || hunt.guesses_open ? (
-            <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-surface" />}>
+            <Suspense
+              fallback={
+                <div className="h-40 animate-pulse rounded-2xl bg-surface" />
+              }
+            >
               <Participation hunt={hunt} lang={lang} />
             </Suspense>
           ) : null}
           {!finished ? (
             <div className="rounded-2xl border border-line bg-surface p-5 text-sm text-muted">
               <p className="flex items-center gap-2 font-semibold text-text">
-                <Target className="size-4 text-accent-text" aria-hidden /> {t.hunt.gtb}
+                <Target className="size-4 text-accent-text" aria-hidden />{" "}
+                {t.hunt.gtb}
               </p>
               <p className="mt-1">
-                <span className="num font-semibold text-gold">{formatInteger(hunt.guessCount)}</span>{" "}
-                {t.hunt.guessers(hunt.guessCount)}. {hunt.guesses_open ? t.hunt.gtbOpen : t.hunt.gtbClosed}
+                <span className="num font-semibold text-gold">
+                  {formatInteger(hunt.guessCount)}
+                </span>{" "}
+                {t.hunt.guessers(hunt.guessCount)}.{" "}
+                {hunt.guesses_open ? t.hunt.gtbOpen : t.hunt.gtbClosed}
               </p>
             </div>
           ) : null}
@@ -121,10 +160,15 @@ async function HuntDetail({ params }: Pick<PageProps<"/[lang]/bonus-hunt/[id]">,
               className="block rounded-2xl border border-line bg-surface p-5 text-sm hover:border-accent/60"
             >
               <span className="text-subtle">{t.hunt.playedAt}</span>{" "}
-              <span className="font-semibold text-accent-light">{hunt.casino.name}</span>
+              <span className="font-semibold text-accent-light">
+                {hunt.casino.name}
+              </span>
               {hunt.casino.code ? (
                 <span className="mt-1 block text-xs text-subtle">
-                  {t.common.code} <span className="num font-semibold text-gold">{hunt.casino.code}</span>
+                  {t.common.code}{" "}
+                  <span className="num font-semibold text-gold">
+                    {hunt.casino.code}
+                  </span>
                 </span>
               ) : null}
             </a>
@@ -139,13 +183,23 @@ function Results({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
   const { t } = getI18n(lang);
   const top = hunt.guesses.slice(0, 10);
   return (
-    <section aria-labelledby="results-title" className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
-      <h2 id="results-title" className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase">
+    <section
+      aria-labelledby="results-title"
+      className="rounded-2xl border border-gold/40 bg-gold/5 p-5"
+    >
+      <h2
+        id="results-title"
+        className="flex items-center gap-2 font-display text-2xl tracking-wide uppercase"
+      >
         <Trophy className="size-5 text-gold" aria-hidden /> {t.hunt.gtb}
       </h2>
       {hunt.winner ? (
         <div className="mt-3 flex items-center gap-3">
-          <Avatar url={hunt.winner.avatarUrl} name={hunt.winner.name} size={40} />
+          <Avatar
+            url={hunt.winner.avatarUrl}
+            name={hunt.winner.name}
+            size={40}
+          />
           <div>
             <p className="text-xs text-subtle">{t.hunt.winner}</p>
             <p className="font-semibold">{hunt.winner.name}</p>
@@ -159,11 +213,16 @@ function Results({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
           {top.map((guess, i) => (
             <li
               key={guess.userId}
-              className={cn("flex items-center gap-2 rounded-lg px-2 py-1", i === 0 && "bg-gold/10")}
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-2 py-1",
+                i === 0 && "bg-gold/10",
+              )}
             >
               <span className="num w-5 text-subtle">{i + 1}</span>
               <span className="min-w-0 flex-1 truncate">{guess.user.name}</span>
-              <span className="num text-muted">{formatMoney(guess.amount, hunt.currency)}</span>
+              <span className="num text-muted">
+                {formatMoney(guess.amount, hunt.currency)}
+              </span>
             </li>
           ))}
         </ol>
@@ -176,19 +235,30 @@ function Results({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
 function Participation({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
   const { t } = getI18n(lang);
   return (
-    <ParticipationGate next={`/bonus-hunt/${hunt.id}`} loginHint={t.hunt.loginHint} lang={lang}>
+    <ParticipationGate
+      next={`/bonus-hunt/${hunt.id}`}
+      loginHint={t.hunt.loginHint}
+      lang={lang}
+    >
       {async (profile) => {
         const supabase = await createClient();
-        const [{ data: call }, { data: guess }, { data: taken }] = await Promise.all([
-          supabase
-            .from("hunt_calls")
-            .select("slot_name, status")
-            .eq("hunt_id", hunt.id)
-            .eq("user_id", profile.id)
-            .maybeSingle(),
-          supabase.from("hunt_guesses").select("amount").eq("hunt_id", hunt.id).eq("user_id", profile.id).maybeSingle(),
-          supabase.rpc("hunt_taken_slots", { p_hunt: hunt.id }),
-        ]);
+        const [{ data: call }, { data: guess }, { data: taken }] =
+          await Promise.all([
+            supabase
+              .from("hunt_calls")
+              .select("slot_name, status, reject_reason")
+              .eq("hunt_id", hunt.id)
+              .eq("user_id", profile.id)
+              .maybeSingle(),
+            supabase
+              .from("hunt_guesses")
+              .select("amount")
+              .eq("hunt_id", hunt.id)
+              .eq("user_id", profile.id)
+              .maybeSingle(),
+            supabase.rpc("hunt_taken_slots", { p_hunt: hunt.id }),
+          ]);
+        const retry = retryReason(call);
 
         return (
           <section className={cn(participationBox, "space-y-5")}>
@@ -198,12 +268,22 @@ function Participation({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
                 {call ? (
                   <p className="text-sm">
                     {t.calls.yourCall} <strong>{call.slot_name}</strong>{" "}
-                    <span className={cn("text-xs", call.status === "accepted" ? "text-accent-text" : "text-subtle")}>
-                      · {t.calls.status.hunt[call.status]}
+                    <span
+                      className={cn(
+                        "text-xs",
+                        call.status === "accepted"
+                          ? "text-accent-text"
+                          : "text-subtle",
+                      )}
+                    >
+                      ·{" "}
+                      {retry
+                        ? t.calls.rejectedRetry[retry]
+                        : t.calls.status.hunt[call.status]}
                     </span>
                   </p>
                 ) : null}
-                {hunt.calls_open && !call ? (
+                {hunt.calls_open && (!call || retry) ? (
                   <CallForm
                     action={submitCall}
                     hidden={{ hunt_id: hunt.id }}
@@ -219,7 +299,9 @@ function Participation({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
                 {guess ? (
                   <p className="text-sm">
                     {t.hunt.yourGuess}{" "}
-                    <strong className="num text-gold">{formatMoney(guess.amount, hunt.currency)}</strong>
+                    <strong className="num text-gold">
+                      {formatMoney(guess.amount, hunt.currency)}
+                    </strong>
                   </p>
                 ) : null}
                 <GuessForm
@@ -238,7 +320,10 @@ function Participation({ hunt, lang }: { hunt: PublicHunt; lang: Locale }) {
 
 function HuntSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 pt-10 pb-16" aria-busy="true">
+    <div
+      className="mx-auto max-w-7xl space-y-6 px-4 pt-10 pb-16"
+      aria-busy="true"
+    >
       <div className="h-14 w-2/3 animate-pulse rounded bg-surface-2" />
       <div className="h-20 animate-pulse rounded-2xl bg-surface" />
       <div className="h-96 animate-pulse rounded-2xl bg-surface" />

@@ -3,16 +3,35 @@
 import { Trash2 } from "lucide-react";
 import { useActionState, useId, useState } from "react";
 import { SlotPicker } from "@/components/hunts/slot-picker";
-import { Field, FormMessage, inputClass, SubmitButton } from "@/components/panel/form";
+import {
+  Field,
+  FormMessage,
+  inputClass,
+  SubmitButton,
+} from "@/components/panel/form";
 import { SessionFields } from "@/components/panel/session-fields";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
 import { formatMoney, formatMulti } from "@/lib/format";
 import { BUY_STATUSES } from "@/lib/session-status";
 import type { Enums } from "@/types/database";
-import { addBuy, deleteBuy, reviewBuyCall, saveBuySession, updateBuy } from "./actions";
+import {
+  addBuy,
+  deleteBuy,
+  reviewBuyCall,
+  saveBuySession,
+  updateBuy,
+} from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
-import { confirmFromText, useConfirmSubmit } from "@/components/ui/confirm-dialog";
+import {
+  confirmFromText,
+  useConfirmSubmit,
+} from "@/components/ui/confirm-dialog";
+import {
+  FINAL_REJECT_TEXT,
+  isFinalReject,
+  RejectCallButtons,
+} from "@/components/panel/reject-call-buttons";
 
 const moneyInput = cn(inputClass, "num");
 
@@ -25,8 +44,17 @@ type Session = {
   calls_open: boolean;
 };
 
-export function BuySessionForm({ session, casinos }: { session?: Session; casinos: { id: string; name: string }[] }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(saveBuySession, INITIAL_ACTION_STATE);
+export function BuySessionForm({
+  session,
+  casinos,
+}: {
+  session?: Session;
+  casinos: { id: string; name: string }[];
+}) {
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    saveBuySession,
+    INITIAL_ACTION_STATE,
+  );
   const id = useId();
   const [status, setStatus] = useState(session?.status ?? "draft");
   const [callsOpen, setCallsOpen] = useState(session?.calls_open ?? true);
@@ -39,7 +67,10 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
   };
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <form
+      action={formAction}
+      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+    >
       {session ? <input type="hidden" name="id" value={session.id} /> : null}
       <SessionFields
         id={id}
@@ -60,7 +91,9 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
             id={`${id}-status`}
             name="status"
             value={status}
-            onChange={(e) => changeStatus(e.target.value as Enums<"buy_session_status">)}
+            onChange={(e) =>
+              changeStatus(e.target.value as Enums<"buy_session_status">)
+            }
             className={inputClass}
           >
             {BUY_STATUSES.map((s) => (
@@ -93,26 +126,54 @@ export function BuySessionForm({ session, casinos }: { session?: Session; casino
   );
 }
 
-export function AddBuyForm({ sessionId, defaults }: { sessionId: string; defaults?: { bet: number; cost: number } }) {
+export function AddBuyForm({
+  sessionId,
+  defaults,
+}: {
+  sessionId: string;
+  defaults?: { bet: number; cost: number };
+}) {
   const [round, setRound] = useState(0);
-  const [state, formAction] = useActionState<ActionState, FormData>(async (prev, data) => {
-    const result = await addBuy(prev, data);
-    if (result.ok) setRound((r) => r + 1);
-    return result;
-  }, INITIAL_ACTION_STATE);
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    async (prev, data) => {
+      const result = await addBuy(prev, data);
+      if (result.ok) setRound((r) => r + 1);
+      return result;
+    },
+    INITIAL_ACTION_STATE,
+  );
   const id = useId();
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-start">
+    <form
+      action={formAction}
+      className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-start"
+    >
       <input type="hidden" name="session_id" value={sessionId} />
-      <Field id={`${id}-slot`} label="Slot" hint="Si no está en el catálogo, se agrega.">
+      <Field
+        id={`${id}-slot`}
+        label="Slot"
+        hint="Si no está en el catálogo, se agrega."
+      >
         <SlotPicker key={round} id={`${id}-slot`} required />
       </Field>
       <Field id={`${id}-bet`} label="Apuesta">
-        <AmountInput id={`${id}-bet`} name="bet" required defaultValue={defaults?.bet} className={moneyInput} />
+        <AmountInput
+          id={`${id}-bet`}
+          name="bet"
+          required
+          defaultValue={defaults?.bet}
+          className={moneyInput}
+        />
       </Field>
       <Field id={`${id}-cost`} label="Costo de la compra">
-        <AmountInput id={`${id}-cost`} name="cost" required defaultValue={defaults?.cost} className={moneyInput} />
+        <AmountInput
+          id={`${id}-cost`}
+          name="cost"
+          required
+          defaultValue={defaults?.cost}
+          className={moneyInput}
+        />
       </Field>
       <Field id={`${id}-payout`} label="Pago (si ya se abrió)">
         <AmountInput id={`${id}-payout`} name="payout" className={moneyInput} />
@@ -136,17 +197,27 @@ export function BuyRowForm({
   currency: Enums<"currency_code">;
   locked: boolean;
 }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(updateBuy, INITIAL_ACTION_STATE);
-  const [deleteState, deleteAction] = useActionState<ActionState, FormData>(deleteBuy, INITIAL_ACTION_STATE);
-  const confirmDelete = useConfirmSubmit(confirmFromText("¿Borrar esta compra?"));
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    updateBuy,
+    INITIAL_ACTION_STATE,
+  );
+  const [deleteState, deleteAction] = useActionState<ActionState, FormData>(
+    deleteBuy,
+    INITIAL_ACTION_STATE,
+  );
+  const confirmDelete = useConfirmSubmit(
+    confirmFromText("¿Borrar esta compra?"),
+  );
   const [values, setValues] = useState({
     bet: String(buy.bet),
     cost: String(buy.cost),
     payout: buy.payout === null ? "" : String(buy.payout),
   });
   const bet = Number(values.bet);
-  const multi = values.payout !== "" && bet > 0 ? Number(values.payout) / bet : null;
-  const profit = values.payout !== "" ? Number(values.payout) - Number(values.cost) : null;
+  const multi =
+    values.payout !== "" && bet > 0 ? Number(values.payout) / bet : null;
+  const profit =
+    values.payout !== "" ? Number(values.payout) - Number(values.cost) : null;
   const id = useId();
   const message = deleteState.error ? deleteState : state;
 
@@ -176,11 +247,17 @@ export function BuyRowForm({
         {input("bet", "Apuesta", "w-24")}
         {input("cost", "Costo", "w-28")}
         {input("payout", "Pago", "w-28")}
-        <span className="num w-20 text-right text-sm text-gold">{multi !== null ? formatMulti(multi) : "—"}</span>
+        <span className="num w-20 text-right text-sm text-gold">
+          {multi !== null ? formatMulti(multi) : "—"}
+        </span>
         <span
           className={cn(
             "num w-28 text-right text-sm",
-            profit === null ? "text-subtle" : profit >= 0 ? "text-emerald-400" : "text-live",
+            profit === null
+              ? "text-subtle"
+              : profit >= 0
+                ? "text-emerald-400"
+                : "text-live",
           )}
         >
           {profit !== null ? formatMoney(profit, currency) : "—"}
@@ -205,7 +282,9 @@ export function BuyRowForm({
           </button>
         </form>
       )}
-      {message.error ? <FormMessage state={{ error: message.error }} className="w-full" /> : null}
+      {message.error ? (
+        <FormMessage state={{ error: message.error }} className="w-full" />
+      ) : null}
     </div>
   );
 }
@@ -220,18 +299,23 @@ export function BuyCallReviewForm({
   callId: string;
   defaults?: { bet: number; cost: number };
 }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(reviewBuyCall, INITIAL_ACTION_STATE);
-  // Rechazar es definitivo: se confirma. Aceptar va directo.
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    reviewBuyCall,
+    INITIAL_ACTION_STATE,
+  );
+  // «No salió» es definitivo: se confirma. Aceptar y los otros motivos van directo.
   const confirmReject = useConfirmSubmit(
-    confirmFromText(
-      "¿Rechazar el call? El viewer no va a poder pedir otro slot. Usalo, por ejemplo, si el bono no salió.",
-    ),
-    (b) => b?.getAttribute("value") === "reject",
+    confirmFromText(FINAL_REJECT_TEXT),
+    isFinalReject,
   );
   const id = useId();
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2" onSubmit={confirmReject.onSubmit}>
+    <form
+      action={formAction}
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={confirmReject.onSubmit}
+    >
       {confirmReject.dialog}
       <input type="hidden" name="id" value={callId} />
       <input type="hidden" name="session_id" value={sessionId} />
@@ -257,15 +341,7 @@ export function BuyCallReviewForm({
       >
         Aceptar
       </button>
-      <button
-        type="submit"
-        name="decision"
-        value="reject"
-        formNoValidate
-        className="h-9 rounded-lg px-3 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-live"
-      >
-        Rechazar
-      </button>
+      <RejectCallButtons />
       <FormMessage state={state} className="w-full" />
     </form>
   );
