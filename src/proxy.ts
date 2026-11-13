@@ -75,7 +75,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Todo menos lo interno de Next, los overlays, las imágenes de metadata y los archivos con extensión.
-    "/((?!_next|overlay|opengraph-image|twitter-image|.*\\.[a-zA-Z0-9]+$).*)",
+    // Todo menos lo interno de Next, los overlays, los webhooks, las imágenes de metadata y los archivos con extensión.
+    "/((?!_next|overlay|api/twitch/eventsub|api/cron|opengraph-image|twitter-image|.*\\.[a-zA-Z0-9]+$).*)",
   ],
 };

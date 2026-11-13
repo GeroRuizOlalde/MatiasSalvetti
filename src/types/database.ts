@@ -1317,6 +1317,104 @@ export type Database = {
           },
         ];
       };
+      twitch_channel_auth: {
+        Row: {
+          broadcaster_id: string;
+          login: string;
+          access_token: string;
+          refresh_token: string;
+          scopes: string[];
+          expires_at: string;
+          needs_reconnect: boolean;
+          connected_by: string | null;
+          connected_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          broadcaster_id: string;
+          login: string;
+          access_token: string;
+          refresh_token: string;
+          scopes?: string[];
+          expires_at: string;
+          needs_reconnect?: boolean;
+          connected_by?: string | null;
+          connected_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["twitch_channel_auth"]["Insert"]>;
+        Relationships: [];
+      };
+      twitch_subscriptions: {
+        Row: {
+          type: string;
+          version: string;
+          twitch_id: string | null;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          type: string;
+          version: string;
+          twitch_id?: string | null;
+          status: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["twitch_subscriptions"]["Insert"]>;
+        Relationships: [];
+      };
+      twitch_events: {
+        Row: {
+          id: string;
+          message_id: string;
+          type: string;
+          twitch_user_id: string | null;
+          payload: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          message_id: string;
+          type: string;
+          twitch_user_id?: string | null;
+          payload?: Json;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["twitch_events"]["Insert"]>;
+        Relationships: [];
+      };
+      twitch_streams: {
+        Row: {
+          id: string;
+          twitch_stream_id: string | null;
+          started_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          twitch_stream_id?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["twitch_streams"]["Insert"]>;
+        Relationships: [];
+      };
+      watch_minutes: {
+        Row: {
+          user_id: string;
+          stream_id: string;
+          minutes: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          stream_id: string;
+          minutes?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["watch_minutes"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: {
       public_profiles: {
@@ -1350,6 +1448,12 @@ export type Database = {
           points: number;
         }[];
       };
+      twitch_handle_event: { Args: { p_message_id: string; p_type: string; p_payload: Json }; Returns: boolean };
+      twitch_set_stream: {
+        Args: { p_live: boolean; p_stream_id?: string | null; p_started_at?: string | null };
+        Returns: string | null;
+      };
+      twitch_watch_tick: { Args: { p_twitch_users: string[] }; Returns: number };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       admin_adjust_points: {
         Args: { p_user: string; p_points: number; p_xp: number; p_note: string };

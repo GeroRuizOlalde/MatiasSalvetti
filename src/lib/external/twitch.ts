@@ -40,15 +40,27 @@ async function getAppAccessToken() {
   return appToken.value;
 }
 
-async function helix<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+/** Llamada a Helix con el app access token. Devuelve la respuesta cruda. */
+export async function twitchAppFetch(path: string, init: { method?: string; body?: unknown } = {}) {
   const creds = credentials();
   if (!creds) throw new Error("Twitch no está configurado.");
   const token = await getAppAccessToken();
   const res = await fetch(`https://api.twitch.tv/helix/${path}`, {
-    headers: { "Client-Id": creds.clientId, Authorization: `Bearer ${token}` },
+    method: init.method ?? "GET",
+    headers: {
+      "Client-Id": creds.clientId,
+      Authorization: `Bearer ${token}`,
+      ...(init.body === undefined ? {} : { "Content-Type": "application/json" }),
+    },
+    body: init.body === undefined ? undefined : JSON.stringify(init.body),
     cache: "no-store",
   });
   if (res.status === 401) appToken = null;
+  return res;
+}
+
+async function helix<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+  const res = await twitchAppFetch(path);
   if (!res.ok) throw new Error(`Twitch ${path}: HTTP ${res.status}`);
   return schema.parse(await res.json());
 }
@@ -65,6 +77,11 @@ const usersSchema = z.object({
   ),
 });
 
+/** Client ID y secret de la app, para los flujos OAuth del canal. */
+export function twitchCredentials() {
+  return credentials();
+}
+
 export async function getTwitchUserById(id: string) {
   const json = await helix(`users?id=${encodeURIComponent(id)}`, usersSchema);
   return json.data[0] ?? null;
@@ -73,6 +90,7 @@ export async function getTwitchUserById(id: string) {
 const streamsSchema = z.object({
   data: z.array(
     z.object({
+      id: z.string(),
       type: z.string(),
       title: z.string(),
       viewer_count: z.number(),
@@ -88,6 +106,7 @@ export async function getTwitchStream(login: string) {
   const stream = json.data.find((s) => s.type === "live");
   if (!stream) return null;
   return {
+    id: stream.id,
     title: stream.title,
     viewers: stream.viewer_count,
     startedAt: stream.started_at,
