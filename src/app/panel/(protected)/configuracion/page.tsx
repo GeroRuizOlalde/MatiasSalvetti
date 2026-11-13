@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { requirePanelProfile } from "@/lib/auth/session";
-import { headers } from "next/headers";
-import { publicEnv } from "@/lib/env";
+import { currentOrigin } from "@/lib/origin";
 import { OVERLAYS } from "@/lib/overlay";
 import { getPublicSettings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
@@ -79,14 +78,6 @@ export default async function ConfiguracionPage() {
  * Dirección desde la que se abrió el panel, para que las URLs de los overlays
  * sirvan aunque falte NEXT_PUBLIC_SITE_URL o se use otro dominio.
  */
-async function currentOrigin() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return publicEnv.NEXT_PUBLIC_SITE_URL;
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
 function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <section className="rounded-2xl border border-line bg-surface p-5">

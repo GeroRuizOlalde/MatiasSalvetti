@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Clapperboard,
   Coins,
+  Radio,
   Crosshair,
   ExternalLink,
   Gift,
@@ -48,6 +49,7 @@ const GROUPS: Group[] = [
       { href: "/panel/sorteos", label: "Sorteos", icon: Gift, adminOnly: true },
       { href: "/panel/replays", label: "Replays", icon: Clapperboard },
       { href: "/panel/puntos", label: "Puntos y misiones", icon: Coins, adminOnly: true },
+      { href: "/panel/twitch", label: "Twitch", icon: Radio, adminOnly: true },
     ],
   },
   {
