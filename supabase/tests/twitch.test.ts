@@ -95,8 +95,28 @@ describe("eventos de Twitch", () => {
     await event("channel.cheer", { user_id: "555001", bits: 300 });
     const late = await createTwitchUser(db, "tarde_twitch");
     expect(await points(late)).toBe(0);
-    await db.query("update public.profiles set twitch_id = '555001' where id = $1", [late.id]);
+    // Cambia de cuenta de Twitch: la identidad nueva trae el ID que ya tenía eventos.
+    await db.query("update auth.identities set provider_id = '555001' where user_id = $1", [late.id]);
     expect(await points(late)).toBe(200 + 1500);
+  });
+});
+
+describe("identidad de Twitch", () => {
+  it("editar la metadata no cambia el ID de Twitch ni cobra eventos ajenos", async () => {
+    await event("channel.follow", { user_id: "777001" });
+    await event("channel.cheer", { user_id: "777001", bits: 5000 });
+    const thief = await createTwitchUser(db, "ladron_twitch");
+    const real = await twitchIdOf(thief);
+
+    // Lo que hace updateUser({ data: { provider_id } }) desde el navegador.
+    await db.query(
+      'update auth.users set raw_user_meta_data = raw_user_meta_data || \'{"provider_id": "777001", "sub": "777001"}\'::jsonb where id = $1',
+      [thief.id],
+    );
+    expect(await twitchIdOf(thief)).toBe(real);
+    expect(await points(thief)).toBe(0);
+    await event("channel.cheer", { user_id: "777001", bits: 100 });
+    expect(await points(thief)).toBe(0);
   });
 });
 

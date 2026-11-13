@@ -21,6 +21,15 @@ const SUPABASE_STUBS = `
     created_at timestamptz not null default now()
   );
 
+  create table auth.identities (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references auth.users (id) on delete cascade,
+    provider text not null,
+    provider_id text not null,
+    identity_data jsonb not null default '{}'::jsonb,
+    unique (provider_id, provider)
+  );
+
   create function auth.uid() returns uuid language sql stable as $$
     select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
   $$;
@@ -102,6 +111,11 @@ export async function createTwitchUser(db: TestDb, login: string, options: { fre
     id,
     `${login}@example.test`,
     JSON.stringify(meta),
+  ]);
+  // Supabase Auth crea la identidad de Twitch al entrar: de ahí sale el ID verificado.
+  await db.query("insert into auth.identities (user_id, provider, provider_id) values ($1, 'twitch', $2)", [
+    id,
+    meta.provider_id,
   ]);
   if (!options.fresh) {
     await db.query("update public.profiles set twitch_created_at = now() - interval '2 years' where id = $1", [id]);
