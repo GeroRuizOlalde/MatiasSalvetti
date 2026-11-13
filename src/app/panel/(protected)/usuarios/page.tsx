@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePanelProfile } from "@/lib/auth/session";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatInteger } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { UserRowActions } from "./user-row-actions";
 
@@ -20,7 +20,9 @@ export default async function UsuariosPage({ searchParams }: PageProps<"/panel/u
   const supabase = await createClient();
   let query = supabase
     .from("profiles")
-    .select("id, twitch_login, display_name, avatar_url, role, banned_at, ban_reason, created_at")
+    .select(
+      "id, twitch_login, display_name, avatar_url, role, banned_at, ban_reason, created_at, points, level, points_blocked_at",
+    )
     .order("role", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
@@ -63,13 +65,24 @@ export default async function UsuariosPage({ searchParams }: PageProps<"/panel/u
         </EmptyState>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-line">
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[920px] text-left text-sm">
             <thead className="bg-surface-2 text-xs text-subtle">
               <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">Usuario</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Alta</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Estado</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Acciones</th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  Usuario
+                </th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  Alta
+                </th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  Puntos
+                </th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  Estado
+                </th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -88,6 +101,11 @@ export default async function UsuariosPage({ searchParams }: PageProps<"/panel/u
                     </td>
                     <td className="px-4 py-3 text-muted">{formatDate(user.created_at)}</td>
                     <td className="px-4 py-3">
+                      <span className="num font-semibold text-gold">{formatInteger(user.points)}</span>
+                      <span className="num block text-xs text-subtle">Nivel {user.level}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {user.points_blocked_at ? <span className="block text-xs text-gold">Sin puntos</span> : null}
                       {user.banned_at ? (
                         <span className="text-live" title={user.ban_reason ?? undefined}>
                           Baneado
@@ -104,6 +122,7 @@ export default async function UsuariosPage({ searchParams }: PageProps<"/panel/u
                           userId={user.id}
                           role={user.role}
                           banned={Boolean(user.banned_at)}
+                          pointsBlocked={Boolean(user.points_blocked_at)}
                           displayName={name}
                         />
                       )}

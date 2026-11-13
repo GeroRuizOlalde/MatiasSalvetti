@@ -4,9 +4,11 @@ import { useActionState, useId, useRef, useState } from "react";
 import { Field, FormMessage, inputClass, SubmitButton, textareaClass } from "@/components/panel/form";
 import { INITIAL_ACTION_STATE, type ActionState } from "@/lib/action-state";
 import { cn } from "@/lib/cn";
+import { POINTS_CONFIG_GROUPS } from "@/lib/points-config";
 import { REWARD_KINDS } from "@/lib/rewards";
+import type { PointsConfig } from "@/lib/settings";
 import type { Enums } from "@/types/database";
-import { adjustPoints, handleOrder, saveMission, saveRewards, saveShopItem } from "./actions";
+import { adjustPoints, handleOrder, saveMission, savePointsConfig, saveRewards, saveShopItem } from "./actions";
 import { AmountInput } from "@/components/ui/amount-input";
 
 const numInput = cn(inputClass, "num");
@@ -49,6 +51,61 @@ export function RewardsForm({ rewards }: { rewards: Record<string, { points: num
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <SubmitButton>Guardar premios</SubmitButton>
+        <FormMessage state={state} />
+      </div>
+    </form>
+  );
+}
+
+export function PointsConfigForm({ config, minAccountAgeDays }: { config: PointsConfig; minAccountAgeDays: number }) {
+  const [state, formAction] = useActionState<ActionState, FormData>(savePointsConfig, INITIAL_ACTION_STATE);
+  const id = useId();
+
+  return (
+    <form action={formAction} className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {POINTS_CONFIG_GROUPS.map((group) => (
+          <fieldset key={group.title} className="rounded-xl border border-line p-3">
+            <legend className="px-1 text-sm font-semibold">{group.title}</legend>
+            <p className="mb-2 text-xs text-subtle">{group.description}</p>
+            <div className="grid grid-cols-2 gap-2">
+              {group.fields.map((field) => (
+                <Field key={field.key} id={`${id}-${field.key}`} label={field.label}>
+                  <AmountInput
+                    decimals={false}
+                    id={`${id}-${field.key}`}
+                    name={field.key}
+                    required
+                    defaultValue={config[field.key]}
+                    className={numInput}
+                  />
+                </Field>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+        <fieldset className="rounded-xl border border-line p-3 sm:col-span-2">
+          <legend className="px-1 text-sm font-semibold">Cuentas nuevas</legend>
+          <p className="mb-2 text-xs text-subtle">
+            Las cuentas de Twitch con menos días que esto acumulan puntos, pero no pueden canjear ni entrar a sorteos o
+            predicciones. Con 0 no hay espera.
+          </p>
+          <div className="max-w-40">
+            <Field id={`${id}-age`} label="Días de antigüedad">
+              <AmountInput
+                decimals={false}
+                id={`${id}-age`}
+                name="min_account_age_days"
+                required
+                defaultValue={minAccountAgeDays}
+                className={numInput}
+              />
+            </Field>
+          </div>
+        </fieldset>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <SubmitButton>Guardar valores</SubmitButton>
         <FormMessage state={state} />
       </div>
     </form>

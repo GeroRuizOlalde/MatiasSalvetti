@@ -48,6 +48,11 @@ export type Database = {
           xp: number;
           level: number;
           points: number;
+          points_earned: number;
+          points_blocked_at: string | null;
+          points_block_reason: string | null;
+          daily_streak: number;
+          daily_last_claim: string | null;
           tickets: number;
           notifications_read_at: string;
           panel_notifications_read_at: string;
@@ -70,6 +75,11 @@ export type Database = {
           xp?: number;
           level?: number;
           points?: number;
+          points_earned?: number;
+          points_blocked_at?: string | null;
+          points_block_reason?: string | null;
+          daily_streak?: number;
+          daily_last_claim?: string | null;
           tickets?: number;
           notifications_read_at?: string;
           panel_notifications_read_at?: string;
@@ -832,6 +842,7 @@ export type Database = {
           user_id: string;
           kind: string;
           source_id: string | null;
+          source_ref: string | null;
           points: number;
           xp: number;
           note: string | null;
@@ -843,6 +854,7 @@ export type Database = {
           user_id: string;
           kind: string;
           source_id?: string | null;
+          source_ref?: string | null;
           points?: number;
           xp?: number;
           note?: string | null;
@@ -1323,6 +1335,21 @@ export type Database = {
       accept_battle_call: { Args: { p_call: string }; Returns: string };
       accept_buy_call: { Args: { p_call: string; p_bet: number; p_cost: number }; Returns: string };
       accept_hunt_call: { Args: { p_call: string; p_bet: number }; Returns: string };
+      claim_daily_bonus: { Args: Record<never, never>; Returns: { points: number; streak: number }[] };
+      set_points_block: { Args: { p_user: string; p_blocked: boolean; p_reason?: string }; Returns: undefined };
+      assert_can_redeem: { Args: { p_check_block?: boolean }; Returns: undefined };
+      daily_bonus_points: { Args: { p_streak: number }; Returns: number };
+      points_leaderboard: {
+        Args: { p_period?: string; p_limit?: number };
+        Returns: {
+          id: string;
+          display_name: string;
+          twitch_login: string | null;
+          avatar_url: string | null;
+          level: number;
+          points: number;
+        }[];
+      };
       accept_terms: { Args: { p_version: number }; Returns: undefined };
       admin_adjust_points: {
         Args: { p_user: string; p_points: number; p_xp: number; p_note: string };

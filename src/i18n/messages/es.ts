@@ -60,6 +60,7 @@ export const es = {
     followText: "Seguilo para enterarte cuando arranca el stream.",
   },
   userMenu: {
+    pointsOf: (points: string) => `${points} puntos`,
     user: "Usuario",
     menuOf: (name: string) => `Menú de ${name}`,
     level: "Nivel",
@@ -307,6 +308,8 @@ export const es = {
       invalid_slot: "Elegí un slot de la lista o escribí su nombre.",
     } as Record<string, string>,
     cuartel: {
+      points_blocked: "Tu cuenta no puede usar el sistema de puntos.",
+      account_too_new: "Tu cuenta de Twitch es muy nueva para canjear. Mientras tanto seguís sumando puntos.",
       mission_unavailable: "Esta misión ya no está disponible.",
       wrong_code: "Esa no es la palabra. Prestá atención al stream 👀",
       already_claimed: "Ya la reclamaste.",
@@ -316,9 +319,12 @@ export const es = {
       level_too_low: "Todavía no tenés el nivel que pide.",
       not_enough_points: "No te alcanzan los puntos.",
     } as Record<string, string>,
+    dailyClaimed: (points: string, streak: number): string =>
+      streak > 1 ? `¡+${points} puntos! Racha de ${streak} días.` : `¡+${points} puntos! Volvé mañana para sumar racha.`,
     missionDone: "¡Misión cumplida!",
     redeemed: "¡Canjeado! Lo ves en «Mis canjes».",
     giveaways: {
+      account_too_new: "Tu cuenta de Twitch es muy nueva para entrar a sorteos. Probá en unos días.",
       giveaway_closed: "Este sorteo no está abierto.",
       level_too_low: "Todavía no tenés el nivel que pide este sorteo.",
       casino_not_verified:
@@ -712,6 +718,17 @@ export const es = {
     noTickets: "No tenés tickets. Conseguilos en la tienda del Cuartel.",
   },
   hq: {
+    daily: {
+      title: "Bonus diario",
+      streak: (n: number): string => (n === 1 ? "Racha de 1 día" : `Racha de ${n} días`),
+      noStreak: "Entrá todos los días para armar tu racha.",
+      today: (points: string) => `Hoy te da ${points} puntos.`,
+      tomorrow: (points: string) => `Ya lo reclamaste hoy. Mañana te da ${points} puntos.`,
+      claim: "Reclamar",
+      claiming: "Reclamando…",
+      blocked: "Tu cuenta no está sumando puntos. Si creés que es un error, escribinos por Discord.",
+    },
+    badge: (level: number) => `Badge de nivel ${level}`,
     title: "Cuartel",
     metaDescription: "Tus puntos, nivel, misiones y la tienda.",
     kicker: "tu base",
@@ -797,6 +814,7 @@ export const es = {
       shop: "Canje en la tienda",
       shop_refund: "Reintegro de canje",
       admin_adjust: "Ajuste",
+      daily_bonus: "Bonus diario",
     } as Record<string, string>,
   },
   profile: {

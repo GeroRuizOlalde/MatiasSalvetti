@@ -61,6 +61,7 @@ export const en: Messages = {
     followText: "Follow to know when the stream starts.",
   },
   userMenu: {
+    pointsOf: (points) => `${points} points`,
     user: "User",
     menuOf: (name) => `${name}'s menu`,
     level: "Level",
@@ -317,6 +318,8 @@ export const en: Messages = {
       invalid_slot: "Pick a slot from the list or type its name.",
     },
     cuartel: {
+      points_blocked: "Your account can't use the points system.",
+      account_too_new: "Your Twitch account is too new to redeem. You keep earning points in the meantime.",
       mission_unavailable: "This mission is no longer available.",
       wrong_code: "That's not the word. Pay attention to the stream 👀",
       already_claimed: "You already claimed it.",
@@ -326,9 +329,12 @@ export const en: Messages = {
       level_too_low: "You don't have the required level yet.",
       not_enough_points: "You don't have enough points.",
     },
+    dailyClaimed: (points, streak) =>
+      streak > 1 ? `+${points} points! ${streak}-day streak.` : `+${points} points! Come back tomorrow to build a streak.`,
     missionDone: "Mission complete!",
     redeemed: "Redeemed! You'll see it in «My redemptions».",
     giveaways: {
+      account_too_new: "Your Twitch account is too new to enter giveaways. Try again in a few days.",
       giveaway_closed: "This giveaway isn't open.",
       level_too_low: "You don't have the level this giveaway requires yet.",
       casino_not_verified: "This giveaway requires a verified casino account.",
@@ -718,6 +724,17 @@ export const en: Messages = {
     noTickets: "You don't have tickets. Get them in the HQ shop.",
   },
   hq: {
+    daily: {
+      title: "Daily bonus",
+      streak: (n) => (n === 1 ? "1-day streak" : `${n}-day streak`),
+      noStreak: "Come back every day to build your streak.",
+      today: (points) => `Today it gives you ${points} points.`,
+      tomorrow: (points) => `Already claimed today. Tomorrow it gives you ${points} points.`,
+      claim: "Claim",
+      claiming: "Claiming…",
+      blocked: "Your account isn't earning points. If you think it's a mistake, message us on Discord.",
+    },
+    badge: (level) => `Level ${level} badge`,
     title: "HQ",
     metaDescription: "Your points, level, missions and the shop.",
     kicker: "your base",
@@ -801,6 +818,7 @@ export const en: Messages = {
       shop: "Shop redemption",
       shop_refund: "Redemption refund",
       admin_adjust: "Adjustment",
+      daily_bonus: "Daily bonus",
     },
   },
   profile: {

@@ -20,20 +20,49 @@ const socialsSchema = z.object({
 });
 export type Socials = z.infer<typeof socialsSchema>;
 
-const rewardSchema = z.object({ points: z.number().int().min(0), xp: z.number().int().min(0) });
+const rewardSchema = z.object({
+  points: z.number().int().min(0),
+  xp: z.number().int().min(0),
+});
+
+const amount = z.number().int().min(0);
+
+/** Cuánto paga cada cosa del sistema de puntos. Cada valor cae al de fábrica si falta. */
+const pointsConfigSchema = z.object({
+  watch_points: amount.default(10),
+  watch_interval_minutes: z.number().int().min(1).default(5),
+  chat_points: amount.default(2),
+  chat_per_minute: z.number().int().min(1).default(1),
+  daily_points: amount.default(50),
+  daily_streak_step_pct: amount.default(10),
+  daily_streak_cap_pct: amount.default(100),
+  follow_points: amount.default(200),
+  sub_points: amount.default(1500),
+  gift_sub_points: amount.default(1000),
+  bit_points: amount.default(1),
+});
+export type PointsConfig = z.infer<typeof pointsConfigSchema>;
 
 export const SETTING_SCHEMAS = {
   socials: socialsSchema,
   primary_platform: platformSchema,
   stream_manual: z.object({ live: z.boolean(), platform: platformSchema }),
-  next_stream: z.object({ at: z.iso.datetime({ offset: true }).nullable(), label: z.string().nullable() }),
+  next_stream: z.object({
+    at: z.iso.datetime({ offset: true }).nullable(),
+    label: z.string().nullable(),
+  }),
   home_stats: z.object({
     years_streaming: z.number().nullable(),
     monthly_prizes: z.number().nullable(),
   }),
   responsible_gaming_helpline: z.string(),
   twitch_min_account_age_days: z.number().int().min(0),
-  level_curve: z.object({ base: z.number().positive(), exponent: z.number().positive() }),
+  points_min_account_age_days: z.number().int().min(0),
+  points_config: pointsConfigSchema,
+  level_curve: z.object({
+    base: z.number().positive(),
+    exponent: z.number().positive(),
+  }),
   partner: z.object({
     casino_slug: z.string(),
     description: z.string(),
@@ -53,7 +82,9 @@ export const SETTING_SCHEMAS = {
   }),
 };
 
-export type PublicSettings = { [K in keyof typeof SETTING_SCHEMAS]: z.infer<(typeof SETTING_SCHEMAS)[K]> };
+export type PublicSettings = {
+  [K in keyof typeof SETTING_SCHEMAS]: z.infer<(typeof SETTING_SCHEMAS)[K]>;
+};
 
 export const DEFAULT_SETTINGS: PublicSettings = {
   socials: {
@@ -71,6 +102,8 @@ export const DEFAULT_SETTINGS: PublicSettings = {
   home_stats: { years_streaming: null, monthly_prizes: null },
   responsible_gaming_helpline: "[LÍNEA DE AYUDA]",
   twitch_min_account_age_days: 0,
+  points_min_account_age_days: 7,
+  points_config: pointsConfigSchema.parse({}),
   level_curve: DEFAULT_LEVEL_CURVE,
   partner: {
     casino_slug: "1xslots",

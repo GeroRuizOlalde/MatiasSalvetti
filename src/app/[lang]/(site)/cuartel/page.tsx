@@ -1,6 +1,6 @@
 import type { Locale } from "@/i18n/config";
 import { getI18n, pageLocale } from "@/i18n/server";
-import { Coins, Gift, History, Package, Sparkles, Target, Ticket, Trophy } from "lucide-react";
+import { Award, Coins, Gift, History, Package, Sparkles, Target, Ticket, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,20 +16,31 @@ import { cn } from "@/lib/cn";
 import { getMissions, getShopItems, getXpLeaders, type PublicMission, type ShopItem } from "@/lib/cuartel";
 import { formatDateTime, formatInteger } from "@/lib/format";
 import { getLegalDocument } from "@/lib/legal";
+import { dailyBonusPoints, levelBadge } from "@/lib/points-config";
 import { REWARD_KINDS } from "@/lib/rewards";
 import { getPublicSettings } from "@/lib/settings";
 import { publicAssetUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { buyItem } from "./actions";
+import { DailyBonus } from "./daily-bonus";
 import { MissionForm } from "./mission-form";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/cuartel">): Promise<Metadata> {
   const { t } = getI18n(await pageLocale(params));
-  return { title: t.hq.title, description: t.hq.metaDescription, robots: { index: false } };
+  return {
+    title: t.hq.title,
+    description: t.hq.metaDescription,
+    robots: { index: false },
+  };
 }
 
 const TODAY_AR = () =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date());
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date());
+
+/** El día anterior a una fecha `YYYY-MM-DD`. */
+const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 
 export default async function CuartelPage({ params }: PageProps<"/[lang]/cuartel">) {
   const lang = await pageLocale(params);
@@ -55,7 +66,7 @@ async function CuartelContent({ lang }: { lang: Locale }) {
   if (!profile) redirect(`${href("/entrar")}?next=${href("/cuartel")}`);
 
   const supabase = await createClient();
-  const [settings, terms, missions, items, leaders, claims, orders, events, canParticipate, redeemed] =
+  const [settings, terms, missions, items, leaders, claims, orders, events, canParticipate, redeemed, daily] =
     await Promise.all([
       getPublicSettings(),
       getLegalDocument("terms"),
@@ -77,11 +88,20 @@ async function CuartelContent({ lang }: { lang: Locale }) {
         .limit(20),
       supabase.rpc("can_participate"),
       supabase.from("shop_orders").select("item_id").eq("user_id", profile.id).neq("status", "cancelled"),
+      supabase
+        .from("profiles")
+        .select("daily_streak, daily_last_claim, points_blocked_at")
+        .eq("id", profile.id)
+        .maybeSingle(),
     ]);
 
   const progress = levelFromXp(profile.xp, settings.level_curve);
   const blocked = needsOnboarding(profile, terms?.version ?? null) || !canParticipate.data;
   const today = TODAY_AR();
+  // La racha sigue viva si reclamó hoy o ayer.
+  const lastClaim = daily.data?.daily_last_claim ?? null;
+  const claimedToday = lastClaim === today;
+  const streak = claimedToday || lastClaim === dayBefore(today) ? (daily.data?.daily_streak ?? 0) : 0;
   const claimed = (mission: PublicMission) =>
     (claims.data ?? []).some(
       (c) => c.mission_id === mission.id && c.claim_key === (mission.type === "daily" ? today : "once"),
@@ -92,6 +112,14 @@ async function CuartelContent({ lang }: { lang: Locale }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
       <div className="min-w-0 space-y-8">
         <ProfileCard profile={profile} progress={progress} lang={lang} />
+
+        <DailyBonus
+          streak={streak}
+          claimedToday={claimedToday}
+          nextPoints={dailyBonusPoints(settings.points_config, streak + 1)}
+          disabled={blocked || Boolean(daily.data?.points_blocked_at)}
+          pointsBlocked={Boolean(daily.data?.points_blocked_at)}
+        />
 
         {blocked ? (
           <p className="rounded-xl border border-gold/40 bg-gold/5 px-4 py-3 text-sm">
@@ -336,6 +364,7 @@ function ProfileCard({
 }) {
   const h = getI18n(lang).t.hq;
   const name = profile.display_name || profile.twitch_login || "Viewer";
+  const badge = levelBadge(progress.level);
   return (
     <section className="flex flex-col gap-5 rounded-2xl border border-accent/40 bg-[linear-gradient(135deg,rgb(157_59_255/0.12),transparent_60%)] p-6 sm:flex-row sm:items-center">
       <Avatar url={profile.avatar_url} name={name} size={72} />
@@ -345,6 +374,16 @@ function ProfileCard({
           <span className="rounded-full bg-accent px-3 py-0.5 text-sm font-bold text-white">
             {h.level(progress.level)}
           </span>
+          {badge ? (
+            <span
+              title={h.badge(badge)}
+              className="flex items-center gap-1 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-0.5 text-sm font-bold text-gold"
+            >
+              <Award className="size-4" aria-hidden />
+              <span className="sr-only">{h.badge(badge)}</span>
+              <span aria-hidden>{badge}</span>
+            </span>
+          ) : null}
         </p>
         <div>
           <div

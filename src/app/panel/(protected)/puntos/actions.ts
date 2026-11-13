@@ -6,6 +6,7 @@ import type { ActionState } from "@/lib/action-state";
 import { requirePanelProfile } from "@/lib/auth/session";
 import { CUARTEL_TAG } from "@/lib/cuartel";
 import { argentinaDateTime, checkbox, friendlyError } from "@/lib/panel-forms";
+import { POINTS_CONFIG_KEYS } from "@/lib/points-config";
 import { REWARD_KINDS } from "@/lib/rewards";
 import { SETTINGS_TAG } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
@@ -67,7 +68,9 @@ export async function saveRewards(_prev: ActionState, formData: FormData): Promi
     const points = amount.safeParse(formData.get(`${key}_points`));
     const xp = amount.safeParse(formData.get(`${key}_xp`));
     if (!points.success || !xp.success)
-      return { error: "Los premios tienen que ser números enteros entre 0 y 100.000." };
+      return {
+        error: "Los premios tienen que ser números enteros entre 0 y 100.000.",
+      };
     value[key] = { points: points.data, xp: xp.data };
   }
 
@@ -76,7 +79,41 @@ export async function saveRewards(_prev: ActionState, formData: FormData): Promi
   if (error) return { error: friendly(error.message) };
   updateTag(SETTINGS_TAG);
   refresh();
-  return { ok: "Premios actualizados. Valen para lo que pase de ahora en más." };
+  return {
+    ok: "Premios actualizados. Valen para lo que pase de ahora en más.",
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Valores de puntos (ver, chat, bonus diario, follow, sub, bits)
+// -----------------------------------------------------------------------------
+
+export async function savePointsConfig(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requirePanelProfile("admin");
+  const message = "Los valores tienen que ser números enteros entre 0 y 100.000.";
+  const value: Record<string, number> = {};
+  for (const { key, min } of POINTS_CONFIG_KEYS) {
+    const parsed = int(min ?? 0, 100000, message).safeParse(formData.get(key));
+    if (!parsed.success)
+      return {
+        error: min ? `${message} Los intervalos y topes, desde ${min}.` : message,
+      };
+    value[key] = parsed.data;
+  }
+  const minAge = int(0, 3650, "La antigüedad va de 0 a 3650 días.").safeParse(formData.get("min_account_age_days"));
+  if (!minAge.success) return { error: "La antigüedad va de 0 a 3650 días." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("site_settings").upsert([
+    { key: "points_config", value, is_public: true },
+    { key: "points_min_account_age_days", value: minAge.data, is_public: true },
+  ]);
+  if (error) return { error: friendly(error.message) };
+  updateTag(SETTINGS_TAG);
+  refresh();
+  return {
+    ok: "Valores actualizados. Valen para lo que pase de ahora en más.",
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -91,7 +128,13 @@ const missionSchema = z.object({
   points: int(0, 100000, "Los puntos van de 0 a 100.000."),
   xp: int(0, 100000, "La XP va de 0 a 100.000."),
   url: z
-    .union([z.url({ protocol: /^https$/, error: "El link tiene que empezar con https://" }), z.literal("")])
+    .union([
+      z.url({
+        protocol: /^https$/,
+        error: "El link tiene que empezar con https://",
+      }),
+      z.literal(""),
+    ])
     .optional()
     .transform((v) => v || null),
   code: optionalText(40),
@@ -187,7 +230,9 @@ export async function handleOrder(_prev: ActionState, formData: FormData): Promi
   });
   if (error) return { error: friendly(error.message) };
   invalidate();
-  return { ok: parsed.data.decision === "deliver" ? "Marcado como entregado." : "Canje cancelado y puntos devueltos." };
+  return {
+    ok: parsed.data.decision === "deliver" ? "Marcado como entregado." : "Canje cancelado y puntos devueltos.",
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -223,7 +268,10 @@ export async function adjustPoints(_prev: ActionState, formData: FormData): Prom
     .select("id, display_name")
     .eq("twitch_login", login)
     .maybeSingle();
-  if (!user) return { error: `No encontramos a "${login}". Tiene que haber entrado al menos una vez a la web.` };
+  if (!user)
+    return {
+      error: `No encontramos a "${login}". Tiene que haber entrado al menos una vez a la web.`,
+    };
 
   const { error } = await supabase.rpc("admin_adjust_points", {
     p_user: user.id,
@@ -233,5 +281,7 @@ export async function adjustPoints(_prev: ActionState, formData: FormData): Prom
   });
   if (error) return { error: friendly(error.message) };
   invalidate();
-  return { ok: `Listo: ${points >= 0 ? "+" : ""}${points} puntos y +${xp} XP para ${user.display_name || login}.` };
+  return {
+    ok: `Listo: ${points >= 0 ? "+" : ""}${points} puntos y +${xp} XP para ${user.display_name || login}.`,
+  };
 }

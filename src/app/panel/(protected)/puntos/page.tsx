@@ -3,11 +3,15 @@ import { requirePanelProfile } from "@/lib/auth/session";
 import { formatDateTime, formatInteger, toArgentinaInput } from "@/lib/format";
 import { getPublicSettings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
-import { AdjustForm, MissionForm, OrderForm, RewardsForm, ShopItemForm } from "./forms";
+import { AdjustForm, MissionForm, OrderForm, PointsConfigForm, RewardsForm, ShopItemForm } from "./forms";
 
 export const metadata: Metadata = { title: "Puntos y misiones" };
 
-const MISSION_TYPE = { daily: "Diaria", code: "Palabra secreta", link: "Link" } as const;
+const MISSION_TYPE = {
+  daily: "Diaria",
+  code: "Palabra secreta",
+  link: "Link",
+} as const;
 
 export default async function PuntosPage() {
   await requirePanelProfile("admin");
@@ -74,6 +78,17 @@ export default async function PuntosPage() {
           Se suman solos. Cada cosa paga una sola vez aunque se reabra un hunt o una votación.
         </p>
         <RewardsForm rewards={settings.rewards} />
+      </section>
+
+      <section aria-labelledby="points-config" className="rounded-2xl border border-line bg-surface p-5">
+        <h2 id="points-config" className="mb-1 font-semibold">
+          Valores de puntos
+        </h2>
+        <p className="mb-4 text-sm text-muted">
+          Cuánto paga cada cosa. Los puntos no se compran ni se cambian por plata. La XP sube igual que los puntos
+          ganados.
+        </p>
+        <PointsConfigForm config={settings.points_config} minAccountAgeDays={settings.points_min_account_age_days} />
       </section>
 
       <section aria-labelledby="missions" className="space-y-3">
