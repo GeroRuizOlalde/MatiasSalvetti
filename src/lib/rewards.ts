@@ -26,4 +26,5 @@ export const POINT_KIND_LABEL: Record<string, string> = {
   shop: "Canje en la tienda",
   shop_refund: "Reintegro de canje",
   admin_adjust: "Ajuste",
+  daily_bonus: "Bonus diario",
 };

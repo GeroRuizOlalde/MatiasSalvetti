@@ -58,7 +58,9 @@ const MIGRATIONS_DIR = join(import.meta.dirname, "..", "migrations");
 export async function createTestDb() {
   const db = new PGlite({ extensions: { pg_trgm } });
   await db.exec(SUPABASE_STUBS);
-  const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql")).sort();
+  const files = readdirSync(MIGRATIONS_DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
   for (const file of files) {
     try {
       await db.exec(readFileSync(join(MIGRATIONS_DIR, file), "utf8"));
@@ -85,7 +87,8 @@ export async function as<T>(db: TestDb, who: "anon" | { id: string }, fn: () => 
 
 let counter = 0;
 
-export async function createTwitchUser(db: TestDb, login: string) {
+/** Crea un viewer. Por defecto con una cuenta de Twitch vieja; `fresh` la deja recién creada. */
+export async function createTwitchUser(db: TestDb, login: string, options: { fresh?: boolean } = {}) {
   counter += 1;
   const id = `00000000-0000-4000-8000-${String(counter).padStart(12, "0")}`;
   const meta = {
@@ -100,5 +103,8 @@ export async function createTwitchUser(db: TestDb, login: string) {
     `${login}@example.test`,
     JSON.stringify(meta),
   ]);
+  if (!options.fresh) {
+    await db.query("update public.profiles set twitch_created_at = now() - interval '2 years' where id = $1", [id]);
+  }
   return { id };
 }

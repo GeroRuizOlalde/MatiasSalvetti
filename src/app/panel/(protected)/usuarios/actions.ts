@@ -29,7 +29,10 @@ export async function setUserRole(_prev: UserActionState, formData: FormData): P
   if (!parsed.success) return { error: "Datos inválidos." };
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("set_user_role", { p_user: parsed.data.userId, p_role: parsed.data.role });
+  const { error } = await supabase.rpc("set_user_role", {
+    p_user: parsed.data.userId,
+    p_role: parsed.data.role,
+  });
   if (error) return { error: friendly(error.message) };
   refresh();
   return { ok: "Rol actualizado." };
@@ -54,5 +57,30 @@ export async function setUserBan(_prev: UserActionState, formData: FormData): Pr
   });
   if (error) return { error: friendly(error.message) };
   refresh();
-  return { ok: parsed.data.banned === "true" ? "Usuario baneado." : "Baneo levantado." };
+  return {
+    ok: parsed.data.banned === "true" ? "Usuario baneado." : "Baneo levantado.",
+  };
+}
+
+const pointsBlockSchema = z.object({
+  userId: z.uuid(),
+  blocked: z.enum(["true", "false"]),
+});
+
+/** Saca (o devuelve) a un usuario del sistema de puntos: deja de sumar y no puede canjear. */
+export async function setPointsBlock(_prev: UserActionState, formData: FormData): Promise<UserActionState> {
+  await requirePanelProfile("admin");
+  const parsed = pointsBlockSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Datos inválidos." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_points_block", {
+    p_user: parsed.data.userId,
+    p_blocked: parsed.data.blocked === "true",
+  });
+  if (error) return { error: friendly(error.message) };
+  refresh();
+  return {
+    ok: parsed.data.blocked === "true" ? "Bloqueado de puntos." : "Puntos habilitados de nuevo.",
+  };
 }

@@ -3,7 +3,7 @@
 import { useActionState, useId } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import type { Enums } from "@/types/database";
-import { setUserBan, setUserRole, type UserActionState } from "./actions";
+import { setPointsBlock, setUserBan, setUserRole, type UserActionState } from "./actions";
 
 const fieldClass = "h-9 rounded-lg border border-line bg-surface-2 px-2 text-sm text-text";
 
@@ -11,19 +11,23 @@ export function UserRowActions({
   userId,
   role,
   banned,
+  pointsBlocked,
   displayName,
 }: {
   userId: string;
   role: Enums<"user_role">;
   banned: boolean;
+  pointsBlocked: boolean;
   displayName: string;
 }) {
   const [roleState, roleAction, rolePending] = useActionState<UserActionState, FormData>(setUserRole, {});
   const [banState, banAction, banPending] = useActionState<UserActionState, FormData>(setUserBan, {});
+  const [pointsState, pointsAction, pointsPending] = useActionState<UserActionState, FormData>(setPointsBlock, {});
   const roleId = useId();
   const reasonId = useId();
-  const message = roleState.error ?? banState.error ?? roleState.ok ?? banState.ok;
-  const isError = Boolean(roleState.error ?? banState.error);
+  const error = roleState.error ?? banState.error ?? pointsState.error;
+  const message = error ?? roleState.ok ?? banState.ok ?? pointsState.ok;
+  const isError = Boolean(error);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -56,9 +60,33 @@ export function UserRowActions({
         <button
           type="submit"
           disabled={banPending}
-          className={buttonClasses({ variant: banned ? "secondary" : "ghost", size: "sm", className: banned ? "" : "text-live" })}
+          className={buttonClasses({
+            variant: banned ? "secondary" : "ghost",
+            size: "sm",
+            className: banned ? "" : "text-live",
+          })}
         >
           {banned ? "Desbanear" : "Banear"}
+        </button>
+      </form>
+
+      <form action={pointsAction}>
+        <input type="hidden" name="userId" value={userId} />
+        <input type="hidden" name="blocked" value={pointsBlocked ? "false" : "true"} />
+        <button
+          type="submit"
+          disabled={pointsPending}
+          title={
+            pointsBlocked
+              ? "Vuelve a sumar puntos y a poder canjear."
+              : "Deja de sumar puntos y no puede canjear. Sigue pudiendo usar la web."
+          }
+          className={buttonClasses({
+            variant: pointsBlocked ? "secondary" : "ghost",
+            size: "sm",
+          })}
+        >
+          {pointsBlocked ? "Habilitar puntos" : "Bloquear puntos"}
         </button>
       </form>
 
