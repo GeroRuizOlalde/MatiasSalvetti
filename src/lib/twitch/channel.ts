@@ -165,6 +165,9 @@ export async function disconnectChannel() {
     }).catch(() => null);
   }
   await supabase.from("twitch_channel_auth").delete().neq("broadcaster_id", "");
+  // Los eventos eran de ese canal: se borran para que no sigan llegando ni queden pegados.
+  await deleteAllSubscriptions().catch((error) => console.error("[twitch] no se pudieron borrar los eventos", error));
+  await supabase.from("twitch_subscriptions").delete().neq("type", "");
 }
 
 type ChannelToken = { broadcasterId: string; accessToken: string };
@@ -287,6 +290,7 @@ const subscriptionsSchema = z.object({
       status: z.string(),
       type: z.string(),
       version: z.string(),
+      condition: z.record(z.string(), z.string().nullable()).default({}),
       transport: z.object({ method: z.string(), callback: z.string().optional() }),
     }),
   ),
@@ -308,6 +312,21 @@ async function listSubscriptions() {
 }
 
 const ALIVE = ["enabled", "webhook_callback_verification_pending"];
+
+/** Misma condición: mismo canal (y mismo moderador o usuario, según el evento). */
+export function sameCondition(actual: Record<string, string | null>, wanted: Record<string, string>) {
+  return Object.entries(wanted).every(([key, value]) => actual[key] === value);
+}
+
+/** Borra en Twitch todas las suscripciones de esta app a los eventos que usa la web. */
+async function deleteAllSubscriptions() {
+  const types = new Set(EVENTSUB_TYPES.map((t) => t.type));
+  for (const sub of await listSubscriptions()) {
+    if (types.has(sub.type)) {
+      await twitchAppFetch(`eventsub/subscriptions?id=${encodeURIComponent(sub.id)}`, { method: "DELETE" });
+    }
+  }
+}
 
 export type SyncResult = { ok: true; created: number; failed: string[] } | { ok: false; error: string };
 
@@ -340,10 +359,15 @@ export async function syncEventSubSubscriptions(origin: string): Promise<SyncRes
 
   for (const wanted of EVENTSUB_TYPES) {
     const mine = existing.filter((s) => s.type === wanted.type);
+    const condition = wanted.condition(status.broadcasterId);
     const good = mine.find(
-      (s) => s.version === wanted.version && s.transport.callback === callback && ALIVE.includes(s.status),
+      (s) =>
+        s.version === wanted.version &&
+        s.transport.callback === callback &&
+        ALIVE.includes(s.status) &&
+        sameCondition(s.condition, condition),
     );
-    // Lo que sobra (caídas, de otra URL, repetidas) se borra.
+    // Lo que sobra (caídas, de otra URL, de otro canal, repetidas) se borra.
     for (const stale of mine.filter((s) => s !== good)) {
       await twitchAppFetch(`eventsub/subscriptions?id=${encodeURIComponent(stale.id)}`, { method: "DELETE" });
     }
@@ -357,7 +381,7 @@ export async function syncEventSubSubscriptions(origin: string): Promise<SyncRes
         body: {
           type: wanted.type,
           version: wanted.version,
-          condition: wanted.condition(status.broadcasterId),
+          condition,
           transport: { method: "webhook", callback, secret },
         },
       });
